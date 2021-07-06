@@ -15,7 +15,7 @@
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports instat.Translations
-Public Class dlgDefineCorruptionOutputs
+Public Class dlgCorruptionDefineOutputs
     Private bFirstLoad As Boolean = True
     Private bReset As Boolean = True
     Dim bUseSelectedColumn As Boolean = False
@@ -24,7 +24,6 @@ Public Class dlgDefineCorruptionOutputs
     Private clsCorruptionOutputs As New RFunction
 
     Private Sub dlgDefineCorruptionOutputs_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -37,6 +36,7 @@ Public Class dlgDefineCorruptionOutputs
         End If
         SetRCodeForControls(bReset)
         bReset = False
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()

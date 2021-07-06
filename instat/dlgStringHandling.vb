@@ -43,6 +43,7 @@ Public Class dlgStringHandling
         ucrReceiverStringHandling.SetParameter(New RParameter("string", 0))
         ucrReceiverStringHandling.SetParameterIsRFunction()
         ucrReceiverStringHandling.Selector = ucrSelectorStringHandling
+        ucrReceiverStringHandling.bUseFilteredData = False
         ucrReceiverStringHandling.SetMeAsReceiver()
 
         'ucrRdoOptions
@@ -77,8 +78,9 @@ Public Class dlgStringHandling
         ucrSaveStringHandling.SetPrefix("count")
         ucrSaveStringHandling.SetSaveTypeAsColumn()
         ucrSaveStringHandling.SetDataFrameSelector(ucrSelectorStringHandling.ucrAvailableDataFrames)
-        ucrSaveStringHandling.SetIsTextBox()
-        ucrSaveStringHandling.SetLabelText("Prefix for New Column:")
+        ucrSaveStringHandling.SetIsComboBox()
+        ucrSaveStringHandling.SetLabelText("New Column:")
+        ucrSaveStringHandling.setLinkedReceiver(ucrReceiverStringHandling) 'added
 
         'ucrChkIncludeRegularExpressions
         ucrChkIncludeRegularExpressions.SetText("Include Regular Expressions")
@@ -89,6 +91,8 @@ Public Class dlgStringHandling
 
         'temporary disabling
         grpRegex.Enabled = False
+        'hiding the Regex group box 
+        grpRegex.Hide()
         ucrChkIncludeRegularExpressions.Enabled = False
         'cmdDBackSlah.Visible = False
         'cmdWBackSlash.Visible = False
@@ -116,7 +120,7 @@ Public Class dlgStringHandling
         ucrChkIncludeRegularExpressions.Checked = False
         rdoFixed.Checked = True
         rdoCount.Checked = True
-        Visibile()
+        VisibleRdo()
 
         ucrInputReplaceBy.Reset()
         ucrSaveStringHandling.Reset()
@@ -152,11 +156,11 @@ Public Class dlgStringHandling
         clsCountFunction.SetAssignTo(ucrSaveStringHandling.GetText, strTempDataframe:=ucrSelectorStringHandling.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempColumn:=ucrSaveStringHandling.GetText, bAssignToIsPrefix:=True)
         ucrBase.clsRsyntax.SetBaseRFunction(clsCountFunction)
         NewColumnName()
-        ChangeSize()
+        'ChangeSize()
     End Sub
 
     'temporary fix.
-    Private Sub Visibile()
+    Private Sub VisibleRdo()
         If ucrChkIncludeRegularExpressions.Checked Then
             rdoRegex.Visible = True
             rdoFixed.Visible = True
@@ -190,7 +194,6 @@ Public Class dlgStringHandling
 
         ucrReceiverStringHandling.SetRCode(clsCountFunction, bReset)
         ucrInputPattern.SetRCode(clsCountFunction, bReset)
-        ucrInputReplaceBy.SetRCode(clsReplaceFunction, bReset)
         ucrInputReplaceBy.SetRCode(clsReplaceAllFunction, bReset)
         'ucrPnlStringHandling.SetRCode(clsCountFunction, bReset)
         ucrSaveStringHandling.SetRCode(clsCountFunction, bReset)
@@ -201,7 +204,7 @@ Public Class dlgStringHandling
     Private Sub TestOkEnabled()
         If (rdoCount.Checked OrElse rdoDetect.Checked OrElse rdoExtract.Checked OrElse rdoLocate.Checked) AndAlso ucrSaveStringHandling.IsComplete() AndAlso Not ucrReceiverStringHandling.IsEmpty() AndAlso Not ucrInputPattern.IsEmpty() Then
             ucrBase.OKEnabled(True)
-        ElseIf (rdoReplace.Checked OrElse rdoReplaceAll.Checked) AndAlso ucrSaveStringHandling.IsComplete() AndAlso Not ucrReceiverStringHandling.IsEmpty() AndAlso Not ucrInputPattern.IsEmpty AndAlso Not ucrInputReplaceBy.IsEmpty Then
+        ElseIf (rdoReplace.Checked OrElse rdoReplaceAll.Checked) AndAlso ucrSaveStringHandling.IsComplete() AndAlso Not ucrReceiverStringHandling.IsEmpty() AndAlso Not ucrInputPattern.IsEmpty Then
             ucrBase.OKEnabled(True)
         ElseIf (rdoCount.Checked OrElse rdoDetect.Checked OrElse rdoExtract.Checked OrElse rdoLocate.Checked) AndAlso ucrChkIncludeRegularExpressions.Checked AndAlso rdoRegex.Checked AndAlso Not ucrReceiverForRegexExpression.IsEmpty AndAlso ucrSaveStringHandling.IsComplete() AndAlso Not ucrReceiverStringHandling.IsEmpty() Then
             ucrBase.OKEnabled(True)
@@ -286,7 +289,7 @@ Public Class dlgStringHandling
             Me.Size = New Size(iFullWidth, Me.Height)
         Else
             grpRegex.Visible = False
-            Me.Size = New Size(iFullWidth / 1.57, Me.Height)
+            Me.Size = New Size(iFullWidth / 1.29, Me.Height)
         End If
     End Sub
 
@@ -406,13 +409,18 @@ Public Class dlgStringHandling
         ucrReceiverForRegexExpression.Clear()
     End Sub
 
-    Private Sub ucrPnlFixedRegex_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrPnlFixedRegex.ControlContentsChanged, ucrChkIncludeRegularExpressions.ControlValueChanged, ucrReceiverForRegexExpression.ControlValueChanged, ucrInputPattern.ControlValueChanged
-        Visibile()
+    Private Sub ucrAll_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrChkIncludeRegularExpressions.ControlValueChanged, ucrReceiverForRegexExpression.ControlValueChanged, ucrInputPattern.ControlValueChanged
+        VisibleRdo()
+        AddRemoveParameters()
+    End Sub
+
+    Private Sub ucrPnlFixedRegex_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrPnlFixedRegex.ControlContentsChanged
+        VisibleRdo()
         AddRemoveParameters()
         ChangeSize()
     End Sub
 
-    Private Sub ucrReceiverStringHandling_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverStringHandling.ControlContentsChanged, ucrPnlStringHandling.ControlContentsChanged, ucrInputPattern.ControlContentsChanged, ucrInputReplaceBy.ControlContentsChanged, ucrReceiverForRegexExpression.ControlContentsChanged, ucrPnlFixedRegex.ControlContentsChanged, ucrChkIncludeRegularExpressions.ControlContentsChanged
+    Private Sub ucrReceiverStringHandling_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverStringHandling.ControlContentsChanged, ucrPnlStringHandling.ControlContentsChanged, ucrInputPattern.ControlContentsChanged, ucrReceiverForRegexExpression.ControlContentsChanged, ucrPnlFixedRegex.ControlContentsChanged, ucrChkIncludeRegularExpressions.ControlContentsChanged, ucrSaveStringHandling.ControlContentsChanged
         TestOkEnabled()
     End Sub
 End Class

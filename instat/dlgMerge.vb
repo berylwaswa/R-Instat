@@ -25,6 +25,8 @@ Public Class dlgMerge
     Private bResetSubdialog As Boolean = True
     Private ttJoinType As New ToolTip
     Private dctJoinTexts As New Dictionary(Of String, String)
+    Private bMergeColumnsExist As Boolean
+    Private clsSuffixC As RFunction
 
     ' This dialog has a bug when using numeric and integer columns as the joining columns.
     ' Issue reported here: https://github.com/hadley/dplyr/issues/2164
@@ -41,13 +43,13 @@ Public Class dlgMerge
         End If
         SetRCodeForControls(bReset)
         bReset = False
-        autoTranslate(Me)
+        SetMergingBy()
         TestOKEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
         Dim dctJoinTypes As New Dictionary(Of String, String)
-
         ucrBase.iHelpTopicID = 60
 
         'sdgMerge.SetRSyntax(ucrBase.clsRsyntax)
@@ -57,7 +59,7 @@ Public Class dlgMerge
         dctJoinTypes.Add("Inner Join", "inner_join")
         dctJoinTypes.Add("Semi Join", "semi_join")
         dctJoinTypes.Add("Anti Join", "anti_join")
-        ucrInputJoinType.SetItems(dctItemParameterValuePairs:=dctJoinTypes, bSetCondtions:=False)
+        ucrInputJoinType.SetItems(dctItemParameterValuePairs:=dctJoinTypes, bSetConditions:=False)
 
         dctJoinTexts.Add("Full Join", "Include all rows and all columns from both data frames. Where there are not matching values, returns NA for the one missing.")
         dctJoinTexts.Add("Left Join", "Include all rows from the 1st data frame, and all columns from both data frames." & Environment.NewLine & "Rows in the 1st data frame with no match in the second data frame will have NA values in the new columns." & Environment.NewLine & "If there are multiple matches, all combinations of the matches are included.")
@@ -82,6 +84,11 @@ Public Class dlgMerge
         ucrSecondDataFrame.SetParameterIsRFunction()
         ucrSecondDataFrame.SetLabelText("Second Data Frame:")
 
+        ucrInputMergingBy.IsReadOnly = True
+        ucrInputMergingBy.IsMultiline = True
+        ucrInputMergingBy.bIsActiveRControl = False
+        ucrInputMergingBy.txtInput.ScrollBars = ScrollBars.Vertical
+
         ucrSaveMerge.SetLabelText("New Data Frame Name:")
         ucrSaveMerge.SetIsTextBox()
         ucrSaveMerge.SetSaveTypeAsDataFrame()
@@ -91,16 +98,16 @@ Public Class dlgMerge
     Private Sub SetDefaults()
         clsMerge = New RFunction
         clsByList = New RFunction
+        clsSuffixC = New RFunction
 
         ucrFirstDataFrame.Reset()
         ucrSecondDataFrame.Reset()
-
         ucrSaveMerge.Reset()
 
         clsMerge.SetPackageName("dplyr")
         clsMerge.SetRCommand("full_join")
-
         clsByList.SetRCommand("c")
+        clsSuffixC.SetRCommand("c")
 
         ucrBase.clsRsyntax.SetBaseRFunction(clsMerge)
         bResetSubdialog = True
@@ -114,7 +121,7 @@ Public Class dlgMerge
     End Sub
 
     Private Sub TestOKEnabled()
-        If ucrSaveMerge.IsComplete() AndAlso ucrFirstDataFrame.cboAvailableDataFrames.Text <> "" AndAlso ucrSecondDataFrame.cboAvailableDataFrames.Text <> "" Then
+        If ucrSaveMerge.IsComplete() AndAlso ucrFirstDataFrame.cboAvailableDataFrames.Text <> "" AndAlso ucrSecondDataFrame.cboAvailableDataFrames.Text <> "" AndAlso bMergeColumnsExist Then
             ucrBase.OKEnabled(True)
         Else
             ucrBase.OKEnabled(False)
@@ -131,6 +138,14 @@ Public Class dlgMerge
         sdgMerge.Setup(ucrFirstDataFrame.cboAvailableDataFrames.Text, ucrSecondDataFrame.cboAvailableDataFrames.Text, clsMerge, clsByList, bResetSubdialog)
         sdgMerge.ShowDialog()
         bResetSubdialog = False
+        SetMergingBy()
+    End Sub
+
+    Private Sub cmdColumnOptions_Click(sender As Object, e As EventArgs) Handles cmdColumnOptions.Click
+        sdgMergeColumnstoInclude.Setup(ucrFirstDataFrame.cboAvailableDataFrames.Text, ucrSecondDataFrame.cboAvailableDataFrames.Text, clsMerge, clsByList, bResetSubdialog)
+        sdgMergeColumnstoInclude.ShowDialog()
+        bResetSubdialog = False
+        SetMergingBy()
     End Sub
 
     Private Sub ucrInputJoinType_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrInputJoinType.ControlValueChanged
@@ -164,13 +179,70 @@ Public Class dlgMerge
 
     Private Sub DataFrames_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrFirstDataFrame.ControlValueChanged, ucrSecondDataFrame.ControlValueChanged
         If ucrFirstDataFrame.cboAvailableDataFrames.Text <> "" AndAlso ucrSecondDataFrame.cboAvailableDataFrames.Text <> "" Then
-            clsMerge.AddParameter("suffix", "c(" & Chr(34) & ucrFirstDataFrame.cboAvailableDataFrames.Text & Chr(34) & ", " & Chr(34) & ucrSecondDataFrame.cboAvailableDataFrames.Text & Chr(34) & ")")
+            clsSuffixC.AddParameter("0", strParameterValue:=Chr(34) & ucrFirstDataFrame.cboAvailableDataFrames.Text & Chr(34), iPosition:=0, bIncludeArgumentName:=False)
+            clsSuffixC.AddParameter("1", strParameterValue:=Chr(34) & ucrSecondDataFrame.cboAvailableDataFrames.Text & Chr(34), iPosition:=1, bIncludeArgumentName:=False)
         Else
             clsMerge.RemoveParameterByName("suffix")
         End If
+        ' Ensures options set on the subdialog are "reset" since they depend on data frame choice
+        clsMerge.RemoveParameterByName("by")
+        clsByList.ClearParameters()
+        clsMerge.AddParameter("x", clsRFunctionParameter:=ucrFirstDataFrame.clsCurrDataFrame, iPosition:=0)
+        clsMerge.AddParameter("y", clsRFunctionParameter:=ucrSecondDataFrame.clsCurrDataFrame, iPosition:=1)
+        SetMergingBy()
     End Sub
 
     Private Sub ucrFirstDataFrame_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrFirstDataFrame.ControlContentsChanged, ucrSecondDataFrame.ControlContentsChanged, ucrSaveMerge.ControlContentsChanged
+        TestOKEnabled()
+    End Sub
+
+    Private Sub SetMergingBy()
+        Dim dctJoinColumns As New Dictionary(Of String, String)
+        Dim lstJoinPairs As New List(Of String)
+        Dim lstFirstColumns As List(Of String)
+        Dim lstSecondColumns As List(Of String)
+        Dim i As Integer = 0
+
+        If ucrFirstDataFrame.cboAvailableDataFrames.Text <> "" AndAlso ucrSecondDataFrame.cboAvailableDataFrames.Text <> "" Then
+            If clsMerge.ContainsParameter("by") Then
+                For Each clsTempParam As RParameter In clsByList.clsParameters
+                    dctJoinColumns.Add(clsTempParam.strArgumentName.Trim(Chr(34)), clsTempParam.strArgumentValue.Trim(Chr(34)))
+                Next
+            Else
+                lstFirstColumns = frmMain.clsRLink.GetColumnNames(ucrFirstDataFrame.cboAvailableDataFrames.Text)
+                lstSecondColumns = frmMain.clsRLink.GetColumnNames(ucrSecondDataFrame.cboAvailableDataFrames.Text)
+                i = 0
+                For Each strFirst As String In lstFirstColumns
+                    If lstSecondColumns.Contains(strFirst) Then
+                        dctJoinColumns.Add(strFirst, strFirst)
+                        clsByList.AddParameter(Chr(34) & strFirst & Chr(34), Chr(34) & strFirst & Chr(34), iPosition:=i)
+                        i = i + 1
+                    End If
+                Next
+                If clsByList.iParameterCount > 0 Then
+                    clsMerge.AddParameter("by", clsRFunctionParameter:=clsByList, iPosition:=2)
+                End If
+            End If
+            If dctJoinColumns.Count > 0 Then
+                For Each kvpTemp As KeyValuePair(Of String, String) In dctJoinColumns
+                    lstJoinPairs.Add(kvpTemp.Key & " = " & kvpTemp.Value)
+                Next
+                ucrInputMergingBy.SetName(String.Join(", ", lstJoinPairs))
+                ucrInputMergingBy.txtInput.BackColor = SystemColors.Control
+                cmdJoinOptions.BackColor = SystemColors.ButtonFace
+                cmdJoinOptions.UseVisualStyleBackColor = True
+            Else
+                ucrInputMergingBy.SetName("No columns to merge by!" & Environment.NewLine & "Click Join Options to specify merging columns.")
+                ucrInputMergingBy.txtInput.BackColor = Color.LightCoral
+                cmdJoinOptions.BackColor = Color.LemonChiffon
+            End If
+        Else
+            ucrInputMergingBy.SetName("")
+            ucrInputMergingBy.txtInput.BackColor = SystemColors.Control
+            clsMerge.RemoveParameterByName("by")
+            clsByList.ClearParameters()
+        End If
+        bMergeColumnsExist = (dctJoinColumns.Count > 0)
         TestOKEnabled()
     End Sub
 End Class

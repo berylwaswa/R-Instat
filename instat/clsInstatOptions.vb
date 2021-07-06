@@ -35,6 +35,10 @@ Imports RDotNet
     Public strGraphDisplayOption As String
     Public bCommandsinOutput As Nullable(Of Boolean)
     Public bIncludeCommentDefault As Nullable(Of Boolean) 'sets the default for comments on the dialog
+    Public bShowProcurementMenu As Nullable(Of Boolean)
+    Public bShowStructuredMenu As Nullable(Of Boolean)
+    Public bShowClimaticMenu As Nullable(Of Boolean)
+    Public bShowOptionsByContextMenu As Nullable(Of Boolean)
     Public iDigits As Nullable(Of Integer)
     Public bShowSignifStars As Nullable(Of Boolean)
     Public bChangeDataFrame As Nullable(Of Boolean)
@@ -42,12 +46,21 @@ Imports RDotNet
     Public iAutoSaveDataMinutes As Nullable(Of Integer)
     Public bShowWaitDialog As Nullable(Of Boolean)
     Public iWaitTimeDelaySeconds As Nullable(Of Integer)
+    Public iToolbarHeight As Nullable(Of Integer)
+    Public strClimsoftDatabaseName As String
+    Public strClimsoftHost As String
+    Public strClimsoftPort As String
+    Public strClimsoftUsername As String
 
     Public Sub New(Optional bSetOptions As Boolean = True)
         'TODO Is this sensible to do in constructor?
         bIncludeRDefaultParameters = clsInstatOptionsDefaults.DEFAULTbIncludeRDefaultParameters
         bCommandsinOutput = clsInstatOptionsDefaults.DEFAULTbCommandsinOutput
         bIncludeCommentDefault = clsInstatOptionsDefaults.DEFAULTbIncludeCommentDefault
+        bShowClimaticMenu = clsInstatOptionsDefaults.DEFAULTbShowClimaticMenu
+        bShowStructuredMenu = clsInstatOptionsDefaults.DEFAULTbShowStructuredMenu
+        bShowProcurementMenu = clsInstatOptionsDefaults.DEFAULTbShowProcurementMenu
+        bShowOptionsByContextMenu = clsInstatOptionsDefaults.DEFAULTbShowOptionsByContextMenu
         fntOutput = clsInstatOptionsDefaults.DEFAULTfntOutput
         clrOutput = clsInstatOptionsDefaults.DEFAULTclrOutput
         fntComment = clsInstatOptionsDefaults.DEFAULTfntComment
@@ -71,6 +84,11 @@ Imports RDotNet
         iAutoSaveDataMinutes = clsInstatOptionsDefaults.DEFAULTiAutoSaveDataMinutes
         bShowWaitDialog = clsInstatOptionsDefaults.DEFAULTbShowWaitDialog
         iWaitTimeDelaySeconds = clsInstatOptionsDefaults.DEFAULTiWaitTimeDelaySeconds
+        iToolbarHeight = clsInstatOptionsDefaults.DEFAULTiToolbarHeight
+        strClimsoftDatabaseName = clsInstatOptionsDefaults.DEFAULTstrClimsoftDatabaseName
+        strClimsoftHost = clsInstatOptionsDefaults.DEFAULTstrClimsoftHost
+        strClimsoftPort = clsInstatOptionsDefaults.DEFAULTstrClimsoftPort
+        strClimsoftUsername = clsInstatOptionsDefaults.DEFAULTstrClimsoftUsername
         If bSetOptions Then
             SetOptions()
         End If
@@ -173,6 +191,30 @@ Imports RDotNet
             SetIncludeCommentByDefault(clsInstatOptionsDefaults.DEFAULTbIncludeCommentDefault)
         End If
 
+        If bShowOptionsByContextMenu.HasValue Then
+            SetShowOptionsByContextMenu(bShowOptionsByContextMenu)
+        Else
+            SetShowOptionsByContextMenu(clsInstatOptionsDefaults.DEFAULTbShowOptionsByContextMenu)
+        End If
+
+        If bShowProcurementMenu.HasValue Then
+            SetShowProcurementMenu(bShowProcurementMenu)
+        Else
+            SetShowProcurementMenu(clsInstatOptionsDefaults.DEFAULTbShowProcurementMenu)
+        End If
+
+        If bShowStructuredMenu.HasValue Then
+            SetShowStructuredMenu(bShowStructuredMenu)
+        Else
+            SetShowStructuredMenu(clsInstatOptionsDefaults.DEFAULTbShowStructuredMenu)
+        End If
+
+        If bShowClimaticMenu.HasValue Then
+            SetShowClimaticMenu(bShowClimaticMenu)
+        Else
+            SetShowClimaticMenu(clsInstatOptionsDefaults.DEFAULTbShowClimaticMenu)
+        End If
+
         If bIncludeRDefaultParameters.HasValue Then
             SetIncludeRDefaultParameters(bIncludeRDefaultParameters)
         Else
@@ -207,6 +249,36 @@ Imports RDotNet
             SetWaitTimeDelaySeconds(iWaitTimeDelaySeconds)
         Else
             SetWaitTimeDelaySeconds(clsInstatOptionsDefaults.DEFAULTiWaitTimeDelaySeconds)
+        End If
+
+        If iToolbarHeight.HasValue Then
+            SetToolbarHeight(iToolbarHeight)
+        Else
+            SetToolbarHeight(clsInstatOptionsDefaults.DEFAULTiToolbarHeight)
+        End If
+
+        If strClimsoftDatabaseName IsNot Nothing Then
+            SetClimsoftDatabaseName(strClimsoftDatabaseName)
+        Else
+            SetClimsoftDatabaseName(clsInstatOptionsDefaults.DEFAULTstrClimsoftDatabaseName)
+        End If
+
+        If strClimsoftHost IsNot Nothing Then
+            SetClimsoftHost(strClimsoftHost)
+        Else
+            SetClimsoftHost(clsInstatOptionsDefaults.DEFAULTstrClimsoftHost)
+        End If
+
+        If strClimsoftPort IsNot Nothing Then
+            SetClimsoftPort(strClimsoftPort)
+        Else
+            SetClimsoftPort(clsInstatOptionsDefaults.DEFAULTstrClimsoftPort)
+        End If
+
+        If strClimsoftUsername IsNot Nothing Then
+            SetClimsoftUsername(strClimsoftUsername)
+        Else
+            SetClimsoftUsername(clsInstatOptionsDefaults.DEFAULTstrClimsoftUsername)
         End If
     End Sub
 
@@ -256,19 +328,14 @@ Imports RDotNet
         strLanguageCultureCode = strLanguage
         Select Case strLanguageCultureCode
             Case "en-GB"
-                Thread.CurrentThread.CurrentCulture = New CultureInfo("en-GB")
                 Thread.CurrentThread.CurrentUICulture = New CultureInfo("en-GB")
             Case "fr-FR"
-                Thread.CurrentThread.CurrentCulture = New CultureInfo("fr-FR")
                 Thread.CurrentThread.CurrentUICulture = New CultureInfo("fr-FR")
             Case "sw-KE"
-                Thread.CurrentThread.CurrentCulture = New CultureInfo("sw-KE")
                 Thread.CurrentThread.CurrentUICulture = New CultureInfo("sw-KE")
             Case "es-ES"
-                Thread.CurrentThread.CurrentCulture = New CultureInfo("es-ES")
                 Thread.CurrentThread.CurrentUICulture = New CultureInfo("es-ES")
             Case Else
-                Thread.CurrentThread.CurrentCulture = New CultureInfo("en-GB")
                 Thread.CurrentThread.CurrentUICulture = New CultureInfo("en-GB")
         End Select
     End Sub
@@ -351,6 +418,26 @@ Imports RDotNet
         bIncludeCommentDefault = bNewInclude
     End Sub
 
+    Public Sub SetShowProcurementMenu(bNewShowProcurementMenu As Boolean)
+        bShowProcurementMenu = bNewShowProcurementMenu
+        frmMain.SetShowProcurementMenu(bNewShowProcurementMenu)
+    End Sub
+
+    Public Sub SetShowStructuredMenu(bNewShowStructuredMenu As Boolean)
+        bShowStructuredMenu = bNewShowStructuredMenu
+        frmMain.SetShowStructuredMenu(bNewShowStructuredMenu)
+    End Sub
+
+    Public Sub SetShowClimaticMenu(bNewShowClimaticMenu As Boolean)
+        bShowClimaticMenu = bNewShowClimaticMenu
+        frmMain.SetShowClimaticMenu(bNewShowClimaticMenu)
+    End Sub
+
+    Public Sub SetShowOptionsByContextMenu(bNewShowOptionsByContextMenu As Boolean)
+        bShowOptionsByContextMenu = bNewShowOptionsByContextMenu
+        frmMain.SetShowOptionsByContextMenu(bNewShowOptionsByContextMenu)
+    End Sub
+
     Public Sub SetIncludeRDefaultParameters(bNewInclude As Boolean)
         bIncludeRDefaultParameters = bNewInclude
     End Sub
@@ -361,6 +448,7 @@ Imports RDotNet
 
     Public Sub SetAutoSaveDataMinutes(iNewMinutes As Integer)
         iAutoSaveDataMinutes = iNewMinutes
+        frmMain.ResetTimer()
     End Sub
 
     Public Sub SetShowWaitDialog(bNewShow As Boolean)
@@ -371,5 +459,26 @@ Imports RDotNet
     Public Sub SetWaitTimeDelaySeconds(iNewTimeInSeconds As Integer)
         iWaitTimeDelaySeconds = iNewTimeInSeconds
         frmMain.clsRLink.SetWaitDelayTime(iWaitTimeDelaySeconds)
+    End Sub
+
+    Public Sub SetToolbarHeight(iNewToolbarHeight As Integer)
+        iToolbarHeight = iNewToolbarHeight
+        frmMain.SetToolbarHeight(iToolbarHeight)
+    End Sub
+
+    Public Sub SetClimsoftDatabaseName(strNewClimsoftDatabaseName As String)
+        strClimsoftDatabaseName = strNewClimsoftDatabaseName
+    End Sub
+
+    Public Sub SetClimsoftHost(strNewClimsoftHost As String)
+        strClimsoftHost = strNewClimsoftHost
+    End Sub
+
+    Public Sub SetClimsoftPort(strNewClimsoftPort As String)
+        strClimsoftPort = strNewClimsoftPort
+    End Sub
+
+    Public Sub SetClimsoftUsername(strNewClimsoftUsername As String)
+        strClimsoftUsername = strNewClimsoftUsername
     End Sub
 End Class

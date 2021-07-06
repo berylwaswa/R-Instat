@@ -22,12 +22,33 @@ Partial Class dlgClimaticCheckDataRain
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgClimaticCheckDataRain))
         Me.lblStation = New System.Windows.Forms.Label()
         Me.lblDate = New System.Windows.Forms.Label()
         Me.lblYear = New System.Windows.Forms.Label()
         Me.lblDay = New System.Windows.Forms.Label()
         Me.lblMonth = New System.Windows.Forms.Label()
         Me.lblElement = New System.Windows.Forms.Label()
+        Me.lblmm = New System.Windows.Forms.Label()
+        Me.lblDays = New System.Windows.Forms.Label()
+        Me.lblRainDays = New System.Windows.Forms.Label()
+        Me.lblSkewnessWeight = New System.Windows.Forms.Label()
+        Me.grpLogicalCalculatedColumns = New System.Windows.Forms.GroupBox()
+        Me.ucrChkLogicalColumns = New instat.ucrCheck()
+        Me.ucrChkCalculatedColumns = New instat.ucrCheck()
+        Me.lblCoeff = New System.Windows.Forms.Label()
+        Me.cmdOmitMonths = New System.Windows.Forms.Button()
+        Me.lblThreshold = New System.Windows.Forms.Label()
+        Me.lblMissingThreshold = New System.Windows.Forms.Label()
+        Me.lblThresholdmm = New System.Windows.Forms.Label()
+        Me.ucrInputThreshold = New instat.ucrInputTextBox()
+        Me.ucrInputThresholdValue = New instat.ucrInputTextBox()
+        Me.ucrNudCoeff = New instat.ucrNud()
+        Me.ucrChkOmitZero = New instat.ucrCheck()
+        Me.ucrNudSkewnessWeight = New instat.ucrNud()
+        Me.ucrNudWetDays = New instat.ucrNud()
+        Me.ucrNudSame = New instat.ucrNud()
+        Me.ucrNudLarge = New instat.ucrNud()
         Me.ucrChkOutlier = New instat.ucrCheck()
         Me.ucrChkDryMonth = New instat.ucrCheck()
         Me.ucrChkWetDays = New instat.ucrCheck()
@@ -41,196 +62,312 @@ Partial Class dlgClimaticCheckDataRain
         Me.ucrReceiverStation = New instat.ucrReceiverSingle()
         Me.ucrSelectorRain = New instat.ucrSelectorByDataFrameAddRemove()
         Me.ucrBase = New instat.ucrButtons()
+        Me.lblGreater = New System.Windows.Forms.Label()
+        Me.ucrInputSameValue = New instat.ucrInputTextBox()
+        Me.grpLogicalCalculatedColumns.SuspendLayout()
         Me.SuspendLayout()
         '
         'lblStation
         '
-        Me.lblStation.AutoSize = True
-        Me.lblStation.Location = New System.Drawing.Point(253, 45)
+        resources.ApplyResources(Me.lblStation, "lblStation")
         Me.lblStation.Name = "lblStation"
-        Me.lblStation.Size = New System.Drawing.Size(40, 13)
-        Me.lblStation.TabIndex = 2
-        Me.lblStation.Text = "Station"
         '
         'lblDate
         '
-        Me.lblDate.AutoSize = True
-        Me.lblDate.Location = New System.Drawing.Point(256, 88)
+        resources.ApplyResources(Me.lblDate, "lblDate")
         Me.lblDate.Name = "lblDate"
-        Me.lblDate.Size = New System.Drawing.Size(30, 13)
-        Me.lblDate.TabIndex = 4
-        Me.lblDate.Text = "Date"
         '
         'lblYear
         '
-        Me.lblYear.AutoSize = True
-        Me.lblYear.Location = New System.Drawing.Point(256, 131)
+        resources.ApplyResources(Me.lblYear, "lblYear")
         Me.lblYear.Name = "lblYear"
-        Me.lblYear.Size = New System.Drawing.Size(29, 13)
-        Me.lblYear.TabIndex = 4
-        Me.lblYear.Text = "Year"
         '
         'lblDay
         '
-        Me.lblDay.AutoSize = True
-        Me.lblDay.Location = New System.Drawing.Point(255, 217)
+        resources.ApplyResources(Me.lblDay, "lblDay")
         Me.lblDay.Name = "lblDay"
-        Me.lblDay.Size = New System.Drawing.Size(26, 13)
-        Me.lblDay.TabIndex = 4
-        Me.lblDay.Text = "Day"
         '
         'lblMonth
         '
-        Me.lblMonth.AutoSize = True
-        Me.lblMonth.Location = New System.Drawing.Point(258, 174)
+        resources.ApplyResources(Me.lblMonth, "lblMonth")
         Me.lblMonth.Name = "lblMonth"
-        Me.lblMonth.Size = New System.Drawing.Size(37, 13)
-        Me.lblMonth.TabIndex = 4
-        Me.lblMonth.Text = "Month"
         '
         'lblElement
         '
-        Me.lblElement.AutoSize = True
-        Me.lblElement.Location = New System.Drawing.Point(258, 260)
+        resources.ApplyResources(Me.lblElement, "lblElement")
         Me.lblElement.Name = "lblElement"
-        Me.lblElement.Size = New System.Drawing.Size(45, 13)
-        Me.lblElement.TabIndex = 4
-        Me.lblElement.Text = "Element"
+        '
+        'lblmm
+        '
+        resources.ApplyResources(Me.lblmm, "lblmm")
+        Me.lblmm.Name = "lblmm"
+        '
+        'lblDays
+        '
+        resources.ApplyResources(Me.lblDays, "lblDays")
+        Me.lblDays.Name = "lblDays"
+        '
+        'lblRainDays
+        '
+        resources.ApplyResources(Me.lblRainDays, "lblRainDays")
+        Me.lblRainDays.Name = "lblRainDays"
+        '
+        'lblSkewnessWeight
+        '
+        resources.ApplyResources(Me.lblSkewnessWeight, "lblSkewnessWeight")
+        Me.lblSkewnessWeight.Name = "lblSkewnessWeight"
+        '
+        'grpLogicalCalculatedColumns
+        '
+        Me.grpLogicalCalculatedColumns.Controls.Add(Me.ucrChkLogicalColumns)
+        Me.grpLogicalCalculatedColumns.Controls.Add(Me.ucrChkCalculatedColumns)
+        resources.ApplyResources(Me.grpLogicalCalculatedColumns, "grpLogicalCalculatedColumns")
+        Me.grpLogicalCalculatedColumns.Name = "grpLogicalCalculatedColumns"
+        Me.grpLogicalCalculatedColumns.TabStop = False
+        '
+        'ucrChkLogicalColumns
+        '
+        Me.ucrChkLogicalColumns.Checked = False
+        resources.ApplyResources(Me.ucrChkLogicalColumns, "ucrChkLogicalColumns")
+        Me.ucrChkLogicalColumns.Name = "ucrChkLogicalColumns"
+        '
+        'ucrChkCalculatedColumns
+        '
+        Me.ucrChkCalculatedColumns.Checked = False
+        resources.ApplyResources(Me.ucrChkCalculatedColumns, "ucrChkCalculatedColumns")
+        Me.ucrChkCalculatedColumns.Name = "ucrChkCalculatedColumns"
+        '
+        'lblCoeff
+        '
+        resources.ApplyResources(Me.lblCoeff, "lblCoeff")
+        Me.lblCoeff.Name = "lblCoeff"
+        '
+        'cmdOmitMonths
+        '
+        resources.ApplyResources(Me.cmdOmitMonths, "cmdOmitMonths")
+        Me.cmdOmitMonths.Name = "cmdOmitMonths"
+        Me.cmdOmitMonths.UseVisualStyleBackColor = True
+        '
+        'lblThreshold
+        '
+        resources.ApplyResources(Me.lblThreshold, "lblThreshold")
+        Me.lblThreshold.Name = "lblThreshold"
+        '
+        'lblMissingThreshold
+        '
+        resources.ApplyResources(Me.lblMissingThreshold, "lblMissingThreshold")
+        Me.lblMissingThreshold.Name = "lblMissingThreshold"
+        '
+        'lblThresholdmm
+        '
+        resources.ApplyResources(Me.lblThresholdmm, "lblThresholdmm")
+        Me.lblThresholdmm.Name = "lblThresholdmm"
+        '
+        'ucrInputThreshold
+        '
+        Me.ucrInputThreshold.AddQuotesIfUnrecognised = True
+        Me.ucrInputThreshold.IsMultiline = False
+        Me.ucrInputThreshold.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputThreshold, "ucrInputThreshold")
+        Me.ucrInputThreshold.Name = "ucrInputThreshold"
+        '
+        'ucrInputThresholdValue
+        '
+        Me.ucrInputThresholdValue.AddQuotesIfUnrecognised = True
+        Me.ucrInputThresholdValue.IsMultiline = False
+        Me.ucrInputThresholdValue.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputThresholdValue, "ucrInputThresholdValue")
+        Me.ucrInputThresholdValue.Name = "ucrInputThresholdValue"
+        '
+        'ucrNudCoeff
+        '
+        Me.ucrNudCoeff.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudCoeff.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudCoeff, "ucrNudCoeff")
+        Me.ucrNudCoeff.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudCoeff.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudCoeff.Name = "ucrNudCoeff"
+        Me.ucrNudCoeff.Value = New Decimal(New Integer() {0, 0, 0, 0})
+        '
+        'ucrChkOmitZero
+        '
+        Me.ucrChkOmitZero.Checked = False
+        resources.ApplyResources(Me.ucrChkOmitZero, "ucrChkOmitZero")
+        Me.ucrChkOmitZero.Name = "ucrChkOmitZero"
+        '
+        'ucrNudSkewnessWeight
+        '
+        Me.ucrNudSkewnessWeight.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSkewnessWeight.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudSkewnessWeight, "ucrNudSkewnessWeight")
+        Me.ucrNudSkewnessWeight.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudSkewnessWeight.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSkewnessWeight.Name = "ucrNudSkewnessWeight"
+        Me.ucrNudSkewnessWeight.Value = New Decimal(New Integer() {0, 0, 0, 0})
+        '
+        'ucrNudWetDays
+        '
+        Me.ucrNudWetDays.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudWetDays.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudWetDays, "ucrNudWetDays")
+        Me.ucrNudWetDays.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudWetDays.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudWetDays.Name = "ucrNudWetDays"
+        Me.ucrNudWetDays.Value = New Decimal(New Integer() {0, 0, 0, 0})
+        '
+        'ucrNudSame
+        '
+        Me.ucrNudSame.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSame.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudSame, "ucrNudSame")
+        Me.ucrNudSame.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudSame.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSame.Name = "ucrNudSame"
+        Me.ucrNudSame.Value = New Decimal(New Integer() {0, 0, 0, 0})
+        '
+        'ucrNudLarge
+        '
+        Me.ucrNudLarge.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudLarge.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudLarge, "ucrNudLarge")
+        Me.ucrNudLarge.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudLarge.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudLarge.Name = "ucrNudLarge"
+        Me.ucrNudLarge.Value = New Decimal(New Integer() {0, 0, 0, 0})
         '
         'ucrChkOutlier
         '
         Me.ucrChkOutlier.Checked = False
-        Me.ucrChkOutlier.Location = New System.Drawing.Point(10, 292)
+        resources.ApplyResources(Me.ucrChkOutlier, "ucrChkOutlier")
         Me.ucrChkOutlier.Name = "ucrChkOutlier"
-        Me.ucrChkOutlier.Size = New System.Drawing.Size(100, 20)
-        Me.ucrChkOutlier.TabIndex = 6
         '
         'ucrChkDryMonth
         '
         Me.ucrChkDryMonth.Checked = False
-        Me.ucrChkDryMonth.Location = New System.Drawing.Point(10, 268)
+        resources.ApplyResources(Me.ucrChkDryMonth, "ucrChkDryMonth")
         Me.ucrChkDryMonth.Name = "ucrChkDryMonth"
-        Me.ucrChkDryMonth.Size = New System.Drawing.Size(100, 20)
-        Me.ucrChkDryMonth.TabIndex = 6
         '
         'ucrChkWetDays
         '
         Me.ucrChkWetDays.Checked = False
-        Me.ucrChkWetDays.Location = New System.Drawing.Point(12, 244)
+        resources.ApplyResources(Me.ucrChkWetDays, "ucrChkWetDays")
         Me.ucrChkWetDays.Name = "ucrChkWetDays"
-        Me.ucrChkWetDays.Size = New System.Drawing.Size(100, 20)
-        Me.ucrChkWetDays.TabIndex = 6
         '
         'ucrChkSame
         '
         Me.ucrChkSame.Checked = False
-        Me.ucrChkSame.Location = New System.Drawing.Point(13, 220)
+        resources.ApplyResources(Me.ucrChkSame, "ucrChkSame")
         Me.ucrChkSame.Name = "ucrChkSame"
-        Me.ucrChkSame.Size = New System.Drawing.Size(100, 20)
-        Me.ucrChkSame.TabIndex = 6
         '
         'ucrChkLarge
         '
         Me.ucrChkLarge.Checked = False
-        Me.ucrChkLarge.Location = New System.Drawing.Point(13, 196)
+        resources.ApplyResources(Me.ucrChkLarge, "ucrChkLarge")
         Me.ucrChkLarge.Name = "ucrChkLarge"
-        Me.ucrChkLarge.Size = New System.Drawing.Size(100, 20)
-        Me.ucrChkLarge.TabIndex = 6
         '
         'ucrReceiverMonth
         '
         Me.ucrReceiverMonth.frmParent = Me
-        Me.ucrReceiverMonth.Location = New System.Drawing.Point(256, 197)
-        Me.ucrReceiverMonth.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverMonth, "ucrReceiverMonth")
         Me.ucrReceiverMonth.Name = "ucrReceiverMonth"
         Me.ucrReceiverMonth.Selector = Nothing
-        Me.ucrReceiverMonth.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverMonth.strNcFilePath = ""
-        Me.ucrReceiverMonth.TabIndex = 5
         Me.ucrReceiverMonth.ucrSelector = Nothing
         '
         'ucrReceiverElement
         '
         Me.ucrReceiverElement.frmParent = Me
-        Me.ucrReceiverElement.Location = New System.Drawing.Point(256, 273)
-        Me.ucrReceiverElement.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverElement, "ucrReceiverElement")
         Me.ucrReceiverElement.Name = "ucrReceiverElement"
         Me.ucrReceiverElement.Selector = Nothing
-        Me.ucrReceiverElement.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverElement.strNcFilePath = ""
-        Me.ucrReceiverElement.TabIndex = 5
         Me.ucrReceiverElement.ucrSelector = Nothing
         '
         'ucrReceiverDay
         '
         Me.ucrReceiverDay.frmParent = Me
-        Me.ucrReceiverDay.Location = New System.Drawing.Point(256, 240)
-        Me.ucrReceiverDay.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverDay, "ucrReceiverDay")
         Me.ucrReceiverDay.Name = "ucrReceiverDay"
         Me.ucrReceiverDay.Selector = Nothing
-        Me.ucrReceiverDay.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverDay.strNcFilePath = ""
-        Me.ucrReceiverDay.TabIndex = 5
         Me.ucrReceiverDay.ucrSelector = Nothing
         '
         'ucrReceiverYear
         '
         Me.ucrReceiverYear.frmParent = Me
-        Me.ucrReceiverYear.Location = New System.Drawing.Point(256, 154)
-        Me.ucrReceiverYear.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverYear, "ucrReceiverYear")
         Me.ucrReceiverYear.Name = "ucrReceiverYear"
         Me.ucrReceiverYear.Selector = Nothing
-        Me.ucrReceiverYear.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverYear.strNcFilePath = ""
-        Me.ucrReceiverYear.TabIndex = 5
         Me.ucrReceiverYear.ucrSelector = Nothing
         '
         'ucrReceiverDate
         '
         Me.ucrReceiverDate.frmParent = Me
-        Me.ucrReceiverDate.Location = New System.Drawing.Point(256, 111)
-        Me.ucrReceiverDate.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverDate, "ucrReceiverDate")
         Me.ucrReceiverDate.Name = "ucrReceiverDate"
         Me.ucrReceiverDate.Selector = Nothing
-        Me.ucrReceiverDate.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverDate.strNcFilePath = ""
-        Me.ucrReceiverDate.TabIndex = 5
         Me.ucrReceiverDate.ucrSelector = Nothing
         '
         'ucrReceiverStation
         '
         Me.ucrReceiverStation.frmParent = Me
-        Me.ucrReceiverStation.Location = New System.Drawing.Point(256, 63)
-        Me.ucrReceiverStation.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverStation, "ucrReceiverStation")
         Me.ucrReceiverStation.Name = "ucrReceiverStation"
         Me.ucrReceiverStation.Selector = Nothing
-        Me.ucrReceiverStation.Size = New System.Drawing.Size(120, 20)
         Me.ucrReceiverStation.strNcFilePath = ""
-        Me.ucrReceiverStation.TabIndex = 3
         Me.ucrReceiverStation.ucrSelector = Nothing
         '
         'ucrSelectorRain
         '
+        Me.ucrSelectorRain.bDropUnusedFilterLevels = False
         Me.ucrSelectorRain.bShowHiddenColumns = False
         Me.ucrSelectorRain.bUseCurrentFilter = True
-        Me.ucrSelectorRain.Location = New System.Drawing.Point(10, 10)
-        Me.ucrSelectorRain.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrSelectorRain, "ucrSelectorRain")
         Me.ucrSelectorRain.Name = "ucrSelectorRain"
-        Me.ucrSelectorRain.Size = New System.Drawing.Size(210, 180)
-        Me.ucrSelectorRain.TabIndex = 1
         '
         'ucrBase
         '
-        Me.ucrBase.Location = New System.Drawing.Point(10, 329)
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(410, 52)
-        Me.ucrBase.TabIndex = 0
+        '
+        'lblGreater
+        '
+        resources.ApplyResources(Me.lblGreater, "lblGreater")
+        Me.lblGreater.Name = "lblGreater"
+        '
+        'ucrInputSameValue
+        '
+        Me.ucrInputSameValue.AddQuotesIfUnrecognised = True
+        Me.ucrInputSameValue.IsMultiline = False
+        Me.ucrInputSameValue.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputSameValue, "ucrInputSameValue")
+        Me.ucrInputSameValue.Name = "ucrInputSameValue"
         '
         'dlgClimaticCheckDataRain
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(423, 388)
+        Me.Controls.Add(Me.ucrInputSameValue)
+        Me.Controls.Add(Me.lblGreater)
+        Me.Controls.Add(Me.lblThresholdmm)
+        Me.Controls.Add(Me.ucrInputThreshold)
+        Me.Controls.Add(Me.lblMissingThreshold)
+        Me.Controls.Add(Me.lblThreshold)
+        Me.Controls.Add(Me.ucrInputThresholdValue)
+        Me.Controls.Add(Me.cmdOmitMonths)
+        Me.Controls.Add(Me.lblCoeff)
+        Me.Controls.Add(Me.ucrNudCoeff)
+        Me.Controls.Add(Me.ucrChkOmitZero)
+        Me.Controls.Add(Me.lblSkewnessWeight)
+        Me.Controls.Add(Me.ucrNudSkewnessWeight)
+        Me.Controls.Add(Me.lblRainDays)
+        Me.Controls.Add(Me.lblDays)
+        Me.Controls.Add(Me.lblmm)
+        Me.Controls.Add(Me.ucrNudWetDays)
+        Me.Controls.Add(Me.ucrNudSame)
+        Me.Controls.Add(Me.ucrNudLarge)
         Me.Controls.Add(Me.ucrChkOutlier)
         Me.Controls.Add(Me.ucrChkDryMonth)
         Me.Controls.Add(Me.ucrChkWetDays)
@@ -250,12 +387,12 @@ Partial Class dlgClimaticCheckDataRain
         Me.Controls.Add(Me.lblStation)
         Me.Controls.Add(Me.ucrSelectorRain)
         Me.Controls.Add(Me.ucrBase)
+        Me.Controls.Add(Me.grpLogicalCalculatedColumns)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgClimaticCheckDataRain"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Climatic Check Data Rain"
+        Me.grpLogicalCalculatedColumns.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -280,4 +417,26 @@ Partial Class dlgClimaticCheckDataRain
     Friend WithEvents ucrReceiverDate As ucrReceiverSingle
     Friend WithEvents lblYear As Label
     Friend WithEvents lblDate As Label
+    Friend WithEvents ucrNudLarge As ucrNud
+    Friend WithEvents ucrNudWetDays As ucrNud
+    Friend WithEvents ucrNudSame As ucrNud
+    Friend WithEvents lblmm As Label
+    Friend WithEvents lblDays As Label
+    Friend WithEvents lblRainDays As Label
+    Friend WithEvents lblSkewnessWeight As Label
+    Friend WithEvents ucrNudSkewnessWeight As ucrNud
+    Friend WithEvents ucrChkCalculatedColumns As ucrCheck
+    Friend WithEvents ucrChkLogicalColumns As ucrCheck
+    Friend WithEvents grpLogicalCalculatedColumns As GroupBox
+    Friend WithEvents ucrChkOmitZero As ucrCheck
+    Friend WithEvents lblCoeff As Label
+    Friend WithEvents ucrNudCoeff As ucrNud
+    Friend WithEvents cmdOmitMonths As Button
+    Friend WithEvents ucrInputThresholdValue As ucrInputTextBox
+    Friend WithEvents lblThreshold As Label
+    Friend WithEvents lblMissingThreshold As Label
+    Friend WithEvents ucrInputThreshold As ucrInputTextBox
+    Friend WithEvents lblThresholdmm As Label
+    Friend WithEvents lblGreater As Label
+    Friend WithEvents ucrInputSameValue As ucrInputTextBox
 End Class

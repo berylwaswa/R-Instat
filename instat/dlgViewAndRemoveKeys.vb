@@ -21,18 +21,17 @@ Public Class dlgViewAndRemoveKeys
     Private clsGetKey As New RFunction
     Private clsRemoveKey As New RFunction
     Private Sub dlgViewAndRemoveKeys_Load(sender As Object, e As EventArgs) Handles Me.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
-        Else
-            ReopenDialog()
         End If
         If bReset Then
             SetDefaults()
         End If
         SetRCodeForControls(bReset)
         bReset = False
+        TestOKEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
@@ -81,10 +80,6 @@ Public Class dlgViewAndRemoveKeys
         Else
             ucrBase.OKEnabled(False)
         End If
-    End Sub
-
-    Private Sub ReopenDialog() 'Temporary fixes remove key error on reopen of the dialog
-        ucrSelectorKeys.Reset()
     End Sub
 
     Private Sub ucrBase_ClickReset(sender As Object, e As EventArgs) Handles ucrBase.ClickReset

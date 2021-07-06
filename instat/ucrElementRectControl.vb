@@ -13,6 +13,7 @@
 '
 ' You should have received a copy of the GNU General Public License 
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Imports instat.Translations
 
 Public Class ucrElementRectControl
     Private bInitialiseControls As Boolean = False
@@ -50,10 +51,10 @@ Public Class ucrElementRectControl
         ucrRectFill.SetItems(New Dictionary(Of String, String)(GgplotDefaults.dctColour))
         ucrRectFill.SetDropDownStyleAsNonEditable()
 
-        ucrChkRectSize.AddToLinkedControls(ucrNudRectSize, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:=0.0)
-        ucrChkRectLineType.AddToLinkedControls(ucrInputRectLineType, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Solid")
-        ucrChkRectColour.AddToLinkedControls(ucrRectColors, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Black")
-        ucrChkRectFill.AddToLinkedControls(ucrRectFill, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Black")
+        ucrChkRectSize.AddToLinkedControls(ucrNudRectSize, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:=0.0, bNewLinkedChangeParameterValue:=True)
+        ucrChkRectLineType.AddToLinkedControls(ucrInputRectLineType, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Solid", bNewLinkedChangeParameterValue:=True)
+        ucrChkRectColour.AddToLinkedControls(ucrRectColors, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Black", bNewLinkedChangeParameterValue:=True)
+        ucrChkRectFill.AddToLinkedControls(ucrRectFill, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="Black", bNewLinkedChangeParameterValue:=True)
 
         bInitialiseControls = True
     End Sub
@@ -110,6 +111,6 @@ Public Class ucrElementRectControl
     End Sub
 
     Public Sub SetLabel(strlabel As String)
-        grpElementRect.Text = strlabel
+        grpElementRect.Text = GetTranslation(strlabel)
     End Sub
 End Class

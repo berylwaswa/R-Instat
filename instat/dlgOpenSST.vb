@@ -19,7 +19,7 @@ Imports System.IO
 
 Public Class dlgOpenSST
     'Private intLines As Integer
-    Private clsReadFile As RFunction
+    Private clsReadFile As New RFunction
     Private clsRBaseCPT, clsBaseNetCDF, clsRCDF As New RFunction
     Private strTempWorkbookName As String
     Dim bFirstLoad As Boolean
@@ -48,7 +48,6 @@ Public Class dlgOpenSST
     End Sub
 
     Private Sub dlgImportDataset_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         Me.Show()
         If bFirstLoad Then
             InitialiseDialog()
@@ -60,6 +59,7 @@ Public Class dlgOpenSST
             bStartOpenDialog = False
         End If
         TestOkEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()

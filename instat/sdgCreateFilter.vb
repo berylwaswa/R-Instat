@@ -14,6 +14,9 @@
 ' You should have received a copy of the GNU General Public License 
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Imports instat.Translations
+Imports System.ComponentModel
+
 Public Class sdgCreateFilter
     Public clsCurrentFilter As RFunction
     Public bFilterDefined As Boolean
@@ -29,5 +32,20 @@ Public Class sdgCreateFilter
 
     Private Sub ucrCreateFilter_FilterChanged() Handles ucrCreateFilter.FilterChanged
         bFilterDefined = ucrCreateFilter.bFilterDefined
+    End Sub
+
+    Private Sub sdgCreateFilter_Load(sender As Object, e As EventArgs) Handles Me.Load
+        autoTranslate(Me)
+    End Sub
+
+    Private Sub sdgCreateFilter_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+        Dim result As MsgBoxResult
+
+        If Not ucrCreateFilter.ucrFilterByReceiver.IsEmpty Then
+            result = MessageBox.Show(text:="Are you sure you want to return to the main dialog?" & Environment.NewLine & "The condition for " & ucrCreateFilter.ucrFilterByReceiver.GetVariableNames(False) & " has not been added." & Environment.NewLine & "Click the " & Chr(34) & "Add Condition" & Chr(34) & " button if you want to add it.", caption:="Return to main dialog?", buttons:=MessageBoxButtons.YesNo, icon:=MessageBoxIcon.Information)
+            If result = MsgBoxResult.No Then
+                e.Cancel = True
+            End If
+        End If
     End Sub
 End Class

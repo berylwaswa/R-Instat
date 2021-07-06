@@ -16,6 +16,8 @@
 
 Imports instat
 Imports instat.Translations
+Imports RDotNet
+
 Public Class ucrReceiver
     Public WithEvents ucrSelector As ucrSelector
     Public lstIncludedMetadataProperties As List(Of KeyValuePair(Of String, String()))
@@ -24,6 +26,7 @@ Public Class ucrReceiver
     Public bFirstShown As Boolean
     Public strSelectorHeading As String
     Public bUseFilteredData As Boolean = True
+    Public bDropUnusedFilterLevels As Boolean = False
     Public bTypeSet As Boolean
     Protected strType As String
     Public bExcludeFromSelector As Boolean = False
@@ -35,13 +38,20 @@ Public Class ucrReceiver
 
     Private strPrvNcFilePath As String = ""
 
+    'Should the receiver attempt to autofill items based on lstIncludedAutoFillProperties?
+    Public bAutoFill As Boolean = False
+    Public lstIncludedAutoFillProperties As Dictionary(Of String, String())
+
     Public bAddParameterIfEmpty As Boolean = False
     'If the control is used to set a parameter that is a string i.e. column = "ID"
     Protected bParameterIsString As Boolean = False
     'If the control is used to set a parameter that is an RFunction i.e. x = InstatDataObject$get_columns_from_data()
     Protected bParameterIsRFunction As Boolean = False
-    'The name of the data parameter in the get columns instat object method (should always be the same)
+    'The name of the parameter which contains the items in the get instat object method (depends on the type of items in the receiver)
     Protected strItemsParameterNameInRFunction As String = "col_names"
+
+    'Name of the data name parameter in the get instat object method (depends on the type of items in the receiver)
+    Protected strDataFrameParameterNameInRFunction As String = "data_name"
 
     'Should quotes be used when bParameterIsString = False
     Public bWithQuotes As Boolean = True
@@ -49,9 +59,26 @@ Public Class ucrReceiver
     'Should columns be forced as a data frame object when bParameterIsRFunction = True
     Public bForceAsDataFrame As Boolean = False
 
-    'Currently no distinction in between selector resetting and data frame changed
-    'Need option to not reset receiver when data frame changed e.g. calculations dialog
-    Public bResetWhenSelectorResets As Boolean = True
+    ' If True then this receiver can only contain a column from the selector's primary data frame
+    ' and this receiver can set the selector's primary data frame (when current receiver), resetting all other receivers
+    Public bAttachedToPrimaryDataFrame As Boolean = True
+
+    ' If not attached to primary data frame, should only data frames linked to the primary data frame be shown.
+    Public bOnlyLinkedToPrimaryDataFrames As Boolean = True
+
+    ' When calling GetVariableNames() this is the R package & function name the variables will be inside
+    ' Only currently used in Multiple receiver but defined here as needed in general method SetControlValue()
+    ' for ExtractItemsFromRList()
+    Protected strVariablesListPackageName As String = ""
+    Protected strVariablesListFunctionName As String = "c"
+    ' Set to True if GetVariableNames() should always return an R list (using function above)
+    ' Even when only one variable.
+    ' Currently only implemented for multiple receiver.
+    Public bForceVariablesAsList As Boolean = False
+
+    'used by the selector to autoswitch from the current receiver
+    Public bAutoSwitchFromReceiver As Boolean = False
+
 
     Public Sub New()
         ' This call is required by the designer.
@@ -61,6 +88,7 @@ Public Class ucrReceiver
         lstIncludedMetadataProperties = New List(Of KeyValuePair(Of String, String()))
         lstExcludedMetadataProperties = New List(Of KeyValuePair(Of String, String()))
         bFirstLoad = True
+        lstIncludedAutoFillProperties = New Dictionary(Of String, String())
         bFirstShown = True
         bTypeSet = False
         strSelectorHeading = "Variables"
@@ -124,7 +152,7 @@ Public Class ucrReceiver
         Return strVarNames
     End Function
 
-    Public Overridable Function GetVariableNamesList(Optional bWithQuotes As Boolean = True) As String()
+    Public Overridable Function GetVariableNamesList(Optional bWithQuotes As Boolean = True, Optional strQuotes As String = Chr(34)) As String()
         Dim strVarNames As String() = Nothing
         Return strVarNames
     End Function
@@ -136,7 +164,6 @@ Public Class ucrReceiver
     End Sub
 
     Private Sub ucrReceiver_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        translateEach(Controls)
         If bFirstLoad Then
             frmParent = ParentForm
             'Remove this line so that single/multiple code can run things on first load as well
@@ -330,9 +357,20 @@ Public Class ucrReceiver
         End If
     End Sub
 
+    'TODO if needed create SetExcludedAutoFillProperties
+    Public Sub SetIncludedAutoFillProperties(lstNewIncludedAutoFillProperties As Dictionary(Of String, String()))
+        lstIncludedAutoFillProperties = lstNewIncludedAutoFillProperties
+    End Sub
+
     Protected Overridable Sub Selector_ResetAll() Handles ucrSelector.ResetReceivers
-        If bResetWhenSelectorResets Then
-            Clear()
+        Clear()
+        CheckAutoFill()
+    End Sub
+
+    Private Sub ucrSelector_DataFrameChanged() Handles ucrSelector.DataFrameChanged
+        'TODO This is possibly an expensive check, there may be more efficient ways of checking if this is the current receiver
+        If ucrSelector IsNot Nothing AndAlso ucrSelector.CurrentReceiver IsNot Nothing AndAlso (ucrSelector.CurrentReceiver.bAttachedToPrimaryDataFrame OrElse ucrSelector.CurrentReceiver.Equals(Me)) Then
+            Selector_ResetAll()
         End If
     End Sub
 
@@ -363,6 +401,8 @@ Public Class ucrReceiver
                 strItemsParameterNameInRFunction = "graph_name"
             Case "model"
                 strItemsParameterNameInRFunction = "model_name"
+            Case "surv"
+                strItemsParameterNameInRFunction = "surv_name"
             Case "table"
                 strItemsParameterNameInRFunction = "table_name"
             Case "filter"
@@ -371,6 +411,8 @@ Public Class ucrReceiver
                 strItemsParameterNameInRFunction = "link_name"
             Case "object"
                 strItemsParameterNameInRFunction = "object_name"
+            Case "calculation"
+                strItemsParameterNameInRFunction = "calculation_name"
         End Select
         If IsCurrentReceiver() Then
             Selector.LoadList()
@@ -402,27 +444,39 @@ Public Class ucrReceiver
         Dim clsTempDataParameter As RParameter
         Dim lstCurrentVariables As String() = Nothing
         Dim clsTempParameter As RParameter
+        Dim strTempDataName As String = ""
 
         clsTempParameter = GetParameter()
         If clsTempParameter IsNot Nothing Then
             If bChangeParameterValue Then
                 If bParameterIsString AndAlso clsTempParameter.bIsString Then
                     If strValuesToIgnore Is Nothing OrElse (Not strValuesToIgnore.Contains(clsTempParameter.strArgumentValue)) Then
-                        lstCurrentVariables = ExtractItemsFromRList(clsTempParameter.strArgumentValue)
+                        lstCurrentVariables = ExtractItemsFromRList(clsTempParameter.strArgumentValue, strPackageName:=strVariablesListPackageName, strFunctionName:=strVariablesListFunctionName)
                     End If
+                    'TODO how to recover the data frame name in this case
                 ElseIf bParameterIsRFunction AndAlso clsTempParameter.bIsFunction Then
                     clsTempDataParameter = clsTempParameter.clsArgumentCodeStructure.GetParameter(strItemsParameterNameInRFunction)
                     If clsTempDataParameter IsNot Nothing Then
-                        lstCurrentVariables = ExtractItemsFromRList(clsTempParameter.clsArgumentCodeStructure.GetParameter(strItemsParameterNameInRFunction).strArgumentValue)
+                        lstCurrentVariables = ExtractItemsFromRList(clsTempParameter.clsArgumentCodeStructure.GetParameter(strItemsParameterNameInRFunction).strArgumentValue, strPackageName:="", strFunctionName:="c")
+                    End If
+                    'TODO Should this the same for other item types?
+                    If strType = "column" Then
+                        clsTempDataParameter = clsTempParameter.clsArgumentCodeStructure.GetParameter(strDataFrameParameterNameInRFunction)
+                        If clsTempDataParameter IsNot Nothing Then
+                            strTempDataName = clsTempParameter.clsArgumentCodeStructure.GetParameter(strDataFrameParameterNameInRFunction).strArgumentValue.Trim(Chr(34))
+                        End If
                     End If
                 End If
                 Clear()
                 If lstCurrentVariables IsNot Nothing Then
                     For Each strTemp As String In lstCurrentVariables
-                        'TODO This only works if the selector is updated before receivers!
+                        'TODO This only works if the selector is updated before receivers and dialog only uses one data frame!
                         '     Needs to change eventually.
                         If Selector IsNot Nothing AndAlso strTemp <> "" Then
-                            Add(strTemp, Selector.strCurrentDataFrame)
+                            If strTempDataName = "" Then
+                                strTempDataName = Selector.strCurrentDataFrame
+                            End If
+                            Add(strTemp, strTempDataName)
                         End If
                     Next
                 End If
@@ -469,7 +523,58 @@ Public Class ucrReceiver
     End Function
 
     Public Sub SetClimaticType(strTemp As String)
-        AddIncludedMetadataProperty("Climatic_Type", {Chr(34) & strTemp & Chr(34)})
+        Dim dctTemp As New Dictionary(Of String, String())
+
+        ' "element" is a special case since it is a different metadata property.
+        If strTemp = "element" Then
+            dctTemp.Add("Is_Element", {"TRUE"})
+            SetIncludedAutoFillProperties(dctTemp)
+        Else
+            SetClimaticType({strTemp})
+        End If
+    End Sub
+
+    Public Sub SetClimaticType(enumTypes As IEnumerable(Of String))
+        Dim dctTemp As New Dictionary(Of String, String())
+        Dim arrTypes() As String = enumTypes.ToArray
+
+        For i As Integer = 0 To arrTypes.Count - 1
+            arrTypes(i) = Chr(34) & arrTypes(i) & Chr(34)
+        Next
+        dctTemp.Add("Climatic_Type", arrTypes)
+        SetIncludedAutoFillProperties(dctTemp)
+    End Sub
+
+    Public Sub SetOptionsByContextType(strSingleType As String, Optional strQuotes As String = Chr(34))
+        AddIncludedMetadataProperty("O_by_C_Type", {strQuotes & strSingleType & strQuotes})
+    End Sub
+
+    Public Sub SetOptionsByContextTypes(strTemp() As String)
+        AddIncludedMetadataProperty("O_by_C_Type", strTemp)
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllMeasurements()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "measurement_1" & Chr(34), Chr(34) & "measurement_other" & Chr(34)})
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllIDs()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "id_1" & Chr(34), Chr(34) & "id_other" & Chr(34)})
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllContexts()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "context_1" & Chr(34), Chr(34) & "context_2" & Chr(34), Chr(34) & "context_3" & Chr(34), Chr(34) & "context_4" & Chr(34), Chr(34) & "context_other" & Chr(34)})
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllOptions()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "option_1" & Chr(34), Chr(34) & "option_other" & Chr(34)})
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllBlockings()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "blocking_1" & Chr(34), Chr(34) & "blocking_other" & Chr(34)})
+    End Sub
+
+    Public Sub SetOptionsByContextTypesAllOptionsContextsBlockings()
+        AddIncludedMetadataProperty("O_by_C_Type", {Chr(34) & "option_1" & Chr(34), Chr(34) & "option_other" & Chr(34), Chr(34) & "context_1" & Chr(34), Chr(34) & "context_2" & Chr(34), Chr(34) & "context_3" & Chr(34), Chr(34) & "context_4" & Chr(34), Chr(34) & "context_other" & Chr(34), Chr(34) & "blocking_1" & Chr(34), Chr(34) & "blocking_other" & Chr(34)})
     End Sub
 
     Public Overridable Property Selector As ucrSelector
@@ -477,7 +582,18 @@ Public Class ucrReceiver
             Return ucrSelector
         End Get
         Set(ucrNewSelector As ucrSelector)
+            'remove the receiver from the former selector
+            If ucrSelector IsNot Nothing Then
+                ucrSelector.RemoveReceiver(Me)
+            End If
+
             ucrSelector = ucrNewSelector
+
+            'add the receiver to the new selector
+            If ucrSelector IsNot Nothing Then
+                ucrSelector.AddReceiver(Me)
+            End If
+
         End Set
     End Property
 
@@ -487,5 +603,88 @@ Public Class ucrReceiver
 
     Public Overridable Sub SetTextColour(clrNew As Color)
 
+    End Sub
+
+    Public Overridable Function GetItemsDataFrames() As List(Of String)
+        Return New List(Of String)
+    End Function
+
+    Public Sub AddItemsWithMetadataProperty(strCurrentDataFrame As String, strProperty As String, strValues As String())
+        If Selector IsNot Nothing Then
+            SetMeAsReceiver()
+            frmMain.clsRLink.SelectColumnsWithMetadataProperty(Me, strCurrentDataFrame, strProperty, strValues)
+        End If
+    End Sub
+
+    Public Sub SetVariablesListPackageName(strNewVariablesListPackageName As String)
+        strVariablesListPackageName = strNewVariablesListPackageName
+    End Sub
+
+    Public Sub SetVariablesListFunctionName(strNewVariablesListFunctionName As String)
+        strVariablesListFunctionName = strNewVariablesListFunctionName
+    End Sub
+
+    Public Overridable Sub SetSelectorHeading(strNewHeading As String)
+        strSelectorHeading = strNewHeading
+    End Sub
+
+    Private Sub Selector_DataFrameChanged() Handles ucrSelector.DataFrameChanged
+        CheckAutoFill()
+    End Sub
+
+    Public Overridable Sub CheckAutoFill()
+        Dim clsGetItems As New RFunction
+        Dim clsIncludeList As New RFunction
+        Dim expItems As SymbolicExpression
+        Dim chrColumns As CharacterVector
+
+        'TODO When there are receivers with bAttachedToPrimaryDataFrame = False
+        '     don't always want to autofill when dataframe is changed.
+        '     Something like AndAlso Selector.CurrentReceiver.bAttachedToPrimaryDataFrame
+        '     except always want to autofill when resetting regardless of current receiver
+        If bAutoFill AndAlso Selector IsNot Nothing AndAlso (Selector.CurrentReceiver Is Nothing OrElse Selector.CurrentReceiver.bAttachedToPrimaryDataFrame) Then
+            ' If no autofill properties then simply check if one item is in the selector
+            ' (may need to modify behaviour for multiple receivers)
+            If lstIncludedAutoFillProperties.Count = 0 Then
+                SetMeAsReceiver()
+                If Selector.lstAvailableVariable.Items.Count = 1 Then
+                    Add(Selector.lstAvailableVariable.Items(0).Text, Selector.strCurrentDataFrame)
+                End If
+            ElseIf lstIncludedAutoFillProperties.Count > 0 AndAlso ((bTypeSet AndAlso GetItemType() = "column") OrElse Selector.GetItemType() = "column") Then
+                SetMeAsReceiver()
+                clsGetItems.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_column_names")
+                clsIncludeList.SetRCommand("list")
+                For Each kvpInclude In lstIncludedAutoFillProperties
+                    clsIncludeList.AddParameter(kvpInclude.Key, GetListAsRString(kvpInclude.Value.ToList(), bWithQuotes:=False))
+                Next
+                clsGetItems.AddParameter("include", clsRFunctionParameter:=clsIncludeList)
+                clsGetItems.AddParameter("data_name", Chr(34) & Selector.strCurrentDataFrame & Chr(34))
+                expItems = frmMain.clsRLink.RunInternalScriptGetValue(clsGetItems.ToScript(), bSilent:=True)
+                If expItems IsNot Nothing AndAlso Not expItems.Type = Internals.SymbolicExpressionType.Null Then
+                    chrColumns = expItems.AsCharacter
+                    ' ucrReceiverSingle only autofills if there is exactly one valid item.
+                    If TypeOf Me Is ucrReceiverSingle Then
+                        If chrColumns.Count = 1 Then
+                            For Each lviTempVariable As ListViewItem In Selector.lstAvailableVariable.Items
+                                If lviTempVariable.Text = chrColumns(0) Then
+                                    Add(lviTempVariable.Text, Selector.strCurrentDataFrame)
+                                    Exit For
+                                End If
+                            Next
+                        End If
+                        ' ucrReceiverMultipe autofills all valid items.
+                    ElseIf TypeOf Me Is ucrReceiverMultiple Then
+                        For Each lviTempVariable As ListViewItem In Selector.lstAvailableVariable.Items
+                            For Each chrCol As String In chrColumns
+                                If lviTempVariable.Text = chrCol Then
+                                    Add(lviTempVariable.Text, Selector.strCurrentDataFrame)
+                                    Exit For
+                                End If
+                            Next
+                        Next
+                    End If
+                End If
+            End If
+        End If
     End Sub
 End Class

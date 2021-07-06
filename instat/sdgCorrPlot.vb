@@ -16,10 +16,12 @@
 
 Imports instat.Translations
 Public Class sdgCorrPlot
-    Public clsRGGscatmatrixFunction, clsRGGcorrGraphicsFunction, clsCorrelationFunction, clsRGraphicsFuction, clsRTempFunction As New RFunction
+    Public clsRGGscatmatrixFunction, clsRGGcorrGraphicsFunction, clsCorrelationTestFunction, clsCorrelationFunction, clsRGraphicsFuction, clsRTempFunction As New RFunction
     Public bFirstLoad As Boolean = True
     Public bControlsInitialised As Boolean = False
     Private clsRsyntax As RSyntax
+    Private ucrBaseSelector As ucrSelector
+    Public strDataFrame As String
 
     Private Sub sdgCorrPlot_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         autoTranslate(Me)
@@ -41,11 +43,6 @@ Public Class sdgCorrPlot
         ucrChkLabel.SetText("Label")
         ucrChkLabel.SetRDefault("FALSE")
 
-        ucrNudAlphaCorr.SetParameter(New RParameter("label_alpha", 5))
-        ucrNudAlphaCorr.SetMinMax(0, 1)
-        ucrNudAlphaCorr.DecimalPlaces = 2
-        ucrNudAlphaCorr.Increment = 0.01
-
         ucrSaveGraph.SetPrefix("CorGraph")
         ucrSaveGraph.SetSaveTypeAsGraph()
         ucrSaveGraph.SetDataFrameSelector(dlgCorrelation.ucrSelectorCorrelation.ucrAvailableDataFrames)
@@ -53,33 +50,25 @@ Public Class sdgCorrPlot
         ucrSaveGraph.SetIsComboBox()
         ucrSaveGraph.SetAssignToIfUncheckedValue("last_graph")
 
-        ucrReceiveFactor.SetParameter(New RParameter("data", 1))
-        ucrReceiveFactor.SetParameterIsRFunction()
-        ucrReceiveFactor.Selector = ucrSelectFactor
-        ucrReceiveFactor.strSelectorHeading = "Numerics"
-        ucrReceiveFactor.SetDataType("factor")
-        ucrReceiveFactor.SetMeAsReceiver()
-
-        ucrSelectFactor.Reset()
+        ucrReceiverFactor.SetParameter(New RParameter("color", 2))
+        ucrReceiverFactor.Selector = ucrSelectorFactor
+        ucrReceiverFactor.strSelectorHeading = "Factors"
+        ucrReceiverFactor.SetDataType("factor")
+        ucrReceiverFactor.SetMeAsReceiver()
 
         ucrPnlGraphType.AddToLinkedControls(ucrInputComboGeom, {rdoCorrelationPlot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="tile")
         ucrPnlGraphType.AddToLinkedControls(ucrNudMinimunSize, {rdoCorrelationPlot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlGraphType.AddToLinkedControls(ucrNudMaximumSize, {rdoCorrelationPlot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
-        ucrPnlGraphType.AddToLinkedControls(ucrNudAlphaCorr, {rdoCorrelationPlot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:=1)
         ucrPnlGraphType.AddToLinkedControls(ucrChkLabel, {rdoCorrelationPlot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlGraphType.AddToLinkedControls(ucrSaveGraph, {rdoPairwisePlot, rdoCorrelationPlot, rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrNudMinimunSize.SetLinkedDisplayControl(lblMinimumSize)
         ucrNudMaximumSize.SetLinkedDisplayControl(lblMaximumSize)
-        ucrNudAlphaCorr.SetLinkedDisplayControl(lblLabelAlpha)
         ucrPnlGraphType.SetLinkedDisplayControl(grpOptions)
         ucrInputComboGeom.SetLinkedDisplayControl(lblGeom)
 
-        ucrPnlGraphType.AddToLinkedControls(ucrSelectFactor, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
-        ucrPnlGraphType.AddToLinkedControls(ucrReceiveFactor, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
-        ucrPnlGraphType.AddToLinkedControls(ucrChkColor, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
-        ucrPnlGraphType.AddToLinkedControls(ucrNudAlpha, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
-        ucrReceiveFactor.SetLinkedDisplayControl(lblFactorVariable)
-        ucrNudAlpha.SetLinkedDisplayControl(lblAlpha)
+        ucrPnlGraphType.AddToLinkedControls(ucrSelectorFactor, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrPnlGraphType.AddToLinkedControls(ucrReceiverFactor, {rdoScatterPlotMatrix}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrReceiverFactor.SetLinkedDisplayControl(lblFactor)
 
         ucrInputComboGeom.SetParameter(New RParameter("geom", 3))
         dctGeom.Add("Tile", Chr(34) & "tile" & Chr(34))
@@ -102,11 +91,20 @@ Public Class sdgCorrPlot
         bControlsInitialised = True
     End Sub
 
-    Public Sub SetRCode(clsNewRSyntax As RSyntax, clsNewcorrelationFunction As RFunction, clsNewRGGcorrGraphicsFunction As RFunction, clsNewRGraphicsFuction As RFunction, clsNewRTempFunction As RFunction, clsNewRGGscatmatrixFunction As RFunction, strColFunction As String, Optional bReset As Boolean = False)
+    Public Sub SetRCode(clsNewRSyntax As RSyntax, clsNewcorrelationFunction As RFunction, clsNewcorrelationTestFunction As RFunction, clsNewRGGcorrGraphicsFunction As RFunction, clsNewRGraphicsFuction As RFunction, clsNewRTempFunction As RFunction, clsNewRGGscatmatrixFunction As RFunction, strColFunction As String, Optional ucrNewBaseSelector As ucrSelector = Nothing, Optional bReset As Boolean = False, Optional bTwoColumns As Boolean = False)
         If Not bControlsInitialised Then
             InitialiseControls()
         End If
+
+        'This is meant to force selector select the current dataframe as selected in the main dialog
+        ucrBaseSelector = ucrNewBaseSelector
+        If ucrBaseSelector IsNot Nothing AndAlso ucrBaseSelector.strCurrentDataFrame <> "" Then
+            strDataFrame = ucrBaseSelector.strCurrentDataFrame
+            ucrSelectorFactor.SetDataframe(strDataFrame, False)
+        End If
+
         clsRsyntax = clsNewRSyntax
+        clsCorrelationTestFunction = clsNewcorrelationTestFunction
         clsCorrelationFunction = clsNewcorrelationFunction
         clsRGGcorrGraphicsFunction = clsNewRGGcorrGraphicsFunction
         clsRGraphicsFuction = clsNewRGraphicsFuction
@@ -115,12 +113,24 @@ Public Class sdgCorrPlot
         ucrNudMaximumSize.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
         ucrNudMinimunSize.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
         ucrInputComboGeom.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
-        ucrNudAlphaCorr.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
         ucrChkLabel.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
-        ucrSaveGraph.AddAdditionalRCode(clsRGraphicsFuction, 1)
         ucrSaveGraph.SetRCode(clsRGGcorrGraphicsFunction, bReset, bCloneIfNeeded:=True)
-        ucrChkColor.SetRSyntax(clsRsyntax, bReset)
+        ucrSaveGraph.AddAdditionalRCode(clsRGraphicsFuction, iAdditionalPairNo:=1)
+        ucrSaveGraph.AddAdditionalRCode(clsRGGscatmatrixFunction, iAdditionalPairNo:=2)
         ucrPnlGraphType.SetRSyntax(clsRsyntax, bReset)
+        Visibility()
+        If bReset Then
+            ucrSelectorFactor.Reset()
+        End If
+
+        If bTwoColumns Then
+            rdoCorrelationPlot.Enabled = False
+            If rdoCorrelationPlot.Checked Then
+                rdoNone.Checked = True
+            End If
+        Else
+            rdoCorrelationPlot.Enabled = True
+        End If
     End Sub
 
     Private Sub Visibility()
@@ -142,25 +152,36 @@ Public Class sdgCorrPlot
     End Sub
 
     Private Sub ucrPnlGraphType_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlGraphType.ControlValueChanged
-        If rdoCorrelationPlot.Checked Then
-            clsRsyntax.AddToAfterCodes(clsRGGcorrGraphicsFunction, iPosition:=1)
-            clsRsyntax.RemoveFromAfterCodes(clsRGraphicsFuction)
-            clsRsyntax.RemoveFromAfterCodes(clsRGGscatmatrixFunction)
-        ElseIf rdoPairwisePlot.Checked Then
-            clsRsyntax.AddToAfterCodes(clsRGraphicsFuction, iPosition:=2)
-            clsRsyntax.RemoveFromAfterCodes(clsRGGscatmatrixFunction)
-            clsRsyntax.RemoveFromAfterCodes(clsRGGcorrGraphicsFunction)
-        ElseIf rdoScatterPlotMatrix.Checked Then
-            clsRsyntax.AddToAfterCodes(clsRGGscatmatrixFunction, iPosition:=3)
-            clsRsyntax.RemoveFromAfterCodes(clsRGraphicsFuction)
-            clsRsyntax.RemoveFromAfterCodes(clsRGGcorrGraphicsFunction)
-        ElseIf rdoNone.Checked Then
-            clsRsyntax.RemoveFromAfterCodes(clsRGGcorrGraphicsFunction)
-            clsRsyntax.RemoveFromAfterCodes(clsRGraphicsFuction)
-            clsRsyntax.RemoveFromAfterCodes(clsRGGscatmatrixFunction)
+        Visibility()
+        BeforeAndAfterCodes()
+        If rdoNone.Checked OrElse rdoPairwisePlot.Checked Then
+            grpOptions.Hide()
+        Else
+            grpOptions.Show()
         End If
-        If rdoCorrelationPlot.Checked Then
-            Visibility()
+
+    End Sub
+
+    Private Sub ucrReceiverFactor_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrReceiverFactor.ControlValueChanged
+        If Not ucrReceiverFactor.IsEmpty Then
+            clsRGGscatmatrixFunction.AddParameter("color", ucrReceiverFactor.GetVariableNames(), iPosition:=2)
+        Else
+            clsRGGscatmatrixFunction.RemoveParameterByName("color")
+        End If
+    End Sub
+
+    Public Sub BeforeAndAfterCodes()
+        clsRsyntax.RemoveFromAfterCodes(clsRGGcorrGraphicsFunction)
+        clsRsyntax.RemoveFromAfterCodes(clsRGraphicsFuction)
+        clsRsyntax.RemoveFromAfterCodes(clsRGGscatmatrixFunction)
+        If rdoCorrelationPlot.Checked AndAlso rdoCorrelationPlot.Enabled Then
+            clsRsyntax.AddToAfterCodes(clsRGGcorrGraphicsFunction, iPosition:=1)
+        End If
+        If rdoPairwisePlot.Checked Then
+            clsRsyntax.AddToAfterCodes(clsRGraphicsFuction, iPosition:=2)
+        End If
+        If rdoScatterPlotMatrix.Checked Then
+            clsRsyntax.AddToAfterCodes(clsRGGscatmatrixFunction, iPosition:=3)
         End If
     End Sub
 End Class

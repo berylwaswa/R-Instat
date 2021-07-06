@@ -17,19 +17,36 @@
 Imports instat.Translations
 Public Class dlgCumulativeDistribution
     Private clsRggplotFunction As New RFunction
-    Private clsRgeomCumDistFunction As New RFunction
+    Private clsStatECDFFunction As New RFunction
+    Private clsStatECDFPointFunction As New RFunction
     Private clsRaesFunction As New RFunction
+    Private clsStatECDFAesFunction As New RFunction
+    Private clsStatECDFPointAesFunction As New RFunction
     Private clsBaseOperator As New ROperator
     Private bFirstLoad As Boolean = True
     Private clsLabsFunction As New RFunction
+    Private clsThemeFunction As New RFunction
     Private clsXlabsFunction As New RFunction
     Private clsYlabFunction As New RFunction
     Private clsXScalecontinuousFunction As New RFunction
     Private clsYScalecontinuousFunction As New RFunction
     Private clsRFacetFunction As New RFunction
+    Private clsXScaleDateFunction As New RFunction
+    Private clsYScaleDateFunction As New RFunction
+    Private clsScaleFillViridisFunction As New RFunction
+    Private clsScaleColourViridisFunction As New RFunction
     Private bResetSubdialog As Boolean = True
     Private dctThemeFunctions As New Dictionary(Of String, RFunction)
+    Private clsSequence As New RFunction
     Private bReset As Boolean = True
+
+    Private strFirstParameterName As String = "stat_ecdf"
+    Private strFirstPointParameterName As String = "stat_ecdf2"
+    Private strYScleParameterName As String = "YscaleContinous"
+    Private strGeomParameterNames() As String = {strFirstParameterName, strFirstPointParameterName, strYScleParameterName}
+
+    Private clsCoordPolarFunction As New RFunction
+    Private clsCoordPolarStartOperator As New ROperator
 
     Private Sub dlgCumulativeDistribution_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstLoad Then
@@ -46,16 +63,19 @@ Public Class dlgCumulativeDistribution
     End Sub
 
     Private Sub InitaliseDialog()
-        Dim clsScaleYReverseFunc As New RFunction
-        Dim clsScaleYReverseParam As New RParameter
-        Dim clsGeomPointFunc As New RFunction
-        Dim clsGeomPointParam As New RParameter
+        Dim dctScalesPairs As New Dictionary(Of String, String)
 
         ucrChkCountsOnYAxis.Enabled = False ' temporary What should this do?
 
         ucrBase.clsRsyntax.bExcludeAssignedFunctionOutput = False
         ucrBase.clsRsyntax.iCallType = 3
         ucrBase.iHelpTopicID = 453
+
+        ucrPnlOption.AddRadioButton(rdoCumulative)
+        ucrPnlOption.AddRadioButton(rdoExceedance)
+
+        ucrPnlOption.AddParameterPresentCondition(rdoCumulative, "mapping", bNewIsPositive:=False)
+        ucrPnlOption.AddParameterPresentCondition(rdoExceedance, "mapping")
 
         ucrCumDistSelector.SetParameter(New RParameter("data", 0))
         ucrCumDistSelector.SetParameterIsrfunction()
@@ -75,49 +95,61 @@ Public Class dlgCumulativeDistribution
         ucrVariablesAsFactorforCumDist.SetParameterIsString()
         ucrVariablesAsFactorforCumDist.bWithQuotes = False
 
-        clsScaleYReverseFunc.SetPackageName("ggplot2")
-        clsScaleYReverseFunc.SetRCommand("scale_y_reverse")
-        clsScaleYReverseFunc.AddParameter("breaks", "seq(1,0,-0.25), labels = seq(0,1,0.25)")
-        clsScaleYReverseParam.SetArgumentName("scale_y_reverse")
-        clsScaleYReverseParam.SetArgument(clsScaleYReverseFunc)
+        ucrInputComboScales.SetParameter(New RParameter("labels"))
+        dctScalesPairs.Add("Proportion", "scales::comma")
+        dctScalesPairs.Add("Percent", "scales::percent")
+        ucrInputComboScales.SetItems(dctScalesPairs)
+        ucrInputComboScales.SetDropDownStyleAsNonEditable()
+        ucrInputComboScales.SetRDefault("scales::comma")
 
-        ucrChkExceedancePlots.SetText("Exceedance Plots")
-        ucrChkExceedancePlots.SetParameter(clsScaleYReverseParam, bNewChangeParameterValue:=False, bNewAddRemoveParameter:=True)
+        ucrNudBy.SetParameter(New RParameter("by"))
+        ucrNudBy.DecimalPlaces = 2
+        ucrNudBy.Increment = 0.01
+        ucrNudBy.Minimum = 0
+        ucrNudBy.Maximum = 1
 
         ucrChkCountsOnYAxis.SetText("Counts on Y Axis")
 
-        clsGeomPointFunc.SetPackageName("ggplot2")
-        clsGeomPointFunc.SetRCommand("geom_point")
-        clsGeomPointFunc.AddParameter("stat", Chr(34) & "ecdf" & Chr(34))
-        clsGeomPointParam.SetArgumentName("geom_point")
-        clsGeomPointParam.SetArgument(clsGeomPointFunc)
         ucrChkIncludePoints.SetText("Include Points")
-        ucrChkIncludePoints.SetParameter(clsGeomPointParam, bNewChangeParameterValue:=False, bNewAddRemoveParameter:=True)
+        ucrChkIncludePoints.SetParameter(New RParameter("geom"), bNewChangeParameterValue:=False)
+        ucrChkIncludePoints.SetParameterValue(Chr(34) & "point" & Chr(34))
 
-        ucrSaveCumDist.SetPrefix("cumulative_dist")
+        'ucrInputComboPad.SetParameter(New RParameter("pad"))
+        'ucrInputComboPad.SetItems({"TRUE", "FALSE"})
+        'ucrInputComboPad.SetDropDownStyleAsNonEditable()
+        'ucrInputComboPad.SetRDefault("TRUE")
+
         ucrSaveCumDist.SetSaveTypeAsGraph()
-        ucrSaveCumDist.SetIsComboBox()
-        ucrSaveCumDist.SetCheckBoxText("Save Graph")
-        ucrSaveCumDist.SetAssignToIfUncheckedValue("last_graph")
         ucrSaveCumDist.SetDataFrameSelector(ucrCumDistSelector.ucrAvailableDataFrames)
+        ucrSaveCumDist.SetCheckBoxText("Save Graph")
+        ucrSaveCumDist.SetIsComboBox()
+        ucrSaveCumDist.SetPrefix("cumulative_dist")
+        ucrSaveCumDist.SetAssignToIfUncheckedValue("last_graph")
     End Sub
 
     Private Sub SetDefaults()
         clsBaseOperator = New ROperator
         clsRaesFunction = New RFunction
-        clsRgeomCumDistFunction = New RFunction
+        clsStatECDFFunction = New RFunction
+        clsStatECDFPointFunction = New RFunction
         clsRggplotFunction = New RFunction
+        clsStatECDFAesFunction = New RFunction
+        clsStatECDFPointAesFunction = New RFunction
+
+        clsSequence = New RFunction
+        clsSequence.SetRCommand("seq")
+        clsSequence.AddParameter("from", "0", iPosition:=0)
+        clsSequence.AddParameter("to", "1", iPosition:=1)
+        clsSequence.AddParameter("by", "0.25", iPosition:=2)
 
         ucrCumDistSelector.Reset()
         ucrCumDistSelector.SetGgplotFunction(clsBaseOperator)
         ucrCumDistSelector.Focus()
         ucrSaveCumDist.Reset()
+        ucrVariablesAsFactorforCumDist.SetMeAsReceiver()
         sdgPlots.Reset()
         bResetSubdialog = True
 
-        clsBaseOperator.SetOperation("+")
-        clsBaseOperator.AddParameter("ggplot", clsRFunctionParameter:=clsRggplotFunction, iPosition:=0)
-        clsBaseOperator.AddParameter("stat_ecdf", clsRFunctionParameter:=clsRgeomCumDistFunction, iPosition:=1)
 
         clsRggplotFunction.SetPackageName("ggplot2")
         clsRggplotFunction.SetRCommand("ggplot")
@@ -126,8 +158,31 @@ Public Class dlgCumulativeDistribution
         clsRaesFunction.SetRCommand("aes")
         clsRggplotFunction.AddParameter("mapping", clsRFunctionParameter:=clsRaesFunction, iPosition:=1)
 
-        clsRgeomCumDistFunction.SetPackageName("ggplot2")
-        clsRgeomCumDistFunction.SetRCommand("stat_ecdf")
+        clsStatECDFFunction.SetPackageName("ggplot2")
+        clsStatECDFFunction.SetRCommand("stat_ecdf")
+        clsStatECDFFunction.AddParameter("pad", "FALSE", iPosition:=0)
+
+        clsStatECDFPointFunction.SetPackageName("ggplot2")
+        clsStatECDFPointFunction.SetRCommand("stat_ecdf")
+        clsStatECDFPointFunction.AddParameter("pad", "FALSE", iPosition:=0)
+
+        clsBaseOperator.SetOperation("+")
+        clsBaseOperator.AddParameter("ggplot", clsRFunctionParameter:=clsRggplotFunction, iPosition:=0)
+        clsBaseOperator.AddParameter("labs", clsRFunctionParameter:=clsLabsFunction, iPosition:=1)
+
+        clsStatECDFAesFunction.SetPackageName("ggplot2")
+        clsStatECDFAesFunction.SetRCommand("aes")
+        clsStatECDFAesFunction.AddParameter("y", "1 - ..y..", iPosition:=0)
+
+        clsStatECDFPointAesFunction.SetPackageName("ggplot2")
+        clsStatECDFPointAesFunction.SetRCommand("aes")
+        clsStatECDFPointAesFunction.AddParameter("y", "1 - ..y..", iPosition:=0)
+
+
+        clsYScalecontinuousFunction.AddParameter("labels", "scales::comma")
+
+        clsLabsFunction.SetRCommand("labs")
+        clsLabsFunction.AddParameter("y", "NULL")
 
         clsBaseOperator.AddParameter(GgplotDefaults.clsDefaultThemeParameter.Clone())
         clsXlabsFunction = GgplotDefaults.clsXlabTitleFunction.Clone()
@@ -135,8 +190,22 @@ Public Class dlgCumulativeDistribution
         clsXScalecontinuousFunction = GgplotDefaults.clsXScalecontinuousFunction.Clone()
         clsYScalecontinuousFunction = GgplotDefaults.clsYScalecontinuousFunction.Clone
         clsRFacetFunction = GgplotDefaults.clsFacetFunction.Clone()
-        clsYlabFunction = GgplotDefaults.clsYlabTitleFunction.Clone
+        clsYlabFunction = GgplotDefaults.clsYlabTitleFunction.Clone()
+        clsXScaleDateFunction = GgplotDefaults.clsXScaleDateFunction.Clone()
+        clsScaleFillViridisFunction = GgplotDefaults.clsScaleFillViridisFunction
+        clsScaleColourViridisFunction = GgplotDefaults.clsScaleColorViridisFunction
+        clsYScaleDateFunction = GgplotDefaults.clsYScaleDateFunction.Clone()
+
+        clsThemeFunction = GgplotDefaults.clsDefaultThemeFunction.Clone()
         dctThemeFunctions = New Dictionary(Of String, RFunction)(GgplotDefaults.dctThemeFunctions)
+
+        clsYScalecontinuousFunction.AddParameter("breaks", clsRFunctionParameter:=clsSequence)
+
+        clsBaseOperator.AddParameter(strFirstParameterName, clsRFunctionParameter:=clsStatECDFFunction, iPosition:=2)
+        clsBaseOperator.AddParameter(strYScleParameterName, clsRFunctionParameter:=clsYScalecontinuousFunction, bIncludeArgumentName:=False)
+
+        clsCoordPolarStartOperator = GgplotDefaults.clsCoordPolarStartOperator.Clone()
+        clsCoordPolarFunction = GgplotDefaults.clsCoordPolarFunction.Clone()
 
         clsBaseOperator.SetAssignTo("last_graph", strTempDataframe:=ucrCumDistSelector.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_graph")
         ucrBase.clsRsyntax.SetBaseROperator(clsBaseOperator)
@@ -147,8 +216,14 @@ Public Class dlgCumulativeDistribution
         ucrVariablesAsFactorforCumDist.SetRCode(clsRaesFunction, bReset)
         ucrSaveCumDist.SetRCode(clsBaseOperator, bReset)
         ucrCumDistSelector.SetRCode(clsRggplotFunction, bReset)
-        ucrChkExceedancePlots.SetRCode(clsBaseOperator, bReset)
-        ucrChkIncludePoints.SetRCode(clsBaseOperator, bReset)
+
+        ucrPnlOption.SetRCode(clsStatECDFFunction, bReset)
+        ucrInputComboScales.SetRCode(clsYScalecontinuousFunction, bReset)
+
+        ucrChkIncludePoints.SetRCode(clsStatECDFPointFunction, bReset)
+
+        ucrNudBy.SetRCode(clsSequence, bReset)
+
     End Sub
 
     Private Sub TestOkEnabled()
@@ -166,16 +241,31 @@ Public Class dlgCumulativeDistribution
     End Sub
 
     Private Sub cmdPlotOptions_Click(sender As Object, e As EventArgs) Handles cmdPlotOptions.Click
-        sdgPlots.SetRCode(clsBaseOperator, dctNewThemeFunctions:=dctThemeFunctions, clsNewGlobalAesFunction:=clsRaesFunction, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewFacetFunction:=clsRFacetFunction, ucrNewBaseSelector:=ucrCumDistSelector, bReset:=bResetSubdialog)
+        sdgPlots.SetRCode(clsBaseOperator, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, clsNewGlobalAesFunction:=clsRaesFunction, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewFacetFunction:=clsRFacetFunction, clsNewScaleFillViridisFunction:=clsScaleFillViridisFunction, clsNewScaleColourViridisFunction:=clsScaleColourViridisFunction, ucrNewBaseSelector:=ucrCumDistSelector, clsNewCoordPolarFunction:=clsCoordPolarFunction, clsNewCoordPolarStartOperator:=clsCoordPolarStartOperator, clsNewXScaleDateFunction:=clsXScaleDateFunction, clsNewYScaleDateFunction:=clsYScaleDateFunction, strMainDialogGeomParameterNames:=strGeomParameterNames, bReset:=bResetSubdialog)
         sdgPlots.ShowDialog()
         bResetSubdialog = False
     End Sub
 
-    Private Sub cmdLineOptions_Click(sender As Object, e As EventArgs) Handles cmdLineOptions.Click
-        sdgLayerOptions.ShowDialog()
-    End Sub
-
     Private Sub CoreControls_ControlContentsChanged() Handles ucrVariablesAsFactorforCumDist.ControlContentsChanged, ucrSaveCumDist.ControlContentsChanged
         TestOkEnabled()
+    End Sub
+
+    Private Sub ucrPnlOption_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlOption.ControlValueChanged
+        If rdoExceedance.Checked Then
+            clsStatECDFFunction.AddParameter("mapping", clsRFunctionParameter:=clsStatECDFAesFunction, iPosition:=2)
+            clsStatECDFPointFunction.AddParameter("mapping", clsRFunctionParameter:=clsStatECDFPointAesFunction, iPosition:=2)
+
+        ElseIf rdoCumulative.Checked Then
+            clsStatECDFFunction.RemoveParameterByName("mapping")
+            clsStatECDFPointFunction.RemoveParameterByName("mapping")
+        End If
+    End Sub
+
+    Private Sub ucrChkIncludePoints_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkIncludePoints.ControlValueChanged
+        If ucrChkIncludePoints.Checked Then
+            clsBaseOperator.AddParameter(strFirstPointParameterName, clsRFunctionParameter:=clsStatECDFPointFunction, iPosition:=3)
+        Else
+            clsBaseOperator.RemoveParameterByName(strFirstPointParameterName)
+        End If
     End Sub
 End Class

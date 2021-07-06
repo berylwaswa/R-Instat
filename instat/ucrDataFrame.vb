@@ -24,6 +24,7 @@ Public Class ucrDataFrame
     Public bFirstLoad As Boolean = True
     Private bIncludeOverall As Boolean = False
     Private bPvtUseFilteredData As Boolean
+    Private bPvtDropUnusedFilterLevels As Boolean = False
     Public strCurrDataFrame As String = ""
     Public bDataFrameFixed As Boolean = False
     Private strFixedDataFrame As String
@@ -33,6 +34,15 @@ Public Class ucrDataFrame
     Private bParameterIsRFunction As Boolean = False
     'The name of the data parameter in the get data frame instat object method (should always be the same)
     Private strDataParameterNameInRFunction As String = "data_name"
+    'Same as strPrimaryDataFrame in ucrSelector
+    Private strPrimaryDataFrame As String = ""
+    'If True, only data frames linked to the primary data frame will be displayed
+    'This is usually set by the current receiver of the dialog
+    Private bOnlyLinkedToPrimaryDataFrames As Boolean = False
+    'If bOnlyLinkedToPrimaryDataFrames then should the primary data frame itself be displayed
+    Private bIncludePrimaryDataFrameAsLinked As Boolean = True
+    ' To prevent circular refreshing of data frame list
+    Private bSuppressRefresh As Boolean = False
 
     Private Sub ucrDataFrame_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         FillComboBox()
@@ -72,7 +82,7 @@ Public Class ucrDataFrame
         iOldText = cboAvailableDataFrames.Text
         cboAvailableDataFrames.Items.Clear()
         cboAvailableDataFrames.Text = ""
-        frmMain.clsRLink.FillComboDataFrames(cboAvailableDataFrames, bFirstLoad, strCurrentDataFrame:=iOldText)
+        frmMain.clsRLink.FillComboDataFrames(cboAvailableDataFrames, bFirstLoad, strCurrentDataFrame:=iOldText, bOnlyLinkedToPrimaryDataFrames:=bOnlyLinkedToPrimaryDataFrames, strPrimaryDataFrame:=strPrimaryDataFrame, bIncludePrimaryDataFrameAsLinked:=bIncludePrimaryDataFrameAsLinked)
         If bSetFixed AndAlso bDataFrameFixed AndAlso strFixedDataFrame <> "" Then
             SetDataframe(strFixedDataFrame, False)
         End If
@@ -84,14 +94,19 @@ Public Class ucrDataFrame
     Public Event DataFrameChanged(sender As Object, e As EventArgs, strPrevDataFrame As String)
 
     Private Sub cboAvailableDataFrames_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboAvailableDataFrames.SelectedIndexChanged
-        If cboAvailableDataFrames.SelectedIndex = -1 Then
-            cboAvailableDataFrames.Text = ""
-        End If
-        If strCurrDataFrame <> cboAvailableDataFrames.Text Then
-            RaiseEvent DataFrameChanged(sender, e, strCurrDataFrame)
-            strCurrDataFrame = cboAvailableDataFrames.Text
-            SetDataFrameProperties()
-            OnControlValueChanged()
+        If Not bSuppressRefresh Then
+            If cboAvailableDataFrames.SelectedIndex = -1 Then
+                cboAvailableDataFrames.Text = ""
+            End If
+            If strCurrDataFrame <> cboAvailableDataFrames.Text Then
+                ' This prevents circular refreshing with receivers linked to primary data frame
+                bSuppressRefresh = True
+                RaiseEvent DataFrameChanged(sender, e, strCurrDataFrame)
+                bSuppressRefresh = False
+                strCurrDataFrame = cboAvailableDataFrames.Text
+                SetDataFrameProperties()
+                OnControlValueChanged()
+            End If
         End If
     End Sub
 
@@ -126,9 +141,12 @@ Public Class ucrDataFrame
     End Sub
 
     Public Sub SetDataframe(strDataframe As String, Optional bEnableDataframe As Boolean = True)
-        Dim Index As Integer
+        Dim Index As Integer = -1
+
         FillComboBox(False)
-        Index = cboAvailableDataFrames.Items.IndexOf(strDataframe)
+        If strDataframe IsNot Nothing Then
+            Index = cboAvailableDataFrames.Items.IndexOf(strDataframe)
+        End If
         If Index >= 0 Then
             cboAvailableDataFrames.SelectedIndex = Index
         End If
@@ -168,9 +186,29 @@ Public Class ucrDataFrame
         End Set
     End Property
 
+    Public Property bDropUnusedFilterLevels As Boolean
+        Get
+            Return bPvtDropUnusedFilterLevels
+        End Get
+        Set(bValue As Boolean)
+            bPvtDropUnusedFilterLevels = bValue
+            If bPvtDropUnusedFilterLevels Then
+                clsCurrDataFrame.AddParameter("drop_unused_filter_levels", "TRUE")
+            Else
+                If frmMain.clsInstatOptions IsNot Nothing AndAlso frmMain.clsInstatOptions.bIncludeRDefaultParameters Then
+                    clsCurrDataFrame.AddParameter("drop_unused_filter_levels", "FALSE")
+                Else
+                    clsCurrDataFrame.RemoveParameterByName("drop_unused_filter_levels")
+                End If
+            End If
+        End Set
+    End Property
+
     Private Sub mnuRightClickCopy_Click(sender As Object, e As EventArgs) Handles mnuRightClickCopy.Click
         'TODO Combo box should be replaced by ucrInput so that context menu done automatically
-        Clipboard.SetText(cboAvailableDataFrames.SelectedText)
+        If cboAvailableDataFrames.Text <> "" Then
+            Clipboard.SetText(cboAvailableDataFrames.Text)
+        End If
     End Sub
 
     Public Overrides Sub UpdateControl(Optional bReset As Boolean = False, Optional bCloneIfNeeded As Boolean = False)
@@ -222,11 +260,36 @@ Public Class ucrDataFrame
         End If
     End Sub
 
+    '''--------------------------------------------------------------------------------------------
+    ''' <summary> 
+    '''    Translates <paramref name="strText"/> to the current language and then sets 
+    '''    the `Text` property of the label to the translated text.<para>
+    '''    Translations can be bi-directional (e.g. from English to French or from French to English).
+    '''    If <paramref name="strText"/> is already in the current language, or if no translation 
+    '''    can be found, then sets the `Text` property of the control to <paramref name="strText"/>.
+    ''' </para></summary>
+    ''' 
+    ''' <param name="strText"> The parameter's String value.</param>
+    '''--------------------------------------------------------------------------------------------
     Public Sub SetLabelText(strText As String)
-        lblDataFrame.Text = strText
+        lblDataFrame.Text = GetTranslation(strText)
     End Sub
 
     Private Sub mnuRightClickSetData_Click(sender As Object, e As EventArgs) Handles mnuRightClickSetData.Click
         frmMain.SetCurrentDataFrame(cboAvailableDataFrames.Text)
+    End Sub
+
+    Public Sub SetPrimaryDataFrameOptions(strNewPrimaryDataFrame As String, bNewOnlyLinkedToPrimaryDataFrames As Boolean, Optional bNewIncludePrimaryDataFrameAsLinked As Boolean = False)
+        Dim bUpdate As Boolean = False
+
+        If (bNewOnlyLinkedToPrimaryDataFrames <> bOnlyLinkedToPrimaryDataFrames) OrElse (bNewOnlyLinkedToPrimaryDataFrames AndAlso (strPrimaryDataFrame <> strNewPrimaryDataFrame OrElse bNewIncludePrimaryDataFrameAsLinked <> bIncludePrimaryDataFrameAsLinked)) Then
+            bUpdate = True
+        End If
+        strPrimaryDataFrame = strNewPrimaryDataFrame
+        bOnlyLinkedToPrimaryDataFrames = bNewOnlyLinkedToPrimaryDataFrames
+        bNewIncludePrimaryDataFrameAsLinked = bIncludePrimaryDataFrameAsLinked
+        If bUpdate Then
+            FillComboBox()
+        End If
     End Sub
 End Class

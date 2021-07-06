@@ -19,7 +19,7 @@ Partial Class dlgExportRObjects
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -36,109 +36,74 @@ Partial Class dlgExportRObjects
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgExportRObjects))
         Me.lblObjects = New System.Windows.Forms.Label()
-        Me.ucrReceiverObjects = New instat.ucrReceiverMultiple()
+        Me.ucrFilePath = New instat.ucrFilePath()
+        Me.ucrReceiverMultipleObjects = New instat.ucrReceiverMultiple()
         Me.ucrSelectorObjects = New instat.ucrSelectorByDataFrameAddRemove()
         Me.ucrBase = New instat.ucrButtons()
-        Me.ucrInputExportFile = New instat.ucrInputTextBox()
-        Me.lblExportFile = New System.Windows.Forms.Label()
-        Me.cmdBrowse = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'lblObjects
         '
-        Me.lblObjects.AutoSize = True
-        Me.lblObjects.Location = New System.Drawing.Point(264, 45)
+        resources.ApplyResources(Me.lblObjects, "lblObjects")
         Me.lblObjects.Name = "lblObjects"
-        Me.lblObjects.Size = New System.Drawing.Size(91, 13)
-        Me.lblObjects.TabIndex = 1
-        Me.lblObjects.Text = "Selected Objects:"
         '
-        'ucrReceiverObjects
+        'ucrFilePath
         '
-        Me.ucrReceiverObjects.frmParent = Me
-        Me.ucrReceiverObjects.Location = New System.Drawing.Point(264, 60)
-        Me.ucrReceiverObjects.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrReceiverObjects.Name = "ucrReceiverObjects"
-        Me.ucrReceiverObjects.Selector = Nothing
-        Me.ucrReceiverObjects.Size = New System.Drawing.Size(120, 100)
-        Me.ucrReceiverObjects.TabIndex = 2
-        Me.ucrReceiverObjects.ucrSelector = Nothing
+        Me.ucrFilePath.DefaultFileSuggestionName = ""
+        Me.ucrFilePath.FilePath = ""
+        Me.ucrFilePath.FilePathBrowseText = "Browse"
+        Me.ucrFilePath.FilePathDialogFilter = "Saved R objects (*.RData)|*.RData|Serialized R Objects (*.rds)|*.rds"
+        Me.ucrFilePath.FilePathDialogTitle = "Export R Objects"
+        Me.ucrFilePath.FilePathLabel = "Export File:"
+        resources.ApplyResources(Me.ucrFilePath, "ucrFilePath")
+        Me.ucrFilePath.Name = "ucrFilePath"
+        '
+        'ucrReceiverMultipleObjects
+        '
+        Me.ucrReceiverMultipleObjects.frmParent = Me
+        resources.ApplyResources(Me.ucrReceiverMultipleObjects, "ucrReceiverMultipleObjects")
+        Me.ucrReceiverMultipleObjects.Name = "ucrReceiverMultipleObjects"
+        Me.ucrReceiverMultipleObjects.Selector = Nothing
+        Me.ucrReceiverMultipleObjects.strNcFilePath = ""
+        Me.ucrReceiverMultipleObjects.ucrSelector = Nothing
         '
         'ucrSelectorObjects
         '
+        Me.ucrSelectorObjects.bDropUnusedFilterLevels = False
         Me.ucrSelectorObjects.bShowHiddenColumns = False
         Me.ucrSelectorObjects.bUseCurrentFilter = True
-        Me.ucrSelectorObjects.Location = New System.Drawing.Point(10, 10)
-        Me.ucrSelectorObjects.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrSelectorObjects, "ucrSelectorObjects")
         Me.ucrSelectorObjects.Name = "ucrSelectorObjects"
-        Me.ucrSelectorObjects.Size = New System.Drawing.Size(210, 180)
-        Me.ucrSelectorObjects.TabIndex = 0
         '
         'ucrBase
         '
-        Me.ucrBase.Location = New System.Drawing.Point(10, 232)
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(398, 52)
-        Me.ucrBase.TabIndex = 6
-        '
-        'ucrInputExportFile
-        '
-        Me.ucrInputExportFile.AddQuotesIfUnrecognised = True
-        Me.ucrInputExportFile.IsMultiline = False
-        Me.ucrInputExportFile.IsReadOnly = False
-        Me.ucrInputExportFile.Location = New System.Drawing.Point(91, 205)
-        Me.ucrInputExportFile.Name = "ucrInputExportFile"
-        Me.ucrInputExportFile.Size = New System.Drawing.Size(251, 21)
-        Me.ucrInputExportFile.TabIndex = 4
-        '
-        'lblExportFile
-        '
-        Me.lblExportFile.AutoSize = True
-        Me.lblExportFile.Location = New System.Drawing.Point(10, 207)
-        Me.lblExportFile.Name = "lblExportFile"
-        Me.lblExportFile.Size = New System.Drawing.Size(59, 13)
-        Me.lblExportFile.TabIndex = 3
-        Me.lblExportFile.Text = "Export File:"
-        '
-        'cmdBrowse
-        '
-        Me.cmdBrowse.Location = New System.Drawing.Point(346, 203)
-        Me.cmdBrowse.Name = "cmdBrowse"
-        Me.cmdBrowse.Size = New System.Drawing.Size(62, 23)
-        Me.cmdBrowse.TabIndex = 5
-        Me.cmdBrowse.Text = "Browse"
-        Me.cmdBrowse.UseVisualStyleBackColor = True
         '
         'dlgExportRObjects
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(418, 288)
-        Me.Controls.Add(Me.ucrInputExportFile)
-        Me.Controls.Add(Me.cmdBrowse)
-        Me.Controls.Add(Me.lblExportFile)
+        Me.Controls.Add(Me.ucrFilePath)
         Me.Controls.Add(Me.lblObjects)
-        Me.Controls.Add(Me.ucrReceiverObjects)
+        Me.Controls.Add(Me.ucrReceiverMultipleObjects)
         Me.Controls.Add(Me.ucrSelectorObjects)
         Me.Controls.Add(Me.ucrBase)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgExportRObjects"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Export R Objects"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
     Friend WithEvents ucrBase As ucrButtons
     Friend WithEvents ucrSelectorObjects As ucrSelectorByDataFrameAddRemove
-    Friend WithEvents ucrReceiverObjects As ucrReceiverMultiple
+    Friend WithEvents ucrReceiverMultipleObjects As ucrReceiverMultiple
     Friend WithEvents lblObjects As Label
-    Friend WithEvents ucrInputExportFile As ucrInputTextBox
-    Friend WithEvents lblExportFile As Label
-    Friend WithEvents cmdBrowse As Button
+    Friend WithEvents ucrFilePath As ucrFilePath
 End Class

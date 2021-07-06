@@ -14,6 +14,7 @@
 ' You should have received a copy of the GNU General Public License 
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Imports instat
 Imports instat.Translations
 Public Class dlgHistogram
     Private bFirstLoad As Boolean = True
@@ -29,18 +30,28 @@ Public Class dlgHistogram
     Private clsYScalecontinuousFunction As New RFunction
     Private clsRFacetFunction As New RFunction
     Private clsThemeFunction As New RFunction
+    Private clsHistAesFunction As New RFunction
     Private dctThemeFunctions As New Dictionary(Of String, RFunction)
     Private bResetSubdialog As Boolean = True
     Private clsLocalRaesFunction As New RFunction
     Private bResetHistLayerSubdialog As Boolean = True
+    Private clsPercentage As New RFunction
+    Private clsCoordPolarFunction As New RFunction
+    Private clsCoordPolarStartOperator As New ROperator
+    Private clsXScaleDateFunction As New RFunction
+    Private clsYScaleDateFunction As New RFunction
+    Private clsScaleFillViridisFunction As New RFunction
+    Private clsScaleColourViridisFunction As New RFunction
+
+    'Parameter names for geoms
+    Private strFirstParameterName As String = "geomfunc"
+    Private strGeomParameterNames() As String = {strFirstParameterName}
+
 
     Private Sub dlgHistogram_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstLoad Then
-            'setdefaults
             InitialiseDialog()
             bFirstLoad = False
-        Else
-            SetDialogOptions()
         End If
 
         If bReset Then
@@ -49,11 +60,13 @@ Public Class dlgHistogram
 
         SetRCodeForControls(bReset)
         bReset = False
+        SetOptionsButtonText()
         autoTranslate(Me)
         TestOkEnabled()
     End Sub
 
     Private Sub InitialiseDialog()
+        Dim dctStats As New Dictionary(Of String, String)
         ucrBase.clsRsyntax.bExcludeAssignedFunctionOutput = False
         ucrBase.clsRsyntax.iCallType = 3
         ucrBase.iHelpTopicID = 435
@@ -77,6 +90,19 @@ Public Class dlgHistogram
         ucrFactorReceiver.bWithQuotes = False
         ucrFactorReceiver.SetParameterIsString()
 
+        ucrInputStats.SetParameter(New RParameter("y", 0))
+        dctStats.Add("Counts", "stat(count)")
+        dctStats.Add("Fractions", "stat(count/sum(count))")
+        dctStats.Add("Scaled Fractions", "stat(count/max(count))")
+        ucrInputStats.SetDropDownStyleAsNonEditable()
+        ucrInputStats.SetItems(dctStats)
+        ucrInputStats.AddToLinkedControls(ucrChkPercentages, {"Fractions"}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:=False)
+
+        ucrChkPercentages.SetText("percentages")
+        ucrChkPercentages.AddParameterPresentCondition(True, "scale")
+        ucrChkPercentages.AddParameterPresentCondition(False, "scale", False)
+
+
         ucrVariablesAsFactorforHist.SetParameter(New RParameter("x", 0))
         ucrVariablesAsFactorforHist.SetFactorReceiver(ucrFactorReceiver)
         ucrVariablesAsFactorforHist.Selector = ucrHistogramSelector
@@ -98,18 +124,20 @@ Public Class dlgHistogram
         clsRggplotFunction = New RFunction
         clsRgeomPlotFunction = New RFunction
         clsRaesFunction = New RFunction
+        clsHistAesFunction = New RFunction
+        clsPercentage = New RFunction
 
         ucrHistogramSelector.Reset()
         ucrHistogramSelector.SetGgplotFunction(clsBaseOperator)
         ucrSaveHist.Reset()
+        ucrVariablesAsFactorforHist.SetMeAsReceiver()
         bResetSubdialog = True
         bResetHistLayerSubdialog = True
         TempOptionsDisabledInMultipleVariablesCase()
 
         clsBaseOperator.SetOperation("+")
         clsBaseOperator.AddParameter("ggplot", clsRFunctionParameter:=clsRggplotFunction, iPosition:=0)
-        clsBaseOperator.AddParameter("histogram", clsRFunctionParameter:=clsRgeomPlotFunction)
-
+        clsBaseOperator.AddParameter(strFirstParameterName, clsRFunctionParameter:=clsRgeomPlotFunction, iPosition:=2)
         clsRggplotFunction.SetPackageName("ggplot2")
         clsRggplotFunction.SetRCommand("ggplot")
         clsRggplotFunction.AddParameter("mapping", clsRFunctionParameter:=clsRaesFunction, iPosition:=1)
@@ -117,8 +145,17 @@ Public Class dlgHistogram
         clsRaesFunction.SetPackageName("ggplot2")
         clsRaesFunction.SetRCommand("aes")
 
+        clsHistAesFunction.SetPackageName("ggplot2")
+        clsHistAesFunction.SetRCommand("aes")
+        clsHistAesFunction.AddParameter("y", "stat(count)", iPosition:=0)
+
         clsRgeomPlotFunction.SetPackageName("ggplot2")
         clsRgeomPlotFunction.SetRCommand("geom_histogram")
+        clsRgeomPlotFunction.AddParameter("mapping", clsRFunctionParameter:=clsHistAesFunction)
+
+
+        clsPercentage.SetPackageName("scales")
+        clsPercentage.SetRCommand("percent_format")
 
         clsBaseOperator.AddParameter(GgplotDefaults.clsDefaultThemeParameter.Clone())
         clsXlabsFunction = GgplotDefaults.clsXlabTitleFunction.Clone()
@@ -128,8 +165,14 @@ Public Class dlgHistogram
         clsYScalecontinuousFunction = GgplotDefaults.clsYScalecontinuousFunction.Clone()
         clsRFacetFunction = GgplotDefaults.clsFacetFunction.Clone()
         dctThemeFunctions = New Dictionary(Of String, RFunction)(GgplotDefaults.dctThemeFunctions)
+        clsCoordPolarStartOperator = GgplotDefaults.clsCoordPolarStartOperator.Clone()
+        clsCoordPolarFunction = GgplotDefaults.clsCoordPolarFunction.Clone()
         clsThemeFunction = GgplotDefaults.clsDefaultThemeFunction
         clsLocalRaesFunction = GgplotDefaults.clsAesFunction.Clone()
+        clsXScaleDateFunction = GgplotDefaults.clsXScaleDateFunction.Clone()
+        clsYScaleDateFunction = GgplotDefaults.clsYScaleDateFunction.Clone()
+        clsScaleFillViridisFunction = GgplotDefaults.clsScaleFillViridisFunction
+        clsScaleColourViridisFunction = GgplotDefaults.clsScaleColorViridisFunction
 
         clsBaseOperator.SetAssignTo("last_graph", strTempDataframe:=ucrHistogramSelector.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_graph")
         ucrBase.clsRsyntax.SetBaseROperator(clsBaseOperator)
@@ -138,10 +181,13 @@ Public Class dlgHistogram
 
     Public Sub SetRCodeForControls(bReset As Boolean)
         ucrVariablesAsFactorforHist.SetRCode(clsRaesFunction, bReset)
+        ucrInputStats.SetRCode(clsHistAesFunction, bReset)
         ucrFactorReceiver.SetRCode(clsRaesFunction, bReset)
         ucrSaveHist.SetRCode(clsBaseOperator, bReset)
         ucrHistogramSelector.SetRCode(clsRggplotFunction, bReset)
         ucrPnlOptions.SetRCode(clsRgeomPlotFunction, bReset)
+        ucrChkPercentages.SetRCode(clsYScalecontinuousFunction, bReset)
+
     End Sub
 
     Private Sub TestOkEnabled()
@@ -166,46 +212,55 @@ Public Class dlgHistogram
         For Each clsParam In clsRaesFunction.clsParameters
             If clsParam.strArgumentName = "x" AndAlso (clsParam.strArgumentValue <> "value" OrElse ucrVariablesAsFactorforHist.bSingleVariable) Then
                 ucrVariablesAsFactorforHist.Add(clsParam.strArgumentValue)
-            ElseIf clsParam.strArgumentName = "fill" OrElse clsParam.strArgumentName = "colour" Then
+            ElseIf (clsParam.strArgumentName = "fill" AndAlso rdoHistogram.Checked) OrElse (clsParam.strArgumentName = "colour" AndAlso (rdoFrequencyPolygon.Checked OrElse rdoDensity.Checked)) Then
                 ucrFactorReceiver.Add(clsParam.strArgumentValue)
             End If
         Next
+        clsRgeomPlotFunction.AddParameter("mapping", clsRFunctionParameter:=clsHistAesFunction) 'this is here because of the subdialog 
         TestOkEnabled()
     End Sub
 
     Private Sub cmdOptions_Click(sender As Object, e As EventArgs) Handles cmdOptions.Click
-        sdgPlots.SetRCode(clsBaseOperator, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, clsNewFacetFunction:=clsRFacetFunction, ucrNewBaseSelector:=ucrHistogramSelector, clsNewGlobalAesFunction:=clsRaesFunction, bReset:=bResetSubdialog)
+        sdgPlots.SetRCode(clsBaseOperator, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewThemeFunction:=clsThemeFunction, clsNewScaleFillViridisFunction:=clsScaleFillViridisFunction, clsNewScaleColourViridisFunction:=clsScaleColourViridisFunction, dctNewThemeFunctions:=dctThemeFunctions, clsNewFacetFunction:=clsRFacetFunction, ucrNewBaseSelector:=ucrHistogramSelector, clsNewGlobalAesFunction:=clsRaesFunction, clsNewCoordPolarFunction:=clsCoordPolarFunction, clsNewCoordPolarStartOperator:=clsCoordPolarStartOperator, clsNewXScaleDateFunction:=clsXScaleDateFunction, clsNewYScaleDateFunction:=clsYScaleDateFunction, strMainDialogGeomParameterNames:=strGeomParameterNames, bReset:=bResetSubdialog)
+        clsYScalecontinuousFunction.AddParameter("labels", clsRFunctionParameter:=clsPercentage) ' This passes the percent function to the plot options
         sdgPlots.ShowDialog()
         bResetSubdialog = False
     End Sub
 
     Private Sub SetDialogOptions()
-        If rdoHistogram.Checked = True Then
+        If rdoHistogram.Checked Then
             clsRgeomPlotFunction.SetRCommand("geom_histogram")
             ucrFactorReceiver.ChangeParameterName("fill")
-            cmdHistogramOptions.Text = "Histogram Options"
-            cmdHistogramOptions.Size = New Size(120, 25)
             If Not ucrSaveHist.bUserTyped Then
                 ucrSaveHist.SetPrefix("histogram")
             End If
-        ElseIf rdoDensity.Checked = True Then
+        ElseIf rdoDensity.Checked Then
             clsRgeomPlotFunction.SetRCommand("geom_density")
             ucrFactorReceiver.ChangeParameterName("colour")
-            cmdHistogramOptions.Text = "Density Options"
-            cmdHistogramOptions.Size = New Size(120, 25)
             If Not ucrSaveHist.bUserTyped Then
                 ucrSaveHist.SetPrefix("density")
             End If
-        ElseIf rdoFrequencyPolygon.Checked = True Then
+        ElseIf rdoFrequencyPolygon.Checked Then
             clsRgeomPlotFunction.SetRCommand("geom_freqpoly")
             ucrFactorReceiver.ChangeParameterName("colour")
-            cmdHistogramOptions.Text = "Frequency Polygon Options"
-            cmdHistogramOptions.Size = New Size(160, 25)
             If Not ucrSaveHist.bUserTyped Then
                 ucrSaveHist.SetPrefix("frequency_polygon")
             End If
         End If
+        SetOptionsButtonText()
+        autoTranslate(Me)
     End Sub
+
+    Private Sub SetOptionsButtonText()
+        If rdoHistogram.Checked Then
+            cmdHistogramOptions.Text = "Histogram Options"
+        ElseIf rdoDensity.Checked Then
+            cmdHistogramOptions.Text = "Density Options"
+        ElseIf rdoFrequencyPolygon.Checked Then
+            cmdHistogramOptions.Text = "Frequency Polygon Options"
+        End If
+    End Sub
+
 
     Private Sub TempOptionsDisabledInMultipleVariablesCase()
         If ucrVariablesAsFactorforHist.bSingleVariable Then
@@ -219,6 +274,15 @@ Public Class dlgHistogram
 
     Private Sub ucrPnlOptions_Control() Handles ucrPnlOptions.ControlValueChanged
         SetDialogOptions()
+    End Sub
+
+    Private Sub Adding_Percentages(ucrChangedControl As ucrCore) Handles ucrInputStats.ControlValueChanged, ucrChkPercentages.ControlValueChanged
+        If ucrInputStats.GetText() = "Fractions" AndAlso ucrChkPercentages.Checked Then
+            clsYScalecontinuousFunction.AddParameter("labels", clsRFunctionParameter:=clsPercentage)
+            clsBaseOperator.AddParameter("scale", clsRFunctionParameter:=clsYScalecontinuousFunction)
+        Else
+            clsBaseOperator.RemoveParameterByName("scale")
+        End If
     End Sub
 
     Private Sub ucrVariablesAsFactorforHist_SelectionChanged() Handles ucrVariablesAsFactorforHist.SelectionChanged
@@ -246,5 +310,10 @@ Public Class dlgHistogram
 
     Private Sub CoreControls_ControlContentsChanged() Handles ucrVariablesAsFactorforHist.ControlContentsChanged, ucrSaveHist.ControlContentsChanged
         TestOkEnabled()
+    End Sub
+
+    Private Sub ucrFactorReceiver_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrFactorReceiver.ControlValueChanged
+        clsScaleColourViridisFunction.AddParameter("discrete", "TRUE", iPosition:=5)
+        clsScaleFillViridisFunction.AddParameter("discrete", "TRUE", iPosition:=5)
     End Sub
 End Class

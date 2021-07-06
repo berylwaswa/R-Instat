@@ -37,138 +37,170 @@ Partial Class dlgUnstack
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgUnstack))
         Me.lblFactorToUnstackBy = New System.Windows.Forms.Label()
-        Me.lblColumnToUnstack = New System.Windows.Forms.Label()
-        Me.lblIDColumns = New System.Windows.Forms.Label()
-        Me.ucrIDColumns = New instat.ucrReceiverMultiple()
-        Me.ucrColumnToUnstackReceiver = New instat.ucrReceiverSingle()
-        Me.ucrFactorToUnstackReceiver = New instat.ucrReceiverSingle()
-        Me.ucrBase = New instat.ucrButtons()
+        Me.lblCarryColumns = New System.Windows.Forms.Label()
+        Me.rdoSingle = New System.Windows.Forms.RadioButton()
+        Me.rdoMultiple = New System.Windows.Forms.RadioButton()
+        Me.rdoRestoreHierarchy = New System.Windows.Forms.RadioButton()
+        Me.lblMultipleColumns = New System.Windows.Forms.Label()
         Me.ucrNewDFName = New instat.ucrSave()
         Me.ucrChkDropMissingCombinations = New instat.ucrCheck()
+        Me.ucrReceiverCarryColumns = New instat.ucrReceiverMultiple()
+        Me.ucrReceiverFactorToUnstackby = New instat.ucrReceiverSingle()
         Me.ucrSelectorForUnstack = New instat.ucrSelectorByDataFrameAddRemove()
+        Me.ucrBase = New instat.ucrButtons()
+        Me.ucrPnlUnstackCol = New instat.UcrPanel()
+        Me.ucrMultipleColumnsReceiver = New instat.ucrReceiverMultiple()
+        Me.ucrReceiverColumnToUnstack = New instat.ucrReceiverSingle()
+        Me.lblColumnToUnstack = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'lblFactorToUnstackBy
         '
-        Me.lblFactorToUnstackBy.AutoSize = True
-        Me.lblFactorToUnstackBy.Location = New System.Drawing.Point(268, 45)
+        resources.ApplyResources(Me.lblFactorToUnstackBy, "lblFactorToUnstackBy")
         Me.lblFactorToUnstackBy.Name = "lblFactorToUnstackBy"
-        Me.lblFactorToUnstackBy.Size = New System.Drawing.Size(109, 13)
-        Me.lblFactorToUnstackBy.TabIndex = 1
         Me.lblFactorToUnstackBy.Tag = "Factor_to_Unstack_By"
-        Me.lblFactorToUnstackBy.Text = "Factor to Unstack by:"
         '
-        'lblColumnToUnstack
+        'lblCarryColumns
         '
-        Me.lblColumnToUnstack.AutoSize = True
-        Me.lblColumnToUnstack.Location = New System.Drawing.Point(268, 91)
-        Me.lblColumnToUnstack.Name = "lblColumnToUnstack"
-        Me.lblColumnToUnstack.Size = New System.Drawing.Size(100, 13)
-        Me.lblColumnToUnstack.TabIndex = 3
-        Me.lblColumnToUnstack.Tag = "Column_to_Unstack:"
-        Me.lblColumnToUnstack.Text = "Column to Unstack:"
+        resources.ApplyResources(Me.lblCarryColumns, "lblCarryColumns")
+        Me.lblCarryColumns.Name = "lblCarryColumns"
+        Me.lblCarryColumns.Tag = "ID_Columns"
         '
-        'lblIDColumns
+        'rdoSingle
         '
-        Me.lblIDColumns.AutoSize = True
-        Me.lblIDColumns.Location = New System.Drawing.Point(268, 137)
-        Me.lblIDColumns.Name = "lblIDColumns"
-        Me.lblIDColumns.Size = New System.Drawing.Size(64, 13)
-        Me.lblIDColumns.TabIndex = 5
-        Me.lblIDColumns.Tag = "ID_Columns"
-        Me.lblIDColumns.Text = "ID Columns:"
+        resources.ApplyResources(Me.rdoSingle, "rdoSingle")
+        Me.rdoSingle.BackColor = System.Drawing.SystemColors.Control
+        Me.rdoSingle.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoSingle.FlatAppearance.BorderSize = 2
+        Me.rdoSingle.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoSingle.Name = "rdoSingle"
+        Me.rdoSingle.TabStop = True
+        Me.rdoSingle.UseVisualStyleBackColor = False
         '
-        'ucrIDColumns
+        'rdoMultiple
         '
-        Me.ucrIDColumns.frmParent = Me
-        Me.ucrIDColumns.Location = New System.Drawing.Point(268, 152)
-        Me.ucrIDColumns.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrIDColumns.Name = "ucrIDColumns"
-        Me.ucrIDColumns.Selector = Nothing
-        Me.ucrIDColumns.Size = New System.Drawing.Size(120, 110)
-        Me.ucrIDColumns.strNcFilePath = ""
-        Me.ucrIDColumns.TabIndex = 6
-        Me.ucrIDColumns.ucrSelector = Nothing
+        resources.ApplyResources(Me.rdoMultiple, "rdoMultiple")
+        Me.rdoMultiple.BackColor = System.Drawing.SystemColors.Control
+        Me.rdoMultiple.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoMultiple.FlatAppearance.BorderSize = 2
+        Me.rdoMultiple.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoMultiple.Name = "rdoMultiple"
+        Me.rdoMultiple.TabStop = True
+        Me.rdoMultiple.UseVisualStyleBackColor = False
         '
-        'ucrColumnToUnstackReceiver
+        'rdoRestoreHierarchy
         '
-        Me.ucrColumnToUnstackReceiver.frmParent = Me
-        Me.ucrColumnToUnstackReceiver.Location = New System.Drawing.Point(268, 106)
-        Me.ucrColumnToUnstackReceiver.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrColumnToUnstackReceiver.Name = "ucrColumnToUnstackReceiver"
-        Me.ucrColumnToUnstackReceiver.Selector = Nothing
-        Me.ucrColumnToUnstackReceiver.Size = New System.Drawing.Size(120, 20)
-        Me.ucrColumnToUnstackReceiver.strNcFilePath = ""
-        Me.ucrColumnToUnstackReceiver.TabIndex = 4
-        Me.ucrColumnToUnstackReceiver.ucrSelector = Nothing
+        resources.ApplyResources(Me.rdoRestoreHierarchy, "rdoRestoreHierarchy")
+        Me.rdoRestoreHierarchy.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoRestoreHierarchy.FlatAppearance.BorderSize = 2
+        Me.rdoRestoreHierarchy.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoRestoreHierarchy.Name = "rdoRestoreHierarchy"
+        Me.rdoRestoreHierarchy.TabStop = True
+        Me.rdoRestoreHierarchy.UseVisualStyleBackColor = True
         '
-        'ucrFactorToUnstackReceiver
+        'lblMultipleColumns
         '
-        Me.ucrFactorToUnstackReceiver.frmParent = Me
-        Me.ucrFactorToUnstackReceiver.Location = New System.Drawing.Point(268, 60)
-        Me.ucrFactorToUnstackReceiver.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrFactorToUnstackReceiver.Name = "ucrFactorToUnstackReceiver"
-        Me.ucrFactorToUnstackReceiver.Selector = Nothing
-        Me.ucrFactorToUnstackReceiver.Size = New System.Drawing.Size(120, 20)
-        Me.ucrFactorToUnstackReceiver.strNcFilePath = ""
-        Me.ucrFactorToUnstackReceiver.TabIndex = 2
-        Me.ucrFactorToUnstackReceiver.ucrSelector = Nothing
-        '
-        'ucrBase
-        '
-        Me.ucrBase.Location = New System.Drawing.Point(10, 292)
-        Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(410, 52)
-        Me.ucrBase.TabIndex = 9
+        resources.ApplyResources(Me.lblMultipleColumns, "lblMultipleColumns")
+        Me.lblMultipleColumns.Name = "lblMultipleColumns"
         '
         'ucrNewDFName
         '
-        Me.ucrNewDFName.Location = New System.Drawing.Point(10, 266)
+        resources.ApplyResources(Me.ucrNewDFName, "ucrNewDFName")
         Me.ucrNewDFName.Name = "ucrNewDFName"
-        Me.ucrNewDFName.Size = New System.Drawing.Size(307, 24)
-        Me.ucrNewDFName.TabIndex = 8
         '
         'ucrChkDropMissingCombinations
         '
         Me.ucrChkDropMissingCombinations.Checked = False
-        Me.ucrChkDropMissingCombinations.Location = New System.Drawing.Point(10, 239)
+        resources.ApplyResources(Me.ucrChkDropMissingCombinations, "ucrChkDropMissingCombinations")
         Me.ucrChkDropMissingCombinations.Name = "ucrChkDropMissingCombinations"
-        Me.ucrChkDropMissingCombinations.Size = New System.Drawing.Size(159, 20)
-        Me.ucrChkDropMissingCombinations.TabIndex = 7
+        '
+        'ucrReceiverCarryColumns
+        '
+        Me.ucrReceiverCarryColumns.frmParent = Me
+        resources.ApplyResources(Me.ucrReceiverCarryColumns, "ucrReceiverCarryColumns")
+        Me.ucrReceiverCarryColumns.Name = "ucrReceiverCarryColumns"
+        Me.ucrReceiverCarryColumns.Selector = Nothing
+        Me.ucrReceiverCarryColumns.strNcFilePath = ""
+        Me.ucrReceiverCarryColumns.ucrSelector = Nothing
+        '
+        'ucrReceiverFactorToUnstackby
+        '
+        Me.ucrReceiverFactorToUnstackby.frmParent = Me
+        resources.ApplyResources(Me.ucrReceiverFactorToUnstackby, "ucrReceiverFactorToUnstackby")
+        Me.ucrReceiverFactorToUnstackby.Name = "ucrReceiverFactorToUnstackby"
+        Me.ucrReceiverFactorToUnstackby.Selector = Nothing
+        Me.ucrReceiverFactorToUnstackby.strNcFilePath = ""
+        Me.ucrReceiverFactorToUnstackby.ucrSelector = Nothing
         '
         'ucrSelectorForUnstack
         '
+        Me.ucrSelectorForUnstack.bDropUnusedFilterLevels = False
         Me.ucrSelectorForUnstack.bShowHiddenColumns = False
         Me.ucrSelectorForUnstack.bUseCurrentFilter = True
-        Me.ucrSelectorForUnstack.Location = New System.Drawing.Point(10, 10)
-        Me.ucrSelectorForUnstack.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrSelectorForUnstack, "ucrSelectorForUnstack")
         Me.ucrSelectorForUnstack.Name = "ucrSelectorForUnstack"
-        Me.ucrSelectorForUnstack.Size = New System.Drawing.Size(210, 180)
-        Me.ucrSelectorForUnstack.TabIndex = 0
+        '
+        'ucrBase
+        '
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
+        Me.ucrBase.Name = "ucrBase"
+        '
+        'ucrPnlUnstackCol
+        '
+        resources.ApplyResources(Me.ucrPnlUnstackCol, "ucrPnlUnstackCol")
+        Me.ucrPnlUnstackCol.Name = "ucrPnlUnstackCol"
+        '
+        'ucrMultipleColumnsReceiver
+        '
+        Me.ucrMultipleColumnsReceiver.frmParent = Me
+        resources.ApplyResources(Me.ucrMultipleColumnsReceiver, "ucrMultipleColumnsReceiver")
+        Me.ucrMultipleColumnsReceiver.Name = "ucrMultipleColumnsReceiver"
+        Me.ucrMultipleColumnsReceiver.Selector = Nothing
+        Me.ucrMultipleColumnsReceiver.strNcFilePath = ""
+        Me.ucrMultipleColumnsReceiver.ucrSelector = Nothing
+        '
+        'ucrReceiverColumnToUnstack
+        '
+        Me.ucrReceiverColumnToUnstack.frmParent = Me
+        resources.ApplyResources(Me.ucrReceiverColumnToUnstack, "ucrReceiverColumnToUnstack")
+        Me.ucrReceiverColumnToUnstack.Name = "ucrReceiverColumnToUnstack"
+        Me.ucrReceiverColumnToUnstack.Selector = Nothing
+        Me.ucrReceiverColumnToUnstack.strNcFilePath = ""
+        Me.ucrReceiverColumnToUnstack.ucrSelector = Nothing
+        '
+        'lblColumnToUnstack
+        '
+        resources.ApplyResources(Me.lblColumnToUnstack, "lblColumnToUnstack")
+        Me.lblColumnToUnstack.Name = "lblColumnToUnstack"
+        Me.lblColumnToUnstack.Tag = "Column_to_Unstack:"
         '
         'dlgUnstack
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(416, 349)
+        Me.Controls.Add(Me.ucrReceiverColumnToUnstack)
+        Me.Controls.Add(Me.lblColumnToUnstack)
+        Me.Controls.Add(Me.rdoRestoreHierarchy)
+        Me.Controls.Add(Me.rdoMultiple)
+        Me.Controls.Add(Me.rdoSingle)
         Me.Controls.Add(Me.ucrNewDFName)
         Me.Controls.Add(Me.ucrChkDropMissingCombinations)
-        Me.Controls.Add(Me.ucrIDColumns)
-        Me.Controls.Add(Me.ucrColumnToUnstackReceiver)
-        Me.Controls.Add(Me.ucrFactorToUnstackReceiver)
-        Me.Controls.Add(Me.lblColumnToUnstack)
+        Me.Controls.Add(Me.ucrReceiverCarryColumns)
+        Me.Controls.Add(Me.ucrReceiverFactorToUnstackby)
         Me.Controls.Add(Me.lblFactorToUnstackBy)
         Me.Controls.Add(Me.ucrSelectorForUnstack)
         Me.Controls.Add(Me.ucrBase)
-        Me.Controls.Add(Me.lblIDColumns)
+        Me.Controls.Add(Me.lblCarryColumns)
+        Me.Controls.Add(Me.ucrPnlUnstackCol)
+        Me.Controls.Add(Me.lblMultipleColumns)
+        Me.Controls.Add(Me.ucrMultipleColumnsReceiver)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgUnstack"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Tag = "Unstack_Columns"
-        Me.Text = "Unstack Columns"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -176,11 +208,17 @@ Partial Class dlgUnstack
     Friend WithEvents ucrBase As ucrButtons
     Friend WithEvents ucrSelectorForUnstack As ucrSelectorByDataFrameAddRemove
     Friend WithEvents lblFactorToUnstackBy As Label
-    Friend WithEvents lblColumnToUnstack As Label
-    Friend WithEvents ucrFactorToUnstackReceiver As ucrReceiverSingle
-    Friend WithEvents ucrColumnToUnstackReceiver As ucrReceiverSingle
-    Friend WithEvents ucrIDColumns As ucrReceiverMultiple
-    Friend WithEvents lblIDColumns As Label
+    Friend WithEvents ucrReceiverFactorToUnstackby As ucrReceiverSingle
+    Friend WithEvents ucrReceiverCarryColumns As ucrReceiverMultiple
+    Friend WithEvents lblCarryColumns As Label
     Friend WithEvents ucrNewDFName As ucrSave
     Friend WithEvents ucrChkDropMissingCombinations As ucrCheck
+    Friend WithEvents rdoRestoreHierarchy As RadioButton
+    Friend WithEvents rdoMultiple As RadioButton
+    Friend WithEvents rdoSingle As RadioButton
+    Friend WithEvents lblMultipleColumns As Label
+    Friend WithEvents ucrMultipleColumnsReceiver As ucrReceiverMultiple
+    Friend WithEvents ucrPnlUnstackCol As UcrPanel
+    Friend WithEvents ucrReceiverColumnToUnstack As ucrReceiverSingle
+    Friend WithEvents lblColumnToUnstack As Label
 End Class

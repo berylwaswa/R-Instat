@@ -24,7 +24,6 @@ Public Class dlgDefineRedFlags
     Private clsRedFlag As New RFunction
 
     Private Sub dlgDefineRedFlags_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -36,7 +35,9 @@ Public Class dlgDefineRedFlags
             SetDefaults()
         End If
         SetRCodeForControls(bReset)
+        SetRedFlagColumnsInReceiver()
         bReset = False
+        autoTranslate(Me)
     End Sub
 
     Private Sub SetDefaults()
@@ -79,7 +80,7 @@ Public Class dlgDefineRedFlags
     End Sub
 
     Private Sub TestOKEnabled()
-        If Not ucrReceiverRedFlag.IsEmpty Then
+        If ucrSelectorDefineRedFlag.ucrAvailableDataFrames.cboAvailableDataFrames.Text <> "" Then
             ucrBase.OKEnabled(True)
         Else
             ucrBase.OKEnabled(False)
@@ -89,10 +90,19 @@ Public Class dlgDefineRedFlags
     Private Sub ucrBase_ClickReset(sender As Object, e As EventArgs) Handles ucrBase.ClickReset
         SetDefaults()
         SetRCodeForControls(True)
+        SetRedFlagColumnsInReceiver()
         TestOKEnabled()
+    End Sub
+
+    Private Sub SetRedFlagColumnsInReceiver()
+        ucrReceiverRedFlag.AddItemsWithMetadataProperty(ucrSelectorDefineRedFlag.ucrAvailableDataFrames.cboAvailableDataFrames.Text, "Is_Corruption_Red_Flag", {"TRUE"})
     End Sub
 
     Private Sub Controls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverRedFlag.ControlContentsChanged
         TestOKEnabled()
+    End Sub
+
+    Private Sub ucrSelectorDefineRedFlag_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrSelectorDefineRedFlag.ControlValueChanged
+        SetRedFlagColumnsInReceiver()
     End Sub
 End Class

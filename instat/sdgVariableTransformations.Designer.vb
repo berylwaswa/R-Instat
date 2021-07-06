@@ -19,7 +19,7 @@ Partial Class sdgVariableTransformations
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -36,149 +36,212 @@ Partial Class sdgVariableTransformations
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.ucrButtonsSDGVarTransform = New instat.ucrButtonsSubdialogue()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(sdgVariableTransformations))
         Me.rdoLogBase10 = New System.Windows.Forms.RadioButton()
         Me.rdoSquareRoot = New System.Windows.Forms.RadioButton()
-        Me.rdoPower = New System.Windows.Forms.RadioButton()
+        Me.rdoPolynomial = New System.Windows.Forms.RadioButton()
         Me.rdoNaturalLog = New System.Windows.Forms.RadioButton()
         Me.rdoIdentity = New System.Windows.Forms.RadioButton()
-        Me.ucrNudPower = New instat.ucrNud()
         Me.grpChooseFunction = New System.Windows.Forms.GroupBox()
+        Me.ucrNudPolynomial = New instat.ucrNud()
+        Me.ucrChkYearAsFactor = New instat.ucrCheck()
+        Me.ucrChkMonthAsFactor = New instat.ucrCheck()
+        Me.rdoYear = New System.Windows.Forms.RadioButton()
+        Me.rdoMonth = New System.Windows.Forms.RadioButton()
+        Me.ucrNudSplineDF = New instat.ucrNud()
+        Me.ucrInputTxtOwn = New instat.ucrInputTextBox()
+        Me.rdoCustom = New System.Windows.Forms.RadioButton()
+        Me.ucrInputTxtBrokenStick = New instat.ucrInputTextBox()
+        Me.rdoBrokenStick = New System.Windows.Forms.RadioButton()
+        Me.rdoSplineDf = New System.Windows.Forms.RadioButton()
         Me.ucrPnlChooseFunction = New instat.UcrPanel()
         Me.lblPreview = New System.Windows.Forms.Label()
         Me.ucrInputPreview = New instat.ucrInputTextBox()
+        Me.ucrButtonsSDGVarTransform = New instat.ucrButtonsSubdialogue()
         Me.grpChooseFunction.SuspendLayout()
         Me.SuspendLayout()
         '
-        'ucrButtonsSDGVarTransform
-        '
-        Me.ucrButtonsSDGVarTransform.Location = New System.Drawing.Point(42, 250)
-        Me.ucrButtonsSDGVarTransform.Name = "ucrButtonsSDGVarTransform"
-        Me.ucrButtonsSDGVarTransform.Size = New System.Drawing.Size(142, 30)
-        Me.ucrButtonsSDGVarTransform.TabIndex = 2
-        '
         'rdoLogBase10
         '
-        Me.rdoLogBase10.AutoSize = True
-        Me.rdoLogBase10.Location = New System.Drawing.Point(23, 89)
+        resources.ApplyResources(Me.rdoLogBase10, "rdoLogBase10")
         Me.rdoLogBase10.Name = "rdoLogBase10"
-        Me.rdoLogBase10.Size = New System.Drawing.Size(85, 17)
-        Me.rdoLogBase10.TabIndex = 13
         Me.rdoLogBase10.TabStop = True
         Me.rdoLogBase10.Tag = "Log_Base_10"
-        Me.rdoLogBase10.Text = "Log Base 10"
         Me.rdoLogBase10.UseVisualStyleBackColor = True
         '
         'rdoSquareRoot
         '
-        Me.rdoSquareRoot.AutoSize = True
-        Me.rdoSquareRoot.Location = New System.Drawing.Point(23, 118)
+        resources.ApplyResources(Me.rdoSquareRoot, "rdoSquareRoot")
         Me.rdoSquareRoot.Name = "rdoSquareRoot"
-        Me.rdoSquareRoot.Size = New System.Drawing.Size(85, 17)
-        Me.rdoSquareRoot.TabIndex = 14
         Me.rdoSquareRoot.TabStop = True
         Me.rdoSquareRoot.Tag = "Square_root"
-        Me.rdoSquareRoot.Text = "Square Root"
         Me.rdoSquareRoot.UseVisualStyleBackColor = True
         '
-        'rdoPower
+        'rdoPolynomial
         '
-        Me.rdoPower.AutoSize = True
-        Me.rdoPower.Location = New System.Drawing.Point(23, 147)
-        Me.rdoPower.Name = "rdoPower"
-        Me.rdoPower.Size = New System.Drawing.Size(58, 17)
-        Me.rdoPower.TabIndex = 15
-        Me.rdoPower.TabStop = True
-        Me.rdoPower.Tag = "Power"
-        Me.rdoPower.Text = "Power:"
-        Me.rdoPower.UseVisualStyleBackColor = True
+        resources.ApplyResources(Me.rdoPolynomial, "rdoPolynomial")
+        Me.rdoPolynomial.Name = "rdoPolynomial"
+        Me.rdoPolynomial.TabStop = True
+        Me.rdoPolynomial.Tag = "Polynomial"
+        Me.rdoPolynomial.UseVisualStyleBackColor = True
         '
         'rdoNaturalLog
         '
-        Me.rdoNaturalLog.AutoSize = True
-        Me.rdoNaturalLog.Location = New System.Drawing.Point(23, 60)
+        resources.ApplyResources(Me.rdoNaturalLog, "rdoNaturalLog")
         Me.rdoNaturalLog.Name = "rdoNaturalLog"
-        Me.rdoNaturalLog.Size = New System.Drawing.Size(80, 17)
-        Me.rdoNaturalLog.TabIndex = 12
         Me.rdoNaturalLog.TabStop = True
         Me.rdoNaturalLog.Tag = "Natural_log"
-        Me.rdoNaturalLog.Text = "Natural Log"
         Me.rdoNaturalLog.UseVisualStyleBackColor = True
         '
         'rdoIdentity
         '
-        Me.rdoIdentity.AutoSize = True
-        Me.rdoIdentity.Location = New System.Drawing.Point(23, 31)
+        resources.ApplyResources(Me.rdoIdentity, "rdoIdentity")
         Me.rdoIdentity.Name = "rdoIdentity"
-        Me.rdoIdentity.Size = New System.Drawing.Size(59, 17)
-        Me.rdoIdentity.TabIndex = 17
         Me.rdoIdentity.TabStop = True
         Me.rdoIdentity.Tag = "Identity"
-        Me.rdoIdentity.Text = "Identity"
         Me.rdoIdentity.UseVisualStyleBackColor = True
-        '
-        'ucrNudPower
-        '
-        Me.ucrNudPower.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
-        Me.ucrNudPower.Increment = New Decimal(New Integer() {1, 0, 0, 0})
-        Me.ucrNudPower.Location = New System.Drawing.Point(87, 147)
-        Me.ucrNudPower.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
-        Me.ucrNudPower.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
-        Me.ucrNudPower.Name = "ucrNudPower"
-        Me.ucrNudPower.Size = New System.Drawing.Size(50, 20)
-        Me.ucrNudPower.TabIndex = 17
-        Me.ucrNudPower.Value = New Decimal(New Integer() {0, 0, 0, 0})
         '
         'grpChooseFunction
         '
-        Me.grpChooseFunction.Controls.Add(Me.ucrNudPower)
+        Me.grpChooseFunction.Controls.Add(Me.ucrNudPolynomial)
+        Me.grpChooseFunction.Controls.Add(Me.ucrChkYearAsFactor)
+        Me.grpChooseFunction.Controls.Add(Me.ucrChkMonthAsFactor)
+        Me.grpChooseFunction.Controls.Add(Me.rdoYear)
+        Me.grpChooseFunction.Controls.Add(Me.rdoMonth)
+        Me.grpChooseFunction.Controls.Add(Me.ucrNudSplineDF)
+        Me.grpChooseFunction.Controls.Add(Me.ucrInputTxtOwn)
+        Me.grpChooseFunction.Controls.Add(Me.rdoCustom)
+        Me.grpChooseFunction.Controls.Add(Me.ucrInputTxtBrokenStick)
+        Me.grpChooseFunction.Controls.Add(Me.rdoBrokenStick)
+        Me.grpChooseFunction.Controls.Add(Me.rdoSplineDf)
         Me.grpChooseFunction.Controls.Add(Me.rdoIdentity)
         Me.grpChooseFunction.Controls.Add(Me.rdoNaturalLog)
-        Me.grpChooseFunction.Controls.Add(Me.rdoPower)
+        Me.grpChooseFunction.Controls.Add(Me.rdoPolynomial)
         Me.grpChooseFunction.Controls.Add(Me.rdoSquareRoot)
         Me.grpChooseFunction.Controls.Add(Me.rdoLogBase10)
         Me.grpChooseFunction.Controls.Add(Me.ucrPnlChooseFunction)
-        Me.grpChooseFunction.Location = New System.Drawing.Point(10, 10)
+        resources.ApplyResources(Me.grpChooseFunction, "grpChooseFunction")
         Me.grpChooseFunction.Name = "grpChooseFunction"
-        Me.grpChooseFunction.Size = New System.Drawing.Size(218, 184)
-        Me.grpChooseFunction.TabIndex = 1
         Me.grpChooseFunction.TabStop = False
         Me.grpChooseFunction.Tag = "General_Functions"
-        Me.grpChooseFunction.Text = "Choose Function"
+        '
+        'ucrNudPolynomial
+        '
+        Me.ucrNudPolynomial.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudPolynomial.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudPolynomial, "ucrNudPolynomial")
+        Me.ucrNudPolynomial.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudPolynomial.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudPolynomial.Name = "ucrNudPolynomial"
+        Me.ucrNudPolynomial.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        '
+        'ucrChkYearAsFactor
+        '
+        Me.ucrChkYearAsFactor.Checked = False
+        resources.ApplyResources(Me.ucrChkYearAsFactor, "ucrChkYearAsFactor")
+        Me.ucrChkYearAsFactor.Name = "ucrChkYearAsFactor"
+        '
+        'ucrChkMonthAsFactor
+        '
+        Me.ucrChkMonthAsFactor.Checked = False
+        resources.ApplyResources(Me.ucrChkMonthAsFactor, "ucrChkMonthAsFactor")
+        Me.ucrChkMonthAsFactor.Name = "ucrChkMonthAsFactor"
+        '
+        'rdoYear
+        '
+        resources.ApplyResources(Me.rdoYear, "rdoYear")
+        Me.rdoYear.Name = "rdoYear"
+        Me.rdoYear.TabStop = True
+        Me.rdoYear.Tag = ""
+        Me.rdoYear.UseVisualStyleBackColor = True
+        '
+        'rdoMonth
+        '
+        resources.ApplyResources(Me.rdoMonth, "rdoMonth")
+        Me.rdoMonth.Name = "rdoMonth"
+        Me.rdoMonth.TabStop = True
+        Me.rdoMonth.Tag = ""
+        Me.rdoMonth.UseVisualStyleBackColor = True
+        '
+        'ucrNudSplineDF
+        '
+        Me.ucrNudSplineDF.DecimalPlaces = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSplineDF.Increment = New Decimal(New Integer() {1, 0, 0, 0})
+        resources.ApplyResources(Me.ucrNudSplineDF, "ucrNudSplineDF")
+        Me.ucrNudSplineDF.Maximum = New Decimal(New Integer() {100, 0, 0, 0})
+        Me.ucrNudSplineDF.Minimum = New Decimal(New Integer() {0, 0, 0, 0})
+        Me.ucrNudSplineDF.Name = "ucrNudSplineDF"
+        Me.ucrNudSplineDF.Value = New Decimal(New Integer() {1, 0, 0, 0})
+        '
+        'ucrInputTxtOwn
+        '
+        Me.ucrInputTxtOwn.AddQuotesIfUnrecognised = True
+        Me.ucrInputTxtOwn.IsMultiline = False
+        Me.ucrInputTxtOwn.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputTxtOwn, "ucrInputTxtOwn")
+        Me.ucrInputTxtOwn.Name = "ucrInputTxtOwn"
+        '
+        'rdoCustom
+        '
+        resources.ApplyResources(Me.rdoCustom, "rdoCustom")
+        Me.rdoCustom.Name = "rdoCustom"
+        Me.rdoCustom.TabStop = True
+        Me.rdoCustom.Tag = ""
+        Me.rdoCustom.UseVisualStyleBackColor = True
+        '
+        'ucrInputTxtBrokenStick
+        '
+        Me.ucrInputTxtBrokenStick.AddQuotesIfUnrecognised = True
+        Me.ucrInputTxtBrokenStick.IsMultiline = False
+        Me.ucrInputTxtBrokenStick.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputTxtBrokenStick, "ucrInputTxtBrokenStick")
+        Me.ucrInputTxtBrokenStick.Name = "ucrInputTxtBrokenStick"
+        '
+        'rdoBrokenStick
+        '
+        resources.ApplyResources(Me.rdoBrokenStick, "rdoBrokenStick")
+        Me.rdoBrokenStick.Name = "rdoBrokenStick"
+        Me.rdoBrokenStick.TabStop = True
+        Me.rdoBrokenStick.Tag = ""
+        Me.rdoBrokenStick.UseVisualStyleBackColor = True
+        '
+        'rdoSplineDf
+        '
+        resources.ApplyResources(Me.rdoSplineDf, "rdoSplineDf")
+        Me.rdoSplineDf.Name = "rdoSplineDf"
+        Me.rdoSplineDf.TabStop = True
+        Me.rdoSplineDf.Tag = ""
+        Me.rdoSplineDf.UseVisualStyleBackColor = True
         '
         'ucrPnlChooseFunction
         '
-        Me.ucrPnlChooseFunction.Location = New System.Drawing.Point(6, 19)
+        resources.ApplyResources(Me.ucrPnlChooseFunction, "ucrPnlChooseFunction")
         Me.ucrPnlChooseFunction.Name = "ucrPnlChooseFunction"
-        Me.ucrPnlChooseFunction.Size = New System.Drawing.Size(168, 159)
-        Me.ucrPnlChooseFunction.TabIndex = 3
         '
         'lblPreview
         '
-        Me.lblPreview.AutoSize = True
-        Me.lblPreview.Location = New System.Drawing.Point(12, 216)
+        resources.ApplyResources(Me.lblPreview, "lblPreview")
         Me.lblPreview.Name = "lblPreview"
-        Me.lblPreview.Size = New System.Drawing.Size(48, 13)
-        Me.lblPreview.TabIndex = 3
-        Me.lblPreview.Text = "Preview:"
         '
         'ucrInputPreview
         '
         Me.ucrInputPreview.AddQuotesIfUnrecognised = True
         Me.ucrInputPreview.IsMultiline = False
-        Me.ucrInputPreview.IsReadOnly = False
-        Me.ucrInputPreview.Location = New System.Drawing.Point(66, 213)
+        Me.ucrInputPreview.IsReadOnly = True
+        resources.ApplyResources(Me.ucrInputPreview, "ucrInputPreview")
         Me.ucrInputPreview.Name = "ucrInputPreview"
-        Me.ucrInputPreview.Size = New System.Drawing.Size(158, 21)
-        Me.ucrInputPreview.TabIndex = 4
+        '
+        'ucrButtonsSDGVarTransform
+        '
+        resources.ApplyResources(Me.ucrButtonsSDGVarTransform, "ucrButtonsSDGVarTransform")
+        Me.ucrButtonsSDGVarTransform.Name = "ucrButtonsSDGVarTransform"
         '
         'sdgVariableTransformations
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(236, 284)
         Me.Controls.Add(Me.ucrInputPreview)
         Me.Controls.Add(Me.lblPreview)
         Me.Controls.Add(Me.ucrButtonsSDGVarTransform)
@@ -187,9 +250,7 @@ Partial Class sdgVariableTransformations
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "sdgVariableTransformations"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Tag = "Variable _Transformations"
-        Me.Text = "Variable Transformations"
         Me.grpChooseFunction.ResumeLayout(False)
         Me.grpChooseFunction.PerformLayout()
         Me.ResumeLayout(False)
@@ -199,12 +260,22 @@ Partial Class sdgVariableTransformations
     Friend WithEvents ucrButtonsSDGVarTransform As ucrButtonsSubdialogue
     Friend WithEvents rdoLogBase10 As RadioButton
     Friend WithEvents rdoSquareRoot As RadioButton
-    Friend WithEvents rdoPower As RadioButton
+    Friend WithEvents rdoPolynomial As RadioButton
     Friend WithEvents rdoNaturalLog As RadioButton
     Friend WithEvents rdoIdentity As RadioButton
-    Friend WithEvents ucrNudPower As ucrNud
     Friend WithEvents grpChooseFunction As GroupBox
     Friend WithEvents ucrPnlChooseFunction As UcrPanel
     Friend WithEvents lblPreview As Label
     Friend WithEvents ucrInputPreview As ucrInputTextBox
+    Friend WithEvents rdoSplineDf As RadioButton
+    Friend WithEvents ucrInputTxtOwn As ucrInputTextBox
+    Friend WithEvents rdoCustom As RadioButton
+    Friend WithEvents ucrInputTxtBrokenStick As ucrInputTextBox
+    Friend WithEvents rdoBrokenStick As RadioButton
+    Friend WithEvents ucrNudSplineDF As ucrNud
+    Friend WithEvents ucrChkYearAsFactor As ucrCheck
+    Friend WithEvents ucrChkMonthAsFactor As ucrCheck
+    Friend WithEvents rdoYear As RadioButton
+    Friend WithEvents rdoMonth As RadioButton
+    Friend WithEvents ucrNudPolynomial As ucrNud
 End Class

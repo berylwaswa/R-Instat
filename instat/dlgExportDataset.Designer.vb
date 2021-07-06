@@ -19,7 +19,7 @@ Partial Class dlgExportDataset
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -36,84 +36,123 @@ Partial Class dlgExportDataset
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgExportDataset))
+        Me.lblConfirm = New System.Windows.Forms.Label()
+        Me.lblDataFrames = New System.Windows.Forms.Label()
+        Me.lblSelectedDataFrames = New System.Windows.Forms.Label()
+        Me.lblFileExtension = New System.Windows.Forms.Label()
+        Me.cboFileType = New System.Windows.Forms.ComboBox()
         Me.ucrBase = New instat.ucrButtons()
-        Me.ucrInputExportFile = New instat.ucrInputTextBox()
-        Me.cmdBrowse = New System.Windows.Forms.Button()
-        Me.lblExport = New System.Windows.Forms.Label()
-        Me.ucrAvailableSheets = New instat.ucrDataFrame()
+        Me.ucrFilePath = New instat.ucrFilePath()
+        Me.ucrSelectorDataFrames = New instat.ucrSelectorAddRemove()
+        Me.ucrReceiverMultipleDataFrames = New instat.ucrReceiverMultiple()
+        Me.chkSaveAsSingleFile = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
+        '
+        'lblConfirm
+        '
+        resources.ApplyResources(Me.lblConfirm, "lblConfirm")
+        Me.lblConfirm.ForeColor = System.Drawing.Color.Green
+        Me.lblConfirm.Name = "lblConfirm"
+        '
+        'lblDataFrames
+        '
+        resources.ApplyResources(Me.lblDataFrames, "lblDataFrames")
+        Me.lblDataFrames.Name = "lblDataFrames"
+        '
+        'lblSelectedDataFrames
+        '
+        resources.ApplyResources(Me.lblSelectedDataFrames, "lblSelectedDataFrames")
+        Me.lblSelectedDataFrames.Name = "lblSelectedDataFrames"
+        '
+        'lblFileExtension
+        '
+        resources.ApplyResources(Me.lblFileExtension, "lblFileExtension")
+        Me.lblFileExtension.Name = "lblFileExtension"
+        '
+        'cboFileType
+        '
+        Me.cboFileType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cboFileType.FormattingEnabled = True
+        Me.cboFileType.Items.AddRange(New Object() {resources.GetString("cboFileType.Items"), resources.GetString("cboFileType.Items1"), resources.GetString("cboFileType.Items2"), resources.GetString("cboFileType.Items3"), resources.GetString("cboFileType.Items4"), resources.GetString("cboFileType.Items5"), resources.GetString("cboFileType.Items6"), resources.GetString("cboFileType.Items7"), resources.GetString("cboFileType.Items8"), resources.GetString("cboFileType.Items9"), resources.GetString("cboFileType.Items10"), resources.GetString("cboFileType.Items11"), resources.GetString("cboFileType.Items12"), resources.GetString("cboFileType.Items13"), resources.GetString("cboFileType.Items14"), resources.GetString("cboFileType.Items15"), resources.GetString("cboFileType.Items16")})
+        resources.ApplyResources(Me.cboFileType, "cboFileType")
+        Me.cboFileType.Name = "cboFileType"
         '
         'ucrBase
         '
-        Me.ucrBase.Location = New System.Drawing.Point(8, 83)
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(406, 53)
-        Me.ucrBase.TabIndex = 4
         '
-        'ucrInputExportFile
+        'ucrFilePath
         '
-        Me.ucrInputExportFile.AddQuotesIfUnrecognised = True
-        Me.ucrInputExportFile.IsMultiline = False
-        Me.ucrInputExportFile.IsReadOnly = False
-        Me.ucrInputExportFile.Location = New System.Drawing.Point(89, 56)
-        Me.ucrInputExportFile.Name = "ucrInputExportFile"
-        Me.ucrInputExportFile.Size = New System.Drawing.Size(251, 21)
-        Me.ucrInputExportFile.TabIndex = 2
+        Me.ucrFilePath.DefaultFileSuggestionName = ""
+        Me.ucrFilePath.FilePath = ""
+        Me.ucrFilePath.FilePathBrowseText = "Browse"
+        Me.ucrFilePath.FilePathDialogFilter = resources.GetString("ucrFilePath.FilePathDialogFilter")
+        Me.ucrFilePath.FilePathDialogTitle = "Export Data File"
+        Me.ucrFilePath.FilePathLabel = "Export File(s):"
+        Me.ucrFilePath.FolderBrowse = False
+        resources.ApplyResources(Me.ucrFilePath, "ucrFilePath")
+        Me.ucrFilePath.Name = "ucrFilePath"
+        Me.ucrFilePath.SelectedFileFilterIndex = 1
         '
-        'cmdBrowse
+        'ucrSelectorDataFrames
         '
-        Me.cmdBrowse.Location = New System.Drawing.Point(343, 55)
-        Me.cmdBrowse.Name = "cmdBrowse"
-        Me.cmdBrowse.Size = New System.Drawing.Size(62, 23)
-        Me.cmdBrowse.TabIndex = 3
-        Me.cmdBrowse.Text = "Browse"
-        Me.cmdBrowse.UseVisualStyleBackColor = True
+        Me.ucrSelectorDataFrames.bShowHiddenColumns = False
+        resources.ApplyResources(Me.ucrSelectorDataFrames, "ucrSelectorDataFrames")
+        Me.ucrSelectorDataFrames.Name = "ucrSelectorDataFrames"
         '
-        'lblExport
+        'ucrReceiverMultipleDataFrames
         '
-        Me.lblExport.AutoSize = True
-        Me.lblExport.Location = New System.Drawing.Point(8, 59)
-        Me.lblExport.Name = "lblExport"
-        Me.lblExport.Size = New System.Drawing.Size(59, 13)
-        Me.lblExport.TabIndex = 1
-        Me.lblExport.Text = "Export File:"
+        Me.ucrReceiverMultipleDataFrames.frmParent = Me
+        resources.ApplyResources(Me.ucrReceiverMultipleDataFrames, "ucrReceiverMultipleDataFrames")
+        Me.ucrReceiverMultipleDataFrames.Name = "ucrReceiverMultipleDataFrames"
+        Me.ucrReceiverMultipleDataFrames.Selector = Nothing
+        Me.ucrReceiverMultipleDataFrames.strNcFilePath = ""
+        Me.ucrReceiverMultipleDataFrames.ucrSelector = Nothing
         '
-        'ucrAvailableSheets
+        'chkSaveAsSingleFile
         '
-        Me.ucrAvailableSheets.bUseCurrentFilter = True
-        Me.ucrAvailableSheets.Location = New System.Drawing.Point(8, 9)
-        Me.ucrAvailableSheets.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrAvailableSheets.Name = "ucrAvailableSheets"
-        Me.ucrAvailableSheets.Size = New System.Drawing.Size(128, 41)
-        Me.ucrAvailableSheets.TabIndex = 0
+        resources.ApplyResources(Me.chkSaveAsSingleFile, "chkSaveAsSingleFile")
+        Me.chkSaveAsSingleFile.Checked = True
+        Me.chkSaveAsSingleFile.CheckState = System.Windows.Forms.CheckState.Checked
+        Me.chkSaveAsSingleFile.Name = "chkSaveAsSingleFile"
+        Me.chkSaveAsSingleFile.UseVisualStyleBackColor = True
         '
         'dlgExportDataset
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(413, 138)
-        Me.Controls.Add(Me.lblExport)
-        Me.Controls.Add(Me.cmdBrowse)
-        Me.Controls.Add(Me.ucrInputExportFile)
-        Me.Controls.Add(Me.ucrAvailableSheets)
+        Me.Controls.Add(Me.chkSaveAsSingleFile)
+        Me.Controls.Add(Me.cboFileType)
+        Me.Controls.Add(Me.lblFileExtension)
+        Me.Controls.Add(Me.ucrReceiverMultipleDataFrames)
+        Me.Controls.Add(Me.lblSelectedDataFrames)
+        Me.Controls.Add(Me.lblDataFrames)
+        Me.Controls.Add(Me.ucrSelectorDataFrames)
+        Me.Controls.Add(Me.ucrFilePath)
+        Me.Controls.Add(Me.lblConfirm)
         Me.Controls.Add(Me.ucrBase)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgExportDataset"
         Me.ShowIcon = False
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Export Datasets"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
 
     Friend WithEvents ucrBase As ucrButtons
-    Friend WithEvents cmdBrowse As Button
-    Friend WithEvents lblExport As Label
-    Friend WithEvents ucrAvailableSheets As ucrDataFrame
-    Friend WithEvents ucrInputExportFile As ucrInputTextBox
+    Friend WithEvents lblConfirm As Label
+    Friend WithEvents ucrFilePath As ucrFilePath
+    Friend WithEvents ucrSelectorDataFrames As ucrSelectorAddRemove
+    Friend WithEvents lblDataFrames As Label
+    Friend WithEvents lblSelectedDataFrames As Label
+    Friend WithEvents ucrReceiverMultipleDataFrames As ucrReceiverMultiple
+    Friend WithEvents lblFileExtension As Label
+    Friend WithEvents cboFileType As ComboBox
+    Friend WithEvents chkSaveAsSingleFile As CheckBox
 End Class

@@ -40,6 +40,12 @@ Public Class dlgDotPlot
     Private bEditAesFunction As Boolean
     Private clsLocalRaesFunction As New RFunction
     Private bResetDotLayerSubdialog As Boolean = True
+    Private clsCoordPolarFunction As New RFunction
+    Private clsCoordPolarStartOperator As New ROperator
+    Private clsXScaleDateFunction As New RFunction
+    Private clsYScaleDateFunction As New RFunction
+    Private clsScaleFillViridisFunction As New RFunction
+    Private clsScaleColourViridisFunction As New RFunction
 
     Private Sub dlgDotPlot_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstLoad Then
@@ -80,7 +86,6 @@ Public Class dlgDotPlot
         ucrOtherAxisReceiver.SetParameter(New RParameter("y", 1))
         ucrOtherAxisReceiver.SetParameterIsString()
         ucrOtherAxisReceiver.Selector = ucrDotPlotSelector
-        ucrOtherAxisReceiver.SetIncludedDataTypes({"factor", "numeric"}) 'Warning: Even if having "factor" only could be more appropriate for the Axis that is not BinAxis, when coming back from the LayerOptions, where x and y can take both numeric and factor values, we would get bugs if numeric was not allowed.
         ucrOtherAxisReceiver.strSelectorHeading = "Variables"
         ucrOtherAxisReceiver.bWithQuotes = False
         ucrOtherAxisReceiver.SetValuesToIgnore({Chr(34) & Chr(34)})
@@ -98,7 +103,6 @@ Public Class dlgDotPlot
         ucrVariablesAsFactorDotPlot.SetParameter(New RParameter("x"), 0)
         ucrVariablesAsFactorDotPlot.SetFactorReceiver(ucrOtherAxisReceiver) 'Could choose the ucrFactorReceiver for this purpose... 
         ucrVariablesAsFactorDotPlot.Selector = ucrDotPlotSelector
-        ucrVariablesAsFactorDotPlot.SetIncludedDataTypes({"numeric", "factor"})
         ucrVariablesAsFactorDotPlot.strSelectorHeading = "Variables"
         ucrVariablesAsFactorDotPlot.bWithQuotes = False
         ucrVariablesAsFactorDotPlot.SetParameterIsString()
@@ -128,6 +132,7 @@ Public Class dlgDotPlot
         ucrDotPlotSelector.Reset()
         ucrDotPlotSelector.SetGgplotFunction(clsBaseOperator)
         ucrSaveDotPlot.Reset()
+        ucrVariablesAsFactorDotPlot.SetMeAsReceiver()
         bResetSubdialog = True
         bResetDotLayerSubdialog = True
         'I am not sure we need this
@@ -156,9 +161,17 @@ Public Class dlgDotPlot
         clsXScalecontinuousFunction = GgplotDefaults.clsXScalecontinuousFunction.Clone()
         clsYScalecontinuousFunction = GgplotDefaults.clsYScalecontinuousFunction.Clone
         clsRFacetFunction = GgplotDefaults.clsFacetFunction.Clone()
+        clsCoordPolarStartOperator = GgplotDefaults.clsCoordPolarStartOperator.Clone()
+        clsCoordPolarFunction = GgplotDefaults.clsCoordPolarFunction.Clone()
         dctThemeFunctions = New Dictionary(Of String, RFunction)(GgplotDefaults.dctThemeFunctions)
         clsThemeFunction = GgplotDefaults.clsDefaultThemeFunction
         clsLocalRaesFunction = GgplotDefaults.clsAesFunction.Clone()
+        clsXScaleDateFunction = GgplotDefaults.clsXScaleDateFunction.Clone()
+        clsYScaleDateFunction = GgplotDefaults.clsYScaleDateFunction.Clone()
+        clsScaleFillViridisFunction = GgplotDefaults.clsScaleFillViridisFunction
+        clsScaleColourViridisFunction = GgplotDefaults.clsScaleColorViridisFunction
+        clsScaleColourViridisFunction.AddParameter("discrete", "TRUE", iPosition:=7)
+        clsScaleFillViridisFunction.AddParameter("discrete", "TRUE", iPosition:=7)
 
         clsBaseOperator.SetAssignTo("last_graph", strTempDataframe:=ucrDotPlotSelector.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_graph")
         ucrBase.clsRsyntax.SetBaseROperator(clsBaseOperator)
@@ -178,10 +191,12 @@ Public Class dlgDotPlot
         sdgLayerOptions.ShowDialog()
         bResetDotLayerSubdialog = False
         iIndex = clsRDotplotGeomFunction.clsParameters.FindIndex(Function(x) x.strArgumentName = "binaxis")
+        ' Shouldn't be needed now as the panel can read from the code and set value correctly
         If iIndex <> -1 AndAlso clsRDotplotGeomFunction.clsParameters(iIndex).strArgumentValue = Chr(34) & "y" & Chr(34) Then
             rdoYBinAxis.Checked = True
         Else
-            rdoXBinAxis.Checked = True 'Note: the default value of "binaxis" is "x"
+            rdoXBinAxis.Checked = False
+            rdoXBinAxis.Checked = True
         End If
         'Task: adapt for multivariable case...
         'Warning: In specific plots in general, we still have the bug that if ApplyOnAllLayers is unchecked on the LayerOptions, then the aesthetics will be stored in the LocalAes.
@@ -205,7 +220,7 @@ Public Class dlgDotPlot
     End Sub
 
     Private Sub cmdOptions_Click(sender As Object, e As EventArgs) Handles cmdOptions.Click
-        sdgPlots.SetRCode(clsBaseOperator, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewGlobalAesFunction:=clsRaesFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewFacetFunction:=clsRFacetFunction, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, ucrNewBaseSelector:=ucrDotPlotSelector, bReset:=bResetSubdialog)
+        sdgPlots.SetRCode(clsBaseOperator, clsNewCoordPolarFunction:=clsCoordPolarFunction, clsNewCoordPolarStartOperator:=clsCoordPolarStartOperator, clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewGlobalAesFunction:=clsRaesFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewScaleFillViridisFunction:=clsScaleFillViridisFunction, clsNewScaleColourViridisFunction:=clsScaleColourViridisFunction, clsNewFacetFunction:=clsRFacetFunction, clsNewThemeFunction:=clsThemeFunction, clsNewXScaleDateFunction:=clsXScaleDateFunction, clsNewYScaleDateFunction:=clsYScaleDateFunction, dctNewThemeFunctions:=dctThemeFunctions, ucrNewBaseSelector:=ucrDotPlotSelector, bReset:=bResetSubdialog)
         sdgPlots.ShowDialog()
         bResetSubdialog = False
     End Sub

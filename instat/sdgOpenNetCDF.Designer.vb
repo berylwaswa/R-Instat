@@ -22,147 +22,76 @@ Partial Class sdgOpenNetCDF
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(sdgOpenNetCDF))
         Me.tbNetCDF = New System.Windows.Forms.TabControl()
-        Me.tbOptions = New System.Windows.Forms.TabPage()
-        Me.lblX = New System.Windows.Forms.Label()
-        Me.lblMinY = New System.Windows.Forms.Label()
-        Me.lblMinZ = New System.Windows.Forms.Label()
-        Me.lblT = New System.Windows.Forms.Label()
-        Me.lblMaxX = New System.Windows.Forms.Label()
-        Me.lblMaxY = New System.Windows.Forms.Label()
-        Me.lblMaxZ = New System.Windows.Forms.Label()
-        Me.lblMinT = New System.Windows.Forms.Label()
         Me.tbSubset = New System.Windows.Forms.TabPage()
-        Me.lblMaxT = New System.Windows.Forms.Label()
-        Me.dtpMaxT = New System.Windows.Forms.DateTimePicker()
-        Me.dtpMinT = New System.Windows.Forms.DateTimePicker()
-        Me.lblMinX = New System.Windows.Forms.Label()
-        Me.lblY = New System.Windows.Forms.Label()
-        Me.lblZ = New System.Windows.Forms.Label()
-        Me.lblS = New System.Windows.Forms.Label()
-        Me.lblMinS = New System.Windows.Forms.Label()
-        Me.lblMaxS = New System.Windows.Forms.Label()
-        Me.ucrBase = New instat.ucrButtonsSubdialogue()
-        Me.ucrInputFileDetails = New instat.ucrInputTextBox()
-        Me.ucrInputMaxS = New instat.ucrInputTextBox()
-        Me.ucrInputMaxZ = New instat.ucrInputTextBox()
-        Me.ucrInputMaxY = New instat.ucrInputTextBox()
-        Me.ucrInputMaxX = New instat.ucrInputTextBox()
-        Me.ucrInputMinS = New instat.ucrInputTextBox()
-        Me.ucrInputMinZ = New instat.ucrInputTextBox()
-        Me.ucrInputMinY = New instat.ucrInputTextBox()
+        Me.ucrSelectorPoints = New instat.ucrSelectorByDataFrameAddRemove()
+        Me.grpLocation = New System.Windows.Forms.GroupBox()
+        Me.lblPointsID = New System.Windows.Forms.Label()
+        Me.ucrReceiverPointsID = New instat.ucrReceiverSingle()
+        Me.rdoSinglePoint = New System.Windows.Forms.RadioButton()
+        Me.rdoPoints = New System.Windows.Forms.RadioButton()
+        Me.rdoRange = New System.Windows.Forms.RadioButton()
+        Me.ucrReceiverPointsY = New instat.ucrReceiverSingle()
+        Me.ucrReceiverPointsX = New instat.ucrReceiverSingle()
+        Me.ucrInputPointY = New instat.ucrInputTextBox()
+        Me.ucrInputPointX = New instat.ucrInputTextBox()
+        Me.ucrPnlLocation = New instat.UcrPanel()
+        Me.lblX = New System.Windows.Forms.Label()
         Me.ucrInputMinX = New instat.ucrInputTextBox()
+        Me.ucrInputMinY = New instat.ucrInputTextBox()
+        Me.lblMinY = New System.Windows.Forms.Label()
+        Me.ucrInputMaxX = New instat.ucrInputTextBox()
+        Me.lblY = New System.Windows.Forms.Label()
+        Me.lblMaxX = New System.Windows.Forms.Label()
+        Me.lblMinX = New System.Windows.Forms.Label()
+        Me.ucrInputMaxY = New instat.ucrInputTextBox()
+        Me.lblMaxY = New System.Windows.Forms.Label()
+        Me.lblMaxS = New System.Windows.Forms.Label()
+        Me.lblMinS = New System.Windows.Forms.Label()
+        Me.lblS = New System.Windows.Forms.Label()
+        Me.lblZ = New System.Windows.Forms.Label()
+        Me.dtpMinT = New System.Windows.Forms.DateTimePicker()
+        Me.dtpMaxT = New System.Windows.Forms.DateTimePicker()
+        Me.lblMaxT = New System.Windows.Forms.Label()
+        Me.ucrInputFileDetails = New instat.ucrInputTextBox()
+        Me.lblMinT = New System.Windows.Forms.Label()
+        Me.ucrInputMaxS = New instat.ucrInputTextBox()
+        Me.lblMaxZ = New System.Windows.Forms.Label()
+        Me.ucrInputMaxZ = New instat.ucrInputTextBox()
+        Me.lblT = New System.Windows.Forms.Label()
+        Me.ucrInputMinS = New instat.ucrInputTextBox()
+        Me.lblMinZ = New System.Windows.Forms.Label()
+        Me.ucrInputMinZ = New instat.ucrInputTextBox()
+        Me.tbOptions = New System.Windows.Forms.TabPage()
+        Me.ucrChkGreatCircleDist = New instat.ucrCheck()
+        Me.ucrChkIncludeRequestedPoints = New instat.ucrCheck()
         Me.ucrChkOnlyDataVariables = New instat.ucrCheck()
         Me.ucrChkKeepRawTime = New instat.ucrCheck()
         Me.ucrChkIncludeMetadata = New instat.ucrCheck()
+        Me.ucrBase = New instat.ucrButtonsSubdialogue()
         Me.tbNetCDF.SuspendLayout()
-        Me.tbOptions.SuspendLayout()
         Me.tbSubset.SuspendLayout()
+        Me.grpLocation.SuspendLayout()
+        Me.tbOptions.SuspendLayout()
         Me.SuspendLayout()
         '
         'tbNetCDF
         '
         Me.tbNetCDF.Controls.Add(Me.tbSubset)
         Me.tbNetCDF.Controls.Add(Me.tbOptions)
-        Me.tbNetCDF.Location = New System.Drawing.Point(8, 8)
+        resources.ApplyResources(Me.tbNetCDF, "tbNetCDF")
         Me.tbNetCDF.Name = "tbNetCDF"
         Me.tbNetCDF.SelectedIndex = 0
-        Me.tbNetCDF.Size = New System.Drawing.Size(483, 423)
-        Me.tbNetCDF.TabIndex = 0
-        '
-        'tbOptions
-        '
-        Me.tbOptions.Controls.Add(Me.ucrChkOnlyDataVariables)
-        Me.tbOptions.Controls.Add(Me.ucrChkKeepRawTime)
-        Me.tbOptions.Controls.Add(Me.ucrChkIncludeMetadata)
-        Me.tbOptions.Location = New System.Drawing.Point(4, 22)
-        Me.tbOptions.Name = "tbOptions"
-        Me.tbOptions.Padding = New System.Windows.Forms.Padding(3)
-        Me.tbOptions.Size = New System.Drawing.Size(475, 397)
-        Me.tbOptions.TabIndex = 1
-        Me.tbOptions.Text = "Options"
-        Me.tbOptions.UseVisualStyleBackColor = True
-        '
-        'lblX
-        '
-        Me.lblX.AutoSize = True
-        Me.lblX.Location = New System.Drawing.Point(8, 177)
-        Me.lblX.Name = "lblX"
-        Me.lblX.Size = New System.Drawing.Size(17, 13)
-        Me.lblX.TabIndex = 1
-        Me.lblX.Text = "X:"
-        '
-        'lblMinY
-        '
-        Me.lblMinY.AutoSize = True
-        Me.lblMinY.Location = New System.Drawing.Point(120, 204)
-        Me.lblMinY.Name = "lblMinY"
-        Me.lblMinY.Size = New System.Drawing.Size(27, 13)
-        Me.lblMinY.TabIndex = 7
-        Me.lblMinY.Text = "Min:"
-        '
-        'lblMinZ
-        '
-        Me.lblMinZ.AutoSize = True
-        Me.lblMinZ.Location = New System.Drawing.Point(120, 231)
-        Me.lblMinZ.Name = "lblMinZ"
-        Me.lblMinZ.Size = New System.Drawing.Size(27, 13)
-        Me.lblMinZ.TabIndex = 12
-        Me.lblMinZ.Text = "Min:"
-        '
-        'lblT
-        '
-        Me.lblT.AutoSize = True
-        Me.lblT.Location = New System.Drawing.Point(8, 285)
-        Me.lblT.Name = "lblT"
-        Me.lblT.Size = New System.Drawing.Size(17, 13)
-        Me.lblT.TabIndex = 21
-        Me.lblT.Text = "T:"
-        '
-        'lblMaxX
-        '
-        Me.lblMaxX.AutoSize = True
-        Me.lblMaxX.Location = New System.Drawing.Point(296, 177)
-        Me.lblMaxX.Name = "lblMaxX"
-        Me.lblMaxX.Size = New System.Drawing.Size(30, 13)
-        Me.lblMaxX.TabIndex = 4
-        Me.lblMaxX.Text = "Max:"
-        '
-        'lblMaxY
-        '
-        Me.lblMaxY.AutoSize = True
-        Me.lblMaxY.Location = New System.Drawing.Point(296, 204)
-        Me.lblMaxY.Name = "lblMaxY"
-        Me.lblMaxY.Size = New System.Drawing.Size(30, 13)
-        Me.lblMaxY.TabIndex = 9
-        Me.lblMaxY.Text = "Max:"
-        '
-        'lblMaxZ
-        '
-        Me.lblMaxZ.AutoSize = True
-        Me.lblMaxZ.Location = New System.Drawing.Point(296, 231)
-        Me.lblMaxZ.Name = "lblMaxZ"
-        Me.lblMaxZ.Size = New System.Drawing.Size(30, 13)
-        Me.lblMaxZ.TabIndex = 14
-        Me.lblMaxZ.Text = "Max:"
-        '
-        'lblMinT
-        '
-        Me.lblMinT.AutoSize = True
-        Me.lblMinT.Location = New System.Drawing.Point(120, 285)
-        Me.lblMinT.Name = "lblMinT"
-        Me.lblMinT.Size = New System.Drawing.Size(27, 13)
-        Me.lblMinT.TabIndex = 22
-        Me.lblMinT.Text = "Min:"
         '
         'tbSubset
         '
+        Me.tbSubset.Controls.Add(Me.ucrSelectorPoints)
+        Me.tbSubset.Controls.Add(Me.grpLocation)
         Me.tbSubset.Controls.Add(Me.lblMaxS)
         Me.tbSubset.Controls.Add(Me.lblMinS)
         Me.tbSubset.Controls.Add(Me.lblS)
         Me.tbSubset.Controls.Add(Me.lblZ)
-        Me.tbSubset.Controls.Add(Me.lblY)
-        Me.tbSubset.Controls.Add(Me.lblMinX)
         Me.tbSubset.Controls.Add(Me.dtpMinT)
         Me.tbSubset.Controls.Add(Me.dtpMaxT)
         Me.tbSubset.Controls.Add(Me.lblMaxT)
@@ -171,241 +100,353 @@ Partial Class sdgOpenNetCDF
         Me.tbSubset.Controls.Add(Me.ucrInputMaxS)
         Me.tbSubset.Controls.Add(Me.lblMaxZ)
         Me.tbSubset.Controls.Add(Me.ucrInputMaxZ)
-        Me.tbSubset.Controls.Add(Me.lblMaxY)
-        Me.tbSubset.Controls.Add(Me.ucrInputMaxY)
-        Me.tbSubset.Controls.Add(Me.lblMaxX)
-        Me.tbSubset.Controls.Add(Me.ucrInputMaxX)
         Me.tbSubset.Controls.Add(Me.lblT)
         Me.tbSubset.Controls.Add(Me.ucrInputMinS)
         Me.tbSubset.Controls.Add(Me.lblMinZ)
         Me.tbSubset.Controls.Add(Me.ucrInputMinZ)
-        Me.tbSubset.Controls.Add(Me.lblMinY)
-        Me.tbSubset.Controls.Add(Me.ucrInputMinY)
-        Me.tbSubset.Controls.Add(Me.lblX)
-        Me.tbSubset.Controls.Add(Me.ucrInputMinX)
-        Me.tbSubset.Location = New System.Drawing.Point(4, 22)
+        resources.ApplyResources(Me.tbSubset, "tbSubset")
         Me.tbSubset.Name = "tbSubset"
-        Me.tbSubset.Padding = New System.Windows.Forms.Padding(3)
-        Me.tbSubset.Size = New System.Drawing.Size(475, 397)
-        Me.tbSubset.TabIndex = 0
-        Me.tbSubset.Text = "Subset"
         Me.tbSubset.UseVisualStyleBackColor = True
         '
-        'lblMaxT
+        'ucrSelectorPoints
         '
-        Me.lblMaxT.AutoSize = True
-        Me.lblMaxT.Location = New System.Drawing.Point(296, 285)
-        Me.lblMaxT.Name = "lblMaxT"
-        Me.lblMaxT.Size = New System.Drawing.Size(30, 13)
-        Me.lblMaxT.TabIndex = 24
-        Me.lblMaxT.Text = "Max:"
+        Me.ucrSelectorPoints.bDropUnusedFilterLevels = False
+        Me.ucrSelectorPoints.bShowHiddenColumns = False
+        Me.ucrSelectorPoints.bUseCurrentFilter = True
+        resources.ApplyResources(Me.ucrSelectorPoints, "ucrSelectorPoints")
+        Me.ucrSelectorPoints.Name = "ucrSelectorPoints"
         '
-        'dtpMaxT
+        'grpLocation
         '
-        Me.dtpMaxT.Location = New System.Drawing.Point(328, 282)
-        Me.dtpMaxT.Name = "dtpMaxT"
-        Me.dtpMaxT.Size = New System.Drawing.Size(133, 20)
-        Me.dtpMaxT.TabIndex = 25
+        Me.grpLocation.Controls.Add(Me.lblPointsID)
+        Me.grpLocation.Controls.Add(Me.ucrReceiverPointsID)
+        Me.grpLocation.Controls.Add(Me.rdoSinglePoint)
+        Me.grpLocation.Controls.Add(Me.rdoPoints)
+        Me.grpLocation.Controls.Add(Me.rdoRange)
+        Me.grpLocation.Controls.Add(Me.ucrReceiverPointsY)
+        Me.grpLocation.Controls.Add(Me.ucrReceiverPointsX)
+        Me.grpLocation.Controls.Add(Me.ucrInputPointY)
+        Me.grpLocation.Controls.Add(Me.ucrInputPointX)
+        Me.grpLocation.Controls.Add(Me.ucrPnlLocation)
+        Me.grpLocation.Controls.Add(Me.lblX)
+        Me.grpLocation.Controls.Add(Me.ucrInputMinX)
+        Me.grpLocation.Controls.Add(Me.ucrInputMinY)
+        Me.grpLocation.Controls.Add(Me.lblMinY)
+        Me.grpLocation.Controls.Add(Me.ucrInputMaxX)
+        Me.grpLocation.Controls.Add(Me.lblY)
+        Me.grpLocation.Controls.Add(Me.lblMaxX)
+        Me.grpLocation.Controls.Add(Me.lblMinX)
+        Me.grpLocation.Controls.Add(Me.ucrInputMaxY)
+        Me.grpLocation.Controls.Add(Me.lblMaxY)
+        resources.ApplyResources(Me.grpLocation, "grpLocation")
+        Me.grpLocation.Name = "grpLocation"
+        Me.grpLocation.TabStop = False
         '
-        'dtpMinT
+        'lblPointsID
         '
-        Me.dtpMinT.Location = New System.Drawing.Point(149, 282)
-        Me.dtpMinT.Name = "dtpMinT"
-        Me.dtpMinT.Size = New System.Drawing.Size(133, 20)
-        Me.dtpMinT.TabIndex = 23
+        resources.ApplyResources(Me.lblPointsID, "lblPointsID")
+        Me.lblPointsID.Name = "lblPointsID"
         '
-        'lblMinX
+        'ucrReceiverPointsID
         '
-        Me.lblMinX.AutoSize = True
-        Me.lblMinX.Location = New System.Drawing.Point(120, 177)
-        Me.lblMinX.Name = "lblMinX"
-        Me.lblMinX.Size = New System.Drawing.Size(27, 13)
-        Me.lblMinX.TabIndex = 2
-        Me.lblMinX.Text = "Min:"
+        Me.ucrReceiverPointsID.frmParent = Nothing
+        resources.ApplyResources(Me.ucrReceiverPointsID, "ucrReceiverPointsID")
+        Me.ucrReceiverPointsID.Name = "ucrReceiverPointsID"
+        Me.ucrReceiverPointsID.Selector = Nothing
+        Me.ucrReceiverPointsID.strNcFilePath = ""
+        Me.ucrReceiverPointsID.ucrSelector = Nothing
         '
-        'lblY
+        'rdoSinglePoint
         '
-        Me.lblY.AutoSize = True
-        Me.lblY.Location = New System.Drawing.Point(8, 204)
-        Me.lblY.Name = "lblY"
-        Me.lblY.Size = New System.Drawing.Size(17, 13)
-        Me.lblY.TabIndex = 6
-        Me.lblY.Text = "Y:"
+        resources.ApplyResources(Me.rdoSinglePoint, "rdoSinglePoint")
+        Me.rdoSinglePoint.BackColor = System.Drawing.SystemColors.Control
+        Me.rdoSinglePoint.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoSinglePoint.FlatAppearance.BorderSize = 2
+        Me.rdoSinglePoint.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoSinglePoint.Name = "rdoSinglePoint"
+        Me.rdoSinglePoint.TabStop = True
+        Me.rdoSinglePoint.UseVisualStyleBackColor = False
         '
-        'lblZ
+        'rdoPoints
         '
-        Me.lblZ.AutoSize = True
-        Me.lblZ.Location = New System.Drawing.Point(8, 231)
-        Me.lblZ.Name = "lblZ"
-        Me.lblZ.Size = New System.Drawing.Size(17, 13)
-        Me.lblZ.TabIndex = 11
-        Me.lblZ.Text = "Z:"
+        resources.ApplyResources(Me.rdoPoints, "rdoPoints")
+        Me.rdoPoints.BackColor = System.Drawing.SystemColors.Control
+        Me.rdoPoints.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoPoints.FlatAppearance.BorderSize = 2
+        Me.rdoPoints.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoPoints.Name = "rdoPoints"
+        Me.rdoPoints.TabStop = True
+        Me.rdoPoints.UseVisualStyleBackColor = False
         '
-        'lblS
+        'rdoRange
         '
-        Me.lblS.AutoSize = True
-        Me.lblS.Location = New System.Drawing.Point(8, 258)
-        Me.lblS.Name = "lblS"
-        Me.lblS.Size = New System.Drawing.Size(17, 13)
-        Me.lblS.TabIndex = 16
-        Me.lblS.Text = "S:"
+        resources.ApplyResources(Me.rdoRange, "rdoRange")
+        Me.rdoRange.BackColor = System.Drawing.SystemColors.Control
+        Me.rdoRange.FlatAppearance.BorderColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoRange.FlatAppearance.BorderSize = 2
+        Me.rdoRange.FlatAppearance.CheckedBackColor = System.Drawing.SystemColors.ActiveCaption
+        Me.rdoRange.Name = "rdoRange"
+        Me.rdoRange.TabStop = True
+        Me.rdoRange.UseVisualStyleBackColor = False
         '
-        'lblMinS
+        'ucrReceiverPointsY
         '
-        Me.lblMinS.AutoSize = True
-        Me.lblMinS.Location = New System.Drawing.Point(120, 257)
-        Me.lblMinS.Name = "lblMinS"
-        Me.lblMinS.Size = New System.Drawing.Size(27, 13)
-        Me.lblMinS.TabIndex = 17
-        Me.lblMinS.Text = "Min:"
+        Me.ucrReceiverPointsY.frmParent = Nothing
+        resources.ApplyResources(Me.ucrReceiverPointsY, "ucrReceiverPointsY")
+        Me.ucrReceiverPointsY.Name = "ucrReceiverPointsY"
+        Me.ucrReceiverPointsY.Selector = Nothing
+        Me.ucrReceiverPointsY.strNcFilePath = ""
+        Me.ucrReceiverPointsY.ucrSelector = Nothing
         '
-        'lblMaxS
+        'ucrReceiverPointsX
         '
-        Me.lblMaxS.AutoSize = True
-        Me.lblMaxS.Location = New System.Drawing.Point(296, 258)
-        Me.lblMaxS.Name = "lblMaxS"
-        Me.lblMaxS.Size = New System.Drawing.Size(30, 13)
-        Me.lblMaxS.TabIndex = 19
-        Me.lblMaxS.Text = "Max:"
+        Me.ucrReceiverPointsX.frmParent = Nothing
+        resources.ApplyResources(Me.ucrReceiverPointsX, "ucrReceiverPointsX")
+        Me.ucrReceiverPointsX.Name = "ucrReceiverPointsX"
+        Me.ucrReceiverPointsX.Selector = Nothing
+        Me.ucrReceiverPointsX.strNcFilePath = ""
+        Me.ucrReceiverPointsX.ucrSelector = Nothing
         '
-        'ucrBase
+        'ucrInputPointY
         '
-        Me.ucrBase.Location = New System.Drawing.Point(176, 433)
-        Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(142, 30)
-        Me.ucrBase.TabIndex = 1
+        Me.ucrInputPointY.AddQuotesIfUnrecognised = True
+        Me.ucrInputPointY.IsMultiline = False
+        Me.ucrInputPointY.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputPointY, "ucrInputPointY")
+        Me.ucrInputPointY.Name = "ucrInputPointY"
         '
-        'ucrInputFileDetails
+        'ucrInputPointX
         '
-        Me.ucrInputFileDetails.AddQuotesIfUnrecognised = True
-        Me.ucrInputFileDetails.IsMultiline = True
-        Me.ucrInputFileDetails.IsReadOnly = True
-        Me.ucrInputFileDetails.Location = New System.Drawing.Point(11, 9)
-        Me.ucrInputFileDetails.Name = "ucrInputFileDetails"
-        Me.ucrInputFileDetails.Size = New System.Drawing.Size(450, 159)
-        Me.ucrInputFileDetails.TabIndex = 0
+        Me.ucrInputPointX.AddQuotesIfUnrecognised = True
+        Me.ucrInputPointX.IsMultiline = False
+        Me.ucrInputPointX.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputPointX, "ucrInputPointX")
+        Me.ucrInputPointX.Name = "ucrInputPointX"
         '
-        'ucrInputMaxS
+        'ucrPnlLocation
         '
-        Me.ucrInputMaxS.AddQuotesIfUnrecognised = True
-        Me.ucrInputMaxS.IsMultiline = False
-        Me.ucrInputMaxS.IsReadOnly = False
-        Me.ucrInputMaxS.Location = New System.Drawing.Point(328, 255)
-        Me.ucrInputMaxS.Name = "ucrInputMaxS"
-        Me.ucrInputMaxS.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMaxS.TabIndex = 20
+        resources.ApplyResources(Me.ucrPnlLocation, "ucrPnlLocation")
+        Me.ucrPnlLocation.Name = "ucrPnlLocation"
         '
-        'ucrInputMaxZ
+        'lblX
         '
-        Me.ucrInputMaxZ.AddQuotesIfUnrecognised = True
-        Me.ucrInputMaxZ.IsMultiline = False
-        Me.ucrInputMaxZ.IsReadOnly = False
-        Me.ucrInputMaxZ.Location = New System.Drawing.Point(328, 228)
-        Me.ucrInputMaxZ.Name = "ucrInputMaxZ"
-        Me.ucrInputMaxZ.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMaxZ.TabIndex = 15
-        '
-        'ucrInputMaxY
-        '
-        Me.ucrInputMaxY.AddQuotesIfUnrecognised = True
-        Me.ucrInputMaxY.IsMultiline = False
-        Me.ucrInputMaxY.IsReadOnly = False
-        Me.ucrInputMaxY.Location = New System.Drawing.Point(328, 201)
-        Me.ucrInputMaxY.Name = "ucrInputMaxY"
-        Me.ucrInputMaxY.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMaxY.TabIndex = 10
-        '
-        'ucrInputMaxX
-        '
-        Me.ucrInputMaxX.AddQuotesIfUnrecognised = True
-        Me.ucrInputMaxX.IsMultiline = False
-        Me.ucrInputMaxX.IsReadOnly = False
-        Me.ucrInputMaxX.Location = New System.Drawing.Point(328, 174)
-        Me.ucrInputMaxX.Name = "ucrInputMaxX"
-        Me.ucrInputMaxX.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMaxX.TabIndex = 5
-        '
-        'ucrInputMinS
-        '
-        Me.ucrInputMinS.AddQuotesIfUnrecognised = True
-        Me.ucrInputMinS.IsMultiline = False
-        Me.ucrInputMinS.IsReadOnly = False
-        Me.ucrInputMinS.Location = New System.Drawing.Point(149, 255)
-        Me.ucrInputMinS.Name = "ucrInputMinS"
-        Me.ucrInputMinS.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMinS.TabIndex = 18
-        '
-        'ucrInputMinZ
-        '
-        Me.ucrInputMinZ.AddQuotesIfUnrecognised = True
-        Me.ucrInputMinZ.IsMultiline = False
-        Me.ucrInputMinZ.IsReadOnly = False
-        Me.ucrInputMinZ.Location = New System.Drawing.Point(149, 228)
-        Me.ucrInputMinZ.Name = "ucrInputMinZ"
-        Me.ucrInputMinZ.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMinZ.TabIndex = 13
-        '
-        'ucrInputMinY
-        '
-        Me.ucrInputMinY.AddQuotesIfUnrecognised = True
-        Me.ucrInputMinY.IsMultiline = False
-        Me.ucrInputMinY.IsReadOnly = False
-        Me.ucrInputMinY.Location = New System.Drawing.Point(149, 201)
-        Me.ucrInputMinY.Name = "ucrInputMinY"
-        Me.ucrInputMinY.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMinY.TabIndex = 8
+        resources.ApplyResources(Me.lblX, "lblX")
+        Me.lblX.Name = "lblX"
         '
         'ucrInputMinX
         '
         Me.ucrInputMinX.AddQuotesIfUnrecognised = True
         Me.ucrInputMinX.IsMultiline = False
         Me.ucrInputMinX.IsReadOnly = False
-        Me.ucrInputMinX.Location = New System.Drawing.Point(149, 174)
+        resources.ApplyResources(Me.ucrInputMinX, "ucrInputMinX")
         Me.ucrInputMinX.Name = "ucrInputMinX"
-        Me.ucrInputMinX.Size = New System.Drawing.Size(90, 21)
-        Me.ucrInputMinX.TabIndex = 3
+        '
+        'ucrInputMinY
+        '
+        Me.ucrInputMinY.AddQuotesIfUnrecognised = True
+        Me.ucrInputMinY.IsMultiline = False
+        Me.ucrInputMinY.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMinY, "ucrInputMinY")
+        Me.ucrInputMinY.Name = "ucrInputMinY"
+        '
+        'lblMinY
+        '
+        resources.ApplyResources(Me.lblMinY, "lblMinY")
+        Me.lblMinY.Name = "lblMinY"
+        '
+        'ucrInputMaxX
+        '
+        Me.ucrInputMaxX.AddQuotesIfUnrecognised = True
+        Me.ucrInputMaxX.IsMultiline = False
+        Me.ucrInputMaxX.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMaxX, "ucrInputMaxX")
+        Me.ucrInputMaxX.Name = "ucrInputMaxX"
+        '
+        'lblY
+        '
+        resources.ApplyResources(Me.lblY, "lblY")
+        Me.lblY.Name = "lblY"
+        '
+        'lblMaxX
+        '
+        resources.ApplyResources(Me.lblMaxX, "lblMaxX")
+        Me.lblMaxX.Name = "lblMaxX"
+        '
+        'lblMinX
+        '
+        resources.ApplyResources(Me.lblMinX, "lblMinX")
+        Me.lblMinX.Name = "lblMinX"
+        '
+        'ucrInputMaxY
+        '
+        Me.ucrInputMaxY.AddQuotesIfUnrecognised = True
+        Me.ucrInputMaxY.IsMultiline = False
+        Me.ucrInputMaxY.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMaxY, "ucrInputMaxY")
+        Me.ucrInputMaxY.Name = "ucrInputMaxY"
+        '
+        'lblMaxY
+        '
+        resources.ApplyResources(Me.lblMaxY, "lblMaxY")
+        Me.lblMaxY.Name = "lblMaxY"
+        '
+        'lblMaxS
+        '
+        resources.ApplyResources(Me.lblMaxS, "lblMaxS")
+        Me.lblMaxS.Name = "lblMaxS"
+        '
+        'lblMinS
+        '
+        resources.ApplyResources(Me.lblMinS, "lblMinS")
+        Me.lblMinS.Name = "lblMinS"
+        '
+        'lblS
+        '
+        resources.ApplyResources(Me.lblS, "lblS")
+        Me.lblS.Name = "lblS"
+        '
+        'lblZ
+        '
+        resources.ApplyResources(Me.lblZ, "lblZ")
+        Me.lblZ.Name = "lblZ"
+        '
+        'dtpMinT
+        '
+        resources.ApplyResources(Me.dtpMinT, "dtpMinT")
+        Me.dtpMinT.Name = "dtpMinT"
+        '
+        'dtpMaxT
+        '
+        resources.ApplyResources(Me.dtpMaxT, "dtpMaxT")
+        Me.dtpMaxT.Name = "dtpMaxT"
+        '
+        'lblMaxT
+        '
+        resources.ApplyResources(Me.lblMaxT, "lblMaxT")
+        Me.lblMaxT.Name = "lblMaxT"
+        '
+        'ucrInputFileDetails
+        '
+        Me.ucrInputFileDetails.AddQuotesIfUnrecognised = True
+        Me.ucrInputFileDetails.IsMultiline = True
+        Me.ucrInputFileDetails.IsReadOnly = True
+        resources.ApplyResources(Me.ucrInputFileDetails, "ucrInputFileDetails")
+        Me.ucrInputFileDetails.Name = "ucrInputFileDetails"
+        '
+        'lblMinT
+        '
+        resources.ApplyResources(Me.lblMinT, "lblMinT")
+        Me.lblMinT.Name = "lblMinT"
+        '
+        'ucrInputMaxS
+        '
+        Me.ucrInputMaxS.AddQuotesIfUnrecognised = True
+        Me.ucrInputMaxS.IsMultiline = False
+        Me.ucrInputMaxS.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMaxS, "ucrInputMaxS")
+        Me.ucrInputMaxS.Name = "ucrInputMaxS"
+        '
+        'lblMaxZ
+        '
+        resources.ApplyResources(Me.lblMaxZ, "lblMaxZ")
+        Me.lblMaxZ.Name = "lblMaxZ"
+        '
+        'ucrInputMaxZ
+        '
+        Me.ucrInputMaxZ.AddQuotesIfUnrecognised = True
+        Me.ucrInputMaxZ.IsMultiline = False
+        Me.ucrInputMaxZ.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMaxZ, "ucrInputMaxZ")
+        Me.ucrInputMaxZ.Name = "ucrInputMaxZ"
+        '
+        'lblT
+        '
+        resources.ApplyResources(Me.lblT, "lblT")
+        Me.lblT.Name = "lblT"
+        '
+        'ucrInputMinS
+        '
+        Me.ucrInputMinS.AddQuotesIfUnrecognised = True
+        Me.ucrInputMinS.IsMultiline = False
+        Me.ucrInputMinS.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMinS, "ucrInputMinS")
+        Me.ucrInputMinS.Name = "ucrInputMinS"
+        '
+        'lblMinZ
+        '
+        resources.ApplyResources(Me.lblMinZ, "lblMinZ")
+        Me.lblMinZ.Name = "lblMinZ"
+        '
+        'ucrInputMinZ
+        '
+        Me.ucrInputMinZ.AddQuotesIfUnrecognised = True
+        Me.ucrInputMinZ.IsMultiline = False
+        Me.ucrInputMinZ.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMinZ, "ucrInputMinZ")
+        Me.ucrInputMinZ.Name = "ucrInputMinZ"
+        '
+        'tbOptions
+        '
+        Me.tbOptions.Controls.Add(Me.ucrChkGreatCircleDist)
+        Me.tbOptions.Controls.Add(Me.ucrChkIncludeRequestedPoints)
+        Me.tbOptions.Controls.Add(Me.ucrChkOnlyDataVariables)
+        Me.tbOptions.Controls.Add(Me.ucrChkKeepRawTime)
+        Me.tbOptions.Controls.Add(Me.ucrChkIncludeMetadata)
+        resources.ApplyResources(Me.tbOptions, "tbOptions")
+        Me.tbOptions.Name = "tbOptions"
+        Me.tbOptions.UseVisualStyleBackColor = True
+        '
+        'ucrChkGreatCircleDist
+        '
+        Me.ucrChkGreatCircleDist.Checked = False
+        resources.ApplyResources(Me.ucrChkGreatCircleDist, "ucrChkGreatCircleDist")
+        Me.ucrChkGreatCircleDist.Name = "ucrChkGreatCircleDist"
+        '
+        'ucrChkIncludeRequestedPoints
+        '
+        Me.ucrChkIncludeRequestedPoints.Checked = False
+        resources.ApplyResources(Me.ucrChkIncludeRequestedPoints, "ucrChkIncludeRequestedPoints")
+        Me.ucrChkIncludeRequestedPoints.Name = "ucrChkIncludeRequestedPoints"
         '
         'ucrChkOnlyDataVariables
         '
         Me.ucrChkOnlyDataVariables.Checked = False
-        Me.ucrChkOnlyDataVariables.Location = New System.Drawing.Point(11, 18)
+        resources.ApplyResources(Me.ucrChkOnlyDataVariables, "ucrChkOnlyDataVariables")
         Me.ucrChkOnlyDataVariables.Name = "ucrChkOnlyDataVariables"
-        Me.ucrChkOnlyDataVariables.Size = New System.Drawing.Size(162, 20)
-        Me.ucrChkOnlyDataVariables.TabIndex = 0
         '
         'ucrChkKeepRawTime
         '
         Me.ucrChkKeepRawTime.Checked = False
-        Me.ucrChkKeepRawTime.Location = New System.Drawing.Point(11, 44)
+        resources.ApplyResources(Me.ucrChkKeepRawTime, "ucrChkKeepRawTime")
         Me.ucrChkKeepRawTime.Name = "ucrChkKeepRawTime"
-        Me.ucrChkKeepRawTime.Size = New System.Drawing.Size(162, 20)
-        Me.ucrChkKeepRawTime.TabIndex = 1
         '
         'ucrChkIncludeMetadata
         '
         Me.ucrChkIncludeMetadata.Checked = False
-        Me.ucrChkIncludeMetadata.Location = New System.Drawing.Point(11, 70)
+        resources.ApplyResources(Me.ucrChkIncludeMetadata, "ucrChkIncludeMetadata")
         Me.ucrChkIncludeMetadata.Name = "ucrChkIncludeMetadata"
-        Me.ucrChkIncludeMetadata.Size = New System.Drawing.Size(162, 20)
-        Me.ucrChkIncludeMetadata.TabIndex = 2
+        '
+        'ucrBase
+        '
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
+        Me.ucrBase.Name = "ucrBase"
         '
         'sdgOpenNetCDF
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(494, 468)
         Me.Controls.Add(Me.ucrBase)
         Me.Controls.Add(Me.tbNetCDF)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "sdgOpenNetCDF"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "NetCDF Options"
         Me.tbNetCDF.ResumeLayout(False)
-        Me.tbOptions.ResumeLayout(False)
         Me.tbSubset.ResumeLayout(False)
         Me.tbSubset.PerformLayout()
+        Me.grpLocation.ResumeLayout(False)
+        Me.grpLocation.PerformLayout()
+        Me.tbOptions.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
@@ -442,4 +483,18 @@ Partial Class sdgOpenNetCDF
     Friend WithEvents ucrInputMinY As ucrInputTextBox
     Friend WithEvents lblX As Label
     Friend WithEvents ucrInputMinX As ucrInputTextBox
+    Friend WithEvents grpLocation As GroupBox
+    Friend WithEvents ucrPnlLocation As UcrPanel
+    Friend WithEvents ucrReceiverPointsY As ucrReceiverSingle
+    Friend WithEvents ucrReceiverPointsX As ucrReceiverSingle
+    Friend WithEvents ucrInputPointY As ucrInputTextBox
+    Friend WithEvents ucrInputPointX As ucrInputTextBox
+    Friend WithEvents ucrSelectorPoints As ucrSelectorByDataFrameAddRemove
+    Friend WithEvents rdoSinglePoint As RadioButton
+    Friend WithEvents rdoPoints As RadioButton
+    Friend WithEvents rdoRange As RadioButton
+    Friend WithEvents ucrChkIncludeRequestedPoints As ucrCheck
+    Friend WithEvents lblPointsID As Label
+    Friend WithEvents ucrReceiverPointsID As ucrReceiverSingle
+    Friend WithEvents ucrChkGreatCircleDist As ucrCheck
 End Class

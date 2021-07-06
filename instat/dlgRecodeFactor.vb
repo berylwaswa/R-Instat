@@ -44,6 +44,7 @@ Public Class dlgRecodeFactor
         ucrReceiverFactor.strSelectorHeading = "Factors"
         ucrReceiverFactor.SetMeAsReceiver()
         ucrReceiverFactor.SetParameterIsRFunction()
+        ucrReceiverFactor.bUseFilteredData = False
 
         ucrFactorGrid.SetReceiver(ucrReceiverFactor)
         ucrFactorGrid.SetAsViewerOnly()
@@ -54,6 +55,7 @@ Public Class dlgRecodeFactor
         ucrSaveNewColumn.SetDataFrameSelector(ucrSelectorForRecode.ucrAvailableDataFrames)
         ucrSaveNewColumn.SetIsComboBox()
         ucrSaveNewColumn.SetLabelText("New Column Name:")
+        ucrSaveNewColumn.setLinkedReceiver(ucrReceiverFactor)
     End Sub
 
     Private Sub SetDefaults()

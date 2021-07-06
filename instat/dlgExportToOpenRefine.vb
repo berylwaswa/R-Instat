@@ -24,7 +24,6 @@ Public Class dlgExportToOpenRefine
     Private clsGetDataFrame As New RFunction
 
     Private Sub dlgExportToOpenRefine_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -34,6 +33,7 @@ Public Class dlgExportToOpenRefine
         End If
         SetRCodeForControls(bReset)
         bReset = False
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
@@ -69,7 +69,7 @@ Public Class dlgExportToOpenRefine
 
         clsDefaultRefine.SetPackageName("rrefine")
         clsDefaultRefine.SetRCommand("refine_upload")
-        clsDefaultRefine.AddParameter("project.name", ucrDataFrameOpenRefine.cboAvailableDataFrames.SelectedItem & "_clean_up")
+        clsDefaultRefine.AddParameter("project.name", Chr(34) & ucrInputDatasetName.GetText() & Chr(34))
         clsDefaultRefine.AddParameter("open.browser", "FALSE")
 
         ucrBase.clsRsyntax.SetBaseRFunction(clsDefaultRefine)

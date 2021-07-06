@@ -14,6 +14,7 @@
 ' You should have received a copy of the GNU General Public License 
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Imports instat
 Imports instat.Translations
 Public Class dlgBoxplot
     Private clsRggplotFunction As New RFunction
@@ -22,6 +23,7 @@ Public Class dlgBoxplot
     Private clsRaesFunction As New RFunction
     Private clsBaseOperator As New ROperator
     Private clsLocalRaesFunction As New RFunction
+    Private clsStatSummary As New RFunction
     'Similarly clsRgeom_boxplotFunction and clsRaesFunction (respectively the geom_boxplot function and the global aes function) are given through SetupLayer to sdgLayerOptions for edit. 
     Private bFirstLoad As Boolean = True
     Private bReset As Boolean = True
@@ -31,23 +33,43 @@ Public Class dlgBoxplot
     Private clsXScaleContinuousFunction As New RFunction
     Private clsYScaleContinuousFunction As New RFunction
     Private clsRFacetFunction As New RFunction
+    Private clsCoordPolarFunction As New RFunction
+    Private clsCoordPolarStartOperator As New ROperator
     Private clsThemeFunction As New RFunction
+    Private clsScaleFillViridisFunction As New RFunction
+    Private clsScaleColourViridisFunction As New RFunction
     Private dctThemeFunctions As Dictionary(Of String, RFunction)
     Private bResetSubdialog As Boolean = True
     Private bResetBoxLayerSubdialog As Boolean = True
+
+    'Adding new function s
+    Private clsBoxplotFunc As New RFunction
+    Private clsJitterplotFunc As New RFunction
+    Private clsViolinplotFunc As New RFunction
+    Private clsCurrGeomFunc As New RFunction
+    ' Jitter function that can be added to the boxplot/violin base layer
+    Private clsAddedJitterFunc As New RFunction
+    Private clsXScaleDateFunction As New RFunction
+    Private clsYScaleDateFunction As New RFunction
+
+    'Parameter names for geoms
+    Private strFirstParameterName As String = "geomfunc"
+    Private strStatSummaryParameterName As String = "stat_summary"
+    Private strAdditionalPointsParameterName As String = "add_jitter"
+    Private strGeomParameterNames() As String = {strFirstParameterName, strStatSummaryParameterName, strAdditionalPointsParameterName}
 
     Private Sub dlgBoxPlot_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
-        Else
-            'SetGeomprefixFillColourAes()
         End If
+
         If bReset Then
             SetDefaults()
         End If
         SetRCodeForControls(bReset)
         bReset = False
+        SetOptionsButtonstext()
         autoTranslate(Me)
         TestOkEnabled()
     End Sub
@@ -55,7 +77,8 @@ Public Class dlgBoxplot
     Private Sub InitialiseDialog()
         Dim clsCoordFlipFunc As New RFunction
         Dim clsCoordFlipParam As New RParameter
-
+        Dim clsAddedJitterParam As New RParameter
+        Dim dctSummaries As New Dictionary(Of String, String)
         ucrBase.clsRsyntax.bExcludeAssignedFunctionOutput = False
         ucrBase.iHelpTopicID = 436
         ucrBase.clsRsyntax.iCallType = 3
@@ -68,6 +91,7 @@ Public Class dlgBoxplot
         ucrPnlPlots.AddFunctionNamesCondition(rdoJitter, "geom_jitter")
         ucrPnlPlots.AddFunctionNamesCondition(rdoViolin, "geom_violin")
         ucrPnlPlots.AddToLinkedControls(ucrChkVarWidth, {rdoBoxplot}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrPnlPlots.AddToLinkedControls(ucrChkAddPoints, {rdoBoxplot, rdoViolin}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
 
         ucrSelectorBoxPlot.SetParameter(New RParameter("data", 0))
         ucrSelectorBoxPlot.SetParameterIsrfunction()
@@ -96,7 +120,7 @@ Public Class dlgBoxplot
         ucrSecondFactorReceiver.SetParameterIsString()
         ucrSecondFactorReceiver.bWithQuotes = False
 
-        ucrChkVarWidth.SetParameter(New RParameter("varwidth", 1))
+        ucrChkVarWidth.SetParameter(New RParameter("varwidth", 0))
         ucrChkVarWidth.SetText("Variable Width")
         ucrChkVarWidth.SetValuesCheckedAndUnchecked("TRUE", "FALSE")
         ucrChkVarWidth.SetRDefault("FALSE")
@@ -105,8 +129,30 @@ Public Class dlgBoxplot
         clsCoordFlipFunc.SetRCommand("coord_flip")
         clsCoordFlipParam.SetArgumentName("coord_flip")
         clsCoordFlipParam.SetArgument(clsCoordFlipFunc)
+
         ucrChkHorizontalBoxplot.SetText("Horizontal Plot")
         ucrChkHorizontalBoxplot.SetParameter(clsCoordFlipParam, bNewChangeParameterValue:=False, bNewAddRemoveParameter:=True)
+
+        clsAddedJitterParam.SetArgumentName(strAdditionalPointsParameterName)
+        clsAddedJitterParam.SetArgument(clsAddedJitterFunc)
+        clsAddedJitterParam.Position = 3
+
+        ucrChkAddPoints.SetParameter(clsAddedJitterParam, bNewChangeParameterValue:=False, bNewAddRemoveParameter:=True)
+        ucrChkAddPoints.SetText("Add Points")
+        ucrChkAddPoints.AddToLinkedControls({ucrNudJitter, ucrNudTransparency}, {True}, bNewLinkedHideIfParameterMissing:=True)
+
+        ucrNudJitter.SetParameter(New RParameter("width", 2))
+        ucrNudJitter.Minimum = 0
+        ucrNudJitter.DecimalPlaces = 2
+        ucrNudJitter.Increment = 0.01
+        ucrNudJitter.SetLinkedDisplayControl(lblJitter)
+
+        ucrNudTransparency.SetParameter(New RParameter("alpha", 2))
+        ucrNudTransparency.SetMinMax(0, 1)
+        ucrNudTransparency.DecimalPlaces = 2
+        ucrNudTransparency.Increment = 0.01
+        ucrNudTransparency.SetLinkedDisplayControl(lblTransparency)
+        ucrNudTransparency.SetRDefault(1)
 
         ucrSaveBoxplot.SetPrefix("boxplot")
         ucrSaveBoxplot.SetIsComboBox()
@@ -115,7 +161,21 @@ Public Class dlgBoxplot
         ucrSaveBoxplot.SetDataFrameSelector(ucrSelectorBoxPlot.ucrAvailableDataFrames)
         ucrSaveBoxplot.SetAssignToIfUncheckedValue("last_graph")
 
-        '  sdgPlots.SetGgplotFunction(clsRggplotFunction)
+        ucrInputSummaries.SetParameter(New RParameter("fun.y", 2))
+        dctSummaries.Add("mean", Chr(34) & "mean" & Chr(34))
+        dctSummaries.Add("median", Chr(34) & "median" & Chr(34))
+        ucrInputSummaries.SetItems(dctSummaries)
+        ucrInputSummaries.SetDropDownStyleAsNonEditable()
+
+
+        ucrChkGrouptoConnect.SetText("Group to Connect")
+        ucrChkGrouptoConnect.AddToLinkedControls(ucrInputSummaries, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:="mean")
+        ucrChkGrouptoConnect.AddParameterPresentCondition(True, strStatSummaryParameterName, True)
+        ucrChkGrouptoConnect.AddParameterPresentCondition(False, strStatSummaryParameterName, False)
+        'this control exists but diabled for now
+        ucrChkSwapParameters.SetText("swap Parameters")
+
+        'ucrSecondFactorReceiver.AddToLinkedControls(ucrChkSwapParameters, {ucrSecondFactorReceiver.IsEmpty = False}, bNewLinkedHideIfParameterMissing:=True)
     End Sub
 
     Private Sub SetDefaults()
@@ -123,19 +183,52 @@ Public Class dlgBoxplot
         clsRggplotFunction = New RFunction
         clsRgeomPlotFunction = New RFunction
         clsRaesFunction = New RFunction
+        clsLocalRaesFunction = New RFunction
+        clsStatSummary = New RFunction
+
+        'Setting up new functions
+        clsBoxplotFunc = New RFunction
+        clsJitterplotFunc = New RFunction
+        clsViolinplotFunc = New RFunction
+
+        clsAddedJitterFunc.Clear()
 
         ucrSelectorBoxPlot.Reset()
         ucrSelectorBoxPlot.SetGgplotFunction(clsBaseOperator)
 
         ucrSaveBoxplot.Reset()
         sdgPlots.Reset()
+        ucrVariablesAsFactorForBoxplot.SetMeAsReceiver()
         bResetSubdialog = True
         bResetBoxLayerSubdialog = True
-        'rdoBoxplot.Checked = True
-        'These chk boxes add features to the BoxPlot when ticked. See SetCorrdFlip and chkVarwidth_CheckedChanged. By default they are unticked.
+
+        'Setting current geom as boxplot
+        clsCurrGeomFunc.SetPackageName("ggplot2")
+        clsCurrGeomFunc = clsBoxplotFunc
+
+        clsBoxplotFunc.SetPackageName("ggplot2")
+        clsBoxplotFunc.SetRCommand("geom_boxplot")
+        clsBoxplotFunc.AddParameter("varwidth", "FALSE", iPosition:=0)
+        clsBoxplotFunc.AddParameter("outlier.colour", Chr(34) & "red" & Chr(34), iPosition:=1)
+
+        clsViolinplotFunc.SetPackageName("ggplot2")
+        clsViolinplotFunc.SetRCommand("geom_violin")
+
+        clsJitterplotFunc.SetPackageName("ggplot2")
+        clsJitterplotFunc.SetRCommand("geom_jitter")
+        clsJitterplotFunc.AddParameter("height", 0, iPosition:=1)
+        clsJitterplotFunc.AddParameter("width", 0.2, iPosition:=2)
+
+        clsAddedJitterFunc.SetPackageName("ggplot2")
+        clsAddedJitterFunc.SetRCommand("geom_jitter")
+        clsAddedJitterFunc.AddParameter("height", 0, iPosition:=1)
+        clsAddedJitterFunc.AddParameter("width", 0.2, iPosition:=2)
+
+        'Setting operation and adding parameters to baseoperator
         clsBaseOperator.SetOperation("+")
         clsBaseOperator.AddParameter("ggplot", clsRFunctionParameter:=clsRggplotFunction, iPosition:=0)
-        clsBaseOperator.AddParameter("geomfunc", clsRFunctionParameter:=clsRgeomPlotFunction, iPosition:=2)
+        clsBaseOperator.AddParameter(strFirstParameterName, clsRFunctionParameter:=clsBoxplotFunc, iPosition:=2)
+        'clsBaseOperator.AddParameter(strStatSummaryParameterName, clsRFunctionParameter:=clsStatSummary, iPosition:=3)
 
         clsRggplotFunction.SetPackageName("ggplot2")
         clsRggplotFunction.SetRCommand("ggplot")
@@ -145,9 +238,12 @@ Public Class dlgBoxplot
         clsRaesFunction.SetRCommand("aes")
         clsRaesFunction.AddParameter("x", Chr(34) & Chr(34))
 
-        clsRgeomPlotFunction.SetPackageName("ggplot2")
-        clsRgeomPlotFunction.SetRCommand("geom_boxplot")
-        clsRgeomPlotFunction.AddParameter("varwidth", "FALSE")
+        clsStatSummary.SetPackageName("ggplot2")
+        clsStatSummary.SetRCommand("stat_summary")
+        clsStatSummary.AddParameter("geom", Chr(34) & "line" & Chr(34))
+        clsStatSummary.AddParameter("group", 1)
+        clsStatSummary.AddParameter("color", Chr(34) & "blue" & Chr(34))
+        clsStatSummary.AddParameter("size", 1.5)
 
         clsBaseOperator.AddParameter(GgplotDefaults.clsDefaultThemeParameter.Clone())
         clsXlabsFunction = GgplotDefaults.clsXlabTitleFunction.Clone()
@@ -157,8 +253,16 @@ Public Class dlgBoxplot
         clsRFacetFunction = GgplotDefaults.clsFacetFunction.Clone()
         clsYlabFunction = GgplotDefaults.clsYlabTitleFunction.Clone
         clsThemeFunction = GgplotDefaults.clsDefaultThemeFunction.Clone()
+        clsCoordPolarFunction = GgplotDefaults.clsCoordPolarFunction.Clone()
+        clsCoordPolarStartOperator = GgplotDefaults.clsCoordPolarStartOperator.Clone()
+        clsXScaleDateFunction = GgplotDefaults.clsXScaleDateFunction.Clone()
+        clsYScaleDateFunction = GgplotDefaults.clsYScaleDateFunction.Clone()
+        clsScaleFillViridisFunction = GgplotDefaults.clsScaleFillViridisFunction
+        clsScaleColourViridisFunction = GgplotDefaults.clsScaleColorViridisFunction
+        clsScaleColourViridisFunction.AddParameter("discrete", "TRUE", iPosition:=5)
+        clsScaleFillViridisFunction.AddParameter("discrete", "TRUE", iPosition:=5)
+
         dctThemeFunctions = New Dictionary(Of String, RFunction)(GgplotDefaults.dctThemeFunctions)
-        clsLocalRaesFunction = GgplotDefaults.clsAesFunction.Clone()
         clsBaseOperator.SetAssignTo("last_graph", strTempDataframe:=ucrSelectorBoxPlot.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_graph")
         ucrBase.clsRsyntax.SetBaseROperator(clsBaseOperator)
         TempOptionsDisabledInMultipleVariablesCase()
@@ -170,13 +274,20 @@ Public Class dlgBoxplot
         ucrSelectorBoxPlot.SetRCode(clsRggplotFunction, bReset)
 
         ucrChkHorizontalBoxplot.SetRCode(clsBaseOperator, bReset)
-        ucrChkVarWidth.SetRCode(clsRgeomPlotFunction, bReset)
+        ucrChkVarWidth.SetRCode(clsBoxplotFunc, bReset)
         'passes in +cordflip
         ucrChkHorizontalBoxplot.SetRCode(clsBaseOperator, bReset)
         ucrVariablesAsFactorForBoxplot.SetRCode(clsRaesFunction, bReset)
         ucrByFactorsReceiver.SetRCode(clsRaesFunction, bReset)
         ucrSecondFactorReceiver.SetRCode(clsRaesFunction, bReset)
-        ucrPnlPlots.SetRCode(clsRgeomPlotFunction, bReset)
+
+        ucrChkAddPoints.SetRCode(clsBaseOperator, bReset)
+        ucrNudJitter.SetRCode(clsAddedJitterFunc, bReset)
+        ucrNudTransparency.SetRCode(clsAddedJitterFunc, bReset)
+        ucrInputSummaries.SetRCode(clsStatSummary, bReset)
+        ucrChkGrouptoConnect.SetRCode(clsBaseOperator, bReset)
+        ucrPnlPlots.SetRCode(clsCurrGeomFunc, bReset)
+
     End Sub
 
     Private Sub TestOkEnabled()
@@ -194,19 +305,27 @@ Public Class dlgBoxplot
     End Sub
 
     Private Sub cmdOptions_Click(sender As Object, e As EventArgs) Handles cmdOptions.Click
-        sdgPlots.SetRCode(clsBaseOperator, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, clsNewGlobalAesFunction:=clsRaesFunction, clsNewXScalecontinuousFunction:=clsXScaleContinuousFunction, clsNewYScalecontinuousFunction:=clsYScaleContinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction, clsNewFacetFunction:=clsRFacetFunction, ucrNewBaseSelector:=ucrSelectorBoxPlot, bReset:=bResetSubdialog)
+        sdgPlots.SetRCode(clsBaseOperator, clsNewThemeFunction:=clsThemeFunction, dctNewThemeFunctions:=dctThemeFunctions, clsNewGlobalAesFunction:=clsRaesFunction, clsNewXScalecontinuousFunction:=clsXScaleContinuousFunction,
+                          clsNewYScalecontinuousFunction:=clsYScaleContinuousFunction, clsNewXLabsTitleFunction:=clsXlabsFunction, clsNewYLabTitleFunction:=clsYlabFunction, clsNewLabsFunction:=clsLabsFunction,
+                          clsNewFacetFunction:=clsRFacetFunction, clsNewCoordPolarFunction:=clsCoordPolarFunction, clsNewCoordPolarStartOperator:=clsCoordPolarStartOperator, clsNewXScaleDateFunction:=clsXScaleDateFunction,
+                          clsNewScaleFillViridisFunction:=clsScaleFillViridisFunction, clsNewScaleColourViridisFunction:=clsScaleColourViridisFunction, clsNewYScaleDateFunction:=clsYScaleDateFunction, bNewEnableDiscrete:=False,
+                          ucrNewBaseSelector:=ucrSelectorBoxPlot, strMainDialogGeomParameterNames:=strGeomParameterNames, bReset:=bResetSubdialog)
         sdgPlots.ShowDialog()
         bResetSubdialog = False
+
+        'this syncs the coordflip in sdgplots and this main dlg
+        ucrChkHorizontalBoxplot.SetRCode(clsBaseOperator, bReset)
+
     End Sub
 
     Private Sub cmdBoxPlotOptions_Click(sender As Object, e As EventArgs) Handles cmdBoxPlotOptions.Click
         'SetupLayer sends the components storing the plot info (clsRgeom_boxplotFunction, clsRggplotFunction, ...) of dlgBoxPlot through to sdgLayerOptions where these will be edited.
-        sdgLayerOptions.SetupLayer(clsNewGgPlot:=clsRggplotFunction, clsNewGeomFunc:=clsRgeomPlotFunction, clsNewGlobalAesFunc:=clsRaesFunction, clsNewLocalAes:=clsLocalRaesFunction, bFixGeom:=True, ucrNewBaseSelector:=ucrSelectorBoxPlot, bApplyAesGlobally:=True, bReset:=bResetBoxLayerSubdialog)
+        sdgLayerOptions.SetupLayer(clsNewGgPlot:=clsRggplotFunction, clsNewGeomFunc:=clsCurrGeomFunc, clsNewGlobalAesFunc:=clsRaesFunction, clsNewLocalAes:=clsLocalRaesFunction, bFixGeom:=True, ucrNewBaseSelector:=ucrSelectorBoxPlot, bApplyAesGlobally:=True, bReset:=bResetBoxLayerSubdialog)
         sdgLayerOptions.ShowDialog()
         bResetBoxLayerSubdialog = False
         'Coming from the sdgLayerOptions, clsRgeom_boxplot and others has been modified. One then needs to display these modifications on the dlgBoxPlot.
-        If clsRgeomPlotFunction.GetParameter("varwidth") IsNot Nothing Then
-            If clsRgeomPlotFunction.GetParameter("varwidth").strArgumentValue = "TRUE" Then
+        If clsCurrGeomFunc.GetParameter("varwidth") IsNot Nothing Then
+            If clsCurrGeomFunc.GetParameter("varwidth").strArgumentValue = "TRUE" Then
                 ' chkVarwidth.Checked = True
                 'Observe that changing the check of the chkVarwidth here doesn't trigger the checkchanged event.
             End If
@@ -230,6 +349,7 @@ Public Class dlgBoxplot
                 ucrSecondFactorReceiver.Add(clsParam.strArgumentValue)
             End If
         Next
+
         'Question to be discussed: After running through the sdgLayerOptions, the clsCurrDataFrame parameters seem to have been cleared, such that in the multiple variable case, clsCurrDataFrame needs to be repopulated with "stack", "measure.vars" and "id.vars" parameters. Actually, even when repopulated, they are still not appearing in the script. ??
         'This resets the factor receiver and causes it to be cleared of the correct variable. We don't want this.
         'ucrVariablesAsFactorForBoxplot.SetReceiverStatus()
@@ -238,19 +358,33 @@ Public Class dlgBoxplot
     Private Sub SetGeomPrefixFillColourAes()
         'Sets geom function, fill and colour aesthetics and ucrsave prefix
         If rdoBoxplot.Checked Then
-            clsRgeomPlotFunction.SetRCommand("geom_boxplot")
             ucrSaveBoxplot.SetPrefix("boxplot")
             ucrSecondFactorReceiver.ChangeParameterName("fill")
-            cmdBoxPlotOptions.Text = "Boxplot Options"
+            clsCurrGeomFunc = clsBoxplotFunc
+
         ElseIf rdoJitter.Checked Then
-            clsRgeomPlotFunction.SetRCommand("geom_jitter")
             ucrSaveBoxplot.SetPrefix("jitter")
             ucrSecondFactorReceiver.ChangeParameterName("colour")
-            cmdBoxPlotOptions.Text = "Jitter Options"
+            clsCurrGeomFunc = clsJitterplotFunc
         Else
-            clsRgeomPlotFunction.SetRCommand("geom_violin")
             ucrSaveBoxplot.SetPrefix("violin")
             ucrSecondFactorReceiver.ChangeParameterName("fill")
+            clsCurrGeomFunc = clsViolinplotFunc
+        End If
+        'TODO Am not sure why the geomfunc parameter which carries clsCurrGeomFunc(current geom function) 
+        'does Not Update() properly when readio buttons are changed
+        'hence i have to force it to update properly after this if statement
+        clsBaseOperator.AddParameter(strFirstParameterName, clsRFunctionParameter:=clsCurrGeomFunc, iPosition:=2)
+        SetOptionsButtonstext()
+        autoTranslate(Me)
+    End Sub
+
+    Private Sub SetOptionsButtonstext()
+        If rdoBoxplot.Checked Then
+            cmdBoxPlotOptions.Text = "Boxplot Options"
+        ElseIf rdoJitter.Checked Then
+            cmdBoxPlotOptions.Text = "Jitter Options"
+        Else
             cmdBoxPlotOptions.Text = "Violin Options"
         End If
     End Sub
@@ -270,10 +404,31 @@ Public Class dlgBoxplot
     End Sub
 
     Private Sub ucrPnlPlots_ControlValueChanged() Handles ucrPnlPlots.ControlValueChanged
-        SetGeomprefixFillColourAes()
+        SetGeomPrefixFillColourAes()
     End Sub
 
     Private Sub ucrSaveBoxplot_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrSaveBoxplot.ControlContentsChanged, ucrVariablesAsFactorForBoxplot.ControlContentsChanged
         TestOkEnabled()
     End Sub
+
+    Private Sub ucrChkGrouptoConnect_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkGrouptoConnect.ControlValueChanged
+        If ucrChkGrouptoConnect.Checked Then
+            clsBaseOperator.AddParameter(strStatSummaryParameterName, clsRFunctionParameter:=clsStatSummary, iPosition:=4)
+        Else
+            clsBaseOperator.RemoveParameterByName(strStatSummaryParameterName)
+        End If
+    End Sub
+
+
+    'this code is commented out but will work once we get the feature of linking controls with the contents of a receiver
+    'Private Sub SwapFactors()
+    '    If ucrChkSwapParameters.Checked Then
+    '        ucrByFactorsReceiver.ChangeParameterName("fill")
+    '        ucrSecondFactorReceiver.ChangeParameterName("x")
+    '    End If
+    'End Sub
+
+    'Private Sub ucrChkSwapParameters_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkSwapParameters.ControlValueChanged
+    '    SwapFactors()
+    'End Sub
 End Class

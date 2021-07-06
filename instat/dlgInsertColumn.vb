@@ -75,7 +75,9 @@ Public Class dlgInsertColumn
         ucrNudNumberOfColumns.SetMinMax(1, Integer.MaxValue)
 
         ucrInputDefaultValue.SetParameter(New RParameter("col_data", 5))
-        ucrInputDefaultValue.SetRDefault("NA")
+        ucrInputDefaultValue.SetItems({"NA", "NA_real_", " NA_integer_", " NA_complex_", "NA_character_"})
+        ucrInputDefaultValue.AddQuotesIfUnrecognised = False
+        ucrInputDefaultValue.bAllowNonConditionValues = True
 
         ucrPnlInsertColumns.SetParameter(New RParameter("before", 3))
         ucrPnlInsertColumns.AddRadioButton(rdoAtStart, "TRUE")
@@ -94,7 +96,7 @@ Public Class dlgInsertColumn
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrPnlInsertColumns, {rdoInsertColumns}, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrNudNumberOfColumns, {rdoInsertColumns}, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrInputDefaultValue, {rdoInsertColumns}, bNewLinkedHideIfParameterMissing:=True)
-        ucrPnlColumnsOrRows.AddToLinkedControls(ucrInputPrefixForNewColumn, {rdoInsertColumns}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrPnlColumnsOrRows.AddToLinkedControls(ucrInputPrefixForNewColumn, {rdoInsertColumns}, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrPnlBeforeAfter, {rdoInsertRows}, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrNudNumberOfRows, {rdoInsertRows}, bNewLinkedHideIfParameterMissing:=True)
         ucrPnlColumnsOrRows.AddToLinkedControls(ucrNudStartRow, {rdoInsertRows}, bNewLinkedHideIfParameterMissing:=True)
@@ -104,12 +106,16 @@ Public Class dlgInsertColumn
         ucrInputDefaultValue.SetLinkedDisplayControl(lblDefaultValue)
 
         ucrInputPrefixForNewColumn.SetParameter(New RParameter("col_name", 6))
+        ucrInputPrefixForNewColumn.SetPrefix("X")
         ucrInputPrefixForNewColumn.SetLinkedDisplayControl(lblInputColumnPrefix)
 
         ucrPnlBeforeAfter.SetLinkedDisplayControl(grpOptions)
         ucrNudNumberOfRows.SetLinkedDisplayControl(lblNumberOfRowsToInsert)
         ucrNudStartRow.SetLinkedDisplayControl(lblStartPos)
         ucrReceiverColumnsToInsert.SetLinkedDisplayControl(lblColumn)
+
+        ttColumnDefaultValue.SetToolTip(ucrInputDefaultValue.cboInput, "Include the quotes if the default value is a string e.g. ""small"". Do not include quotes if the default value is logical e.g. TRUE")
+
     End Sub
 
     Private Sub SetDefaults()
@@ -120,31 +126,18 @@ Public Class dlgInsertColumn
         ucrInputBeforeAfter.Reset()
         ucrInputDefaultValue.Reset()
         ucrInputPrefixForNewColumn.Reset()
-        clsInsertColumnFunction.AddParameter("col_data", "NA")
-        clsInsertColumnFunction.AddParameter("col_name", "X")
 
         clsInsertColumnFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$add_columns_to_data")
-        clsInsertColumnFunction.AddParameter("use_col_name_as_prefix", "TRUE")
-        clsInsertColumnFunction.AddParameter("before", "FALSE")
+        clsInsertColumnFunction.AddParameter("use_col_name_as_prefix", "TRUE", iPosition:=7)
+        clsInsertColumnFunction.AddParameter("before", "FALSE", iPosition:=3)
+        clsInsertColumnFunction.AddParameter("col_data", "NA", iPosition:=5)
+        clsInsertColumnFunction.AddParameter("col_name", "X", iPosition:=6)
 
         clsInsertRowFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$insert_row_in_data")
-        clsInsertRowFunction.AddParameter("before", "FALSE")
-        clsInsertRowFunction.AddParameter("start_row", ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength)
+        clsInsertRowFunction.AddParameter("before", "FALSE", iPosition:=1)
+        clsInsertRowFunction.AddParameter("start_row", ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength, iPosition:=3)
         ucrNudStartRow.SetMinMax(1, ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength)
         ucrBase.clsRsyntax.SetBaseRFunction(clsInsertColumnFunction)
-    End Sub
-
-    Private Sub ReopenDialog()
-        If rdoInsertColumns.Checked Then
-            grpInsert.Visible = True
-        ElseIf rdoInsertRows.Checked Then
-            grpOptions.Visible = True
-        End If
-        ucrSelectorInsertColumns.Reset()
-        ucrNudStartRow.SetMinMax(1, ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength)
-        If ucrSelectorInsertColumns.ucrAvailableDataFrames.cboAvailableDataFrames.Text <> "" Then
-            ucrNudStartRow.Value = ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength
-        End If
     End Sub
 
     Private Sub SetRCodeForControls(bReset As Boolean)
@@ -153,8 +146,8 @@ Public Class dlgInsertColumn
         ucrNudStartRow.SetRCode(clsInsertRowFunction, bReset)
         ucrPnlBeforeAfter.SetRCode(clsInsertRowFunction, bReset)
 
-        ucrNudNumberOfColumns.SetRCode(clsInsertColumnFunction, bReset)
         ucrInputDefaultValue.SetRCode(clsInsertColumnFunction, bReset)
+        ucrNudNumberOfColumns.SetRCode(clsInsertColumnFunction, bReset)
         ucrInputPrefixForNewColumn.SetRCode(clsInsertColumnFunction, bReset)
         ucrReceiverColumnsToInsert.SetRCode(clsInsertColumnFunction, bReset)
         ucrSelectorInsertColumns.SetRCode(clsInsertColumnFunction, bReset)
@@ -164,20 +157,25 @@ Public Class dlgInsertColumn
     End Sub
 
     Private Sub TestOKEnabled()
-        If rdoInsertColumns.Checked Then
-            If (rdoBeforeAfter.Checked AndAlso Not ucrInputBeforeAfter.IsEmpty AndAlso Not ucrReceiverColumnsToInsert.IsEmpty AndAlso Not ucrInputPrefixForNewColumn.IsEmpty AndAlso ucrNudNumberOfColumns.GetText <> "" AndAlso Not ucrInputDefaultValue.IsEmpty) Then
-                ucrBase.OKEnabled(True)
-            ElseIf ((rdoAtEnd.Checked OrElse rdoAtStart.Checked) AndAlso ucrNudNumberOfColumns.GetText <> "" AndAlso Not ucrInputDefaultValue.IsEmpty AndAlso Not ucrInputPrefixForNewColumn.IsEmpty) Then
-                ucrBase.OKEnabled(True)
-            Else
-                ucrBase.OKEnabled(False)
+        If ucrSelectorInsertColumns.ucrAvailableDataFrames.cboAvailableDataFrames.Text <> "" Then
+            If rdoInsertColumns.Checked Then
+                If (rdoBeforeAfter.Checked AndAlso Not ucrInputBeforeAfter.IsEmpty AndAlso Not ucrReceiverColumnsToInsert.IsEmpty AndAlso Not ucrInputPrefixForNewColumn.IsEmpty AndAlso ucrNudNumberOfColumns.GetText <> "" AndAlso Not ucrInputDefaultValue.IsEmpty) Then
+                    ucrBase.OKEnabled(True)
+                ElseIf ((rdoAtEnd.Checked OrElse rdoAtStart.Checked) AndAlso ucrNudNumberOfColumns.GetText <> "" AndAlso Not ucrInputDefaultValue.IsEmpty AndAlso Not ucrInputPrefixForNewColumn.IsEmpty) Then
+                    ucrBase.OKEnabled(True)
+                Else
+                    ucrBase.OKEnabled(False)
+                End If
+            ElseIf rdoInsertRows.Checked Then
+                If (ucrNudNumberOfRows.GetText <> "" AndAlso ucrNudStartRow.GetText <> "") Then
+                    ucrBase.OKEnabled(True)
+                Else
+                    ucrBase.OKEnabled(False)
+                End If
             End If
-        ElseIf rdoInsertRows.Checked Then
-            If (ucrNudNumberOfRows.GetText <> "" AndAlso ucrNudStartRow.GetText <> "") Then
-                ucrBase.OKEnabled(True)
-            Else
-                ucrBase.OKEnabled(False)
-            End If
+
+        Else
+            ucrBase.OKEnabled(False)
         End If
     End Sub
 
@@ -187,21 +185,18 @@ Public Class dlgInsertColumn
         TestOKEnabled()
     End Sub
 
-    Private Sub ucrBase_BeforeClickOk(sender As Object, e As EventArgs) Handles ucrBase.BeforeClickOk
-        If rdoInsertColumns.Checked Then
-            ucrBase.clsRsyntax.SetBaseRFunction(clsInsertColumnFunction)
-        ElseIf rdoInsertRows.Checked Then
-            ucrBase.clsRsyntax.SetBaseRFunction(clsInsertRowFunction)
-        End If
-    End Sub
-
     Private Sub ucrSelectorInsertColumns_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrSelectorInsertColumns.ControlValueChanged
-        ucrNudStartRow.SetMinMax(1, ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength)
-        ucrNudStartRow.Value = ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength
+        ReopenDialog()
     End Sub
 
-    Private Sub ucrReceiverColumnsToInsert_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverColumnsToInsert.ControlContentsChanged, ucrPnlColumnsOrRows.ControlContentsChanged, ucrPnlBeforeAfter.ControlContentsChanged, ucrPnlInsertColumns.ControlContentsChanged, ucrInputPrefixForNewColumn.ControlContentsChanged, ucrInputDefaultValue.ControlContentsChanged, ucrInputBeforeAfter.ControlContentsChanged, ucrNudNumberOfRows.ControlContentsChanged, ucrNudStartRow.ControlContentsChanged, ucrNudNumberOfColumns.ControlContentsChanged
+    Private Sub ucrReceiverColumnsToInsert_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverColumnsToInsert.ControlContentsChanged, ucrPnlColumnsOrRows.ControlContentsChanged, ucrPnlBeforeAfter.ControlContentsChanged, ucrPnlInsertColumns.ControlContentsChanged, ucrInputPrefixForNewColumn.ControlContentsChanged, ucrInputBeforeAfter.ControlContentsChanged, ucrNudNumberOfRows.ControlContentsChanged, ucrNudStartRow.ControlContentsChanged, ucrNudNumberOfColumns.ControlContentsChanged, ucrSelectorInsertColumns.ControlContentsChanged, ucrInputDefaultValue.ControlValueChanged
         TestOKEnabled()
+    End Sub
+
+    Private Sub ReopenDialog()
+        ' Should use ucrSelectorInsertColumns.ucrAvailableDataFrames.iDataFrameLength but doesn't update before dialog loads
+        ucrNudStartRow.SetMinMax(1, frmMain.clsRLink.GetDataFrameLength(ucrSelectorInsertColumns.ucrAvailableDataFrames.cboAvailableDataFrames.Text))
+        ucrNudStartRow.Value = frmMain.clsRLink.GetDataFrameLength(ucrSelectorInsertColumns.ucrAvailableDataFrames.cboAvailableDataFrames.Text)
     End Sub
 
     Private Sub ucrPnlColumnsOrRows_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlColumnsOrRows.ControlValueChanged, ucrPnlInsertColumns.ControlValueChanged
@@ -209,7 +204,7 @@ Public Class dlgInsertColumn
             ucrBase.clsRsyntax.SetBaseRFunction(clsInsertColumnFunction)
             If rdoAtEnd.Checked OrElse rdoAtStart.Checked Then
                 ucrSelectorInsertColumns.SetVariablesVisible(False)
-            ElseIf rdoBeforeAfter.Checked
+            ElseIf rdoBeforeAfter.Checked Then
                 ucrSelectorInsertColumns.SetVariablesVisible(True)
             End If
         Else

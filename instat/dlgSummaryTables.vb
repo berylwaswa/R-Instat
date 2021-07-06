@@ -20,7 +20,7 @@ Public Class dlgSummaryTables
     Private bReset As Boolean = True
     Private clsSummariesList As New RFunction
     Private bResetSubdialog As Boolean = False
-    Private clsDefaultFunction As New RFunction
+    Private clsDefaultFunction, clsConcFunction As New RFunction
     Private lstCheckboxes As New List(Of ucrCheck)
     Private bRCodeSet As Boolean = True
 
@@ -41,12 +41,12 @@ Public Class dlgSummaryTables
     Private Sub InitialiseDialog()
         Dim dctPageBy As New Dictionary(Of String, String)
         ucrBase.clsRsyntax.iCallType = 4
+        ucrBase.iHelpTopicID = 426
         ucrBase.clsRsyntax.bExcludeAssignedFunctionOutput = False
 
         ucrInputPageBy.Enabled = False ' temporarily disabled
 
         'summary_name = NA - 8
-
         ucrSelectorSummaryTables.SetParameter(New RParameter("data_name", 0))
         ucrSelectorSummaryTables.SetParameterIsString()
 
@@ -132,10 +132,13 @@ Public Class dlgSummaryTables
     Private Sub SetDefaults()
         clsDefaultFunction = New RFunction
         clsSummariesList = New RFunction
+        clsConcFunction = New RFunction
 
         ucrReceiverFactors.SetMeAsReceiver()
         ucrSelectorSummaryTables.Reset()
         ucrSaveTable.Reset()
+
+        clsConcFunction.SetRCommand("c")
 
         clsSummariesList.SetRCommand("c")
         clsSummariesList.AddParameter("summary_mean", Chr(34) & "summary_mean" & Chr(34), bIncludeArgumentName:=False) ' TODO decide which default(s) to use?
@@ -173,9 +176,11 @@ Public Class dlgSummaryTables
     End Sub
 
     Private Sub cmdSummaries_Click(sender As Object, e As EventArgs) Handles cmdSummaries.Click
-        sdgSummaries.SetRFunction(clsSummariesList, bResetSubdialog)
+        sdgSummaries.SetRFunction(clsSummariesList, clsDefaultFunction, clsConcFunction, ucrSelectorSummaryTables, bResetSubdialog)
         bResetSubdialog = False
+        sdgSummaries.bEnable2VariableTab = False
         sdgSummaries.ShowDialog()
+        sdgSummaries.bEnable2VariableTab = True
         TestOKEnabled()
     End Sub
 

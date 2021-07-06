@@ -78,22 +78,20 @@ Public Class dlgStringDistance
         ucrInputComboBoxMethod.SetItems(dctMethod)
         ucrInputComboBoxMethod.SetRDefault(Chr(34) & "osa" & Chr(34))
 
-        ucrSaveStringDistance.SetPrefix("Dist")
+        ucrSaveStringDistance.SetPrefix("dist")
         ucrSaveStringDistance.SetSaveTypeAsColumn()
         ucrSaveStringDistance.SetDataFrameSelector(ucrSelectorStringDistance.ucrAvailableDataFrames)
-        ucrSaveStringDistance.SetIsTextBox()
-        ucrSaveStringDistance.SetLabelText("Save Result:")
+        ucrSaveStringDistance.SetIsComboBox()
+        ucrSaveStringDistance.SetLabelText("New Column:")
+        ucrSaveStringDistance.setLinkedReceiver(ucrReceiverStringDistance)
     End Sub
 
     Private Sub SetDefaults()
         clsStringDistFunction = New RFunction
         clsColumnFunction = New RFunction
 
-        ucrInputPatternStringDistance.SetName("")
         ucrSelectorStringDistance.Reset()
         ucrSaveStringDistance.Reset()
-        ucrInputComboBoxMethod.Reset()
-        ucrInputPatternStringDistance.Reset()
         ucrReceiverStringDistance.SetMeAsReceiver()
 
         clsColumnFunction.SetPackageName("stringdist")
@@ -101,14 +99,12 @@ Public Class dlgStringDistance
 
         clsStringDistFunction.SetPackageName("stringdist")
         clsStringDistFunction.SetRCommand("stringdist")
-        clsStringDistFunction.AddParameter("method", Chr(34) & "osa" & Chr(34))
-        clsStringDistFunction.AddParameter("b", Chr(34) & Chr(34))
         clsCurrentFunction = clsStringDistFunction
         ucrBase.clsRsyntax.SetBaseRFunction(clsCurrentFunction)
     End Sub
 
     Private Sub SetRCodeForControls(bReset As Boolean)
-        ucrReceiverStringDistance.AddAdditionalCodeParameterPair(clsColumnFunction, New RParameter("a", 1), iAdditionalPairNo:=1)
+        ucrReceiverStringDistance.AddAdditionalCodeParameterPair(clsColumnFunction, New RParameter("a", 0), iAdditionalPairNo:=1)
         ucrInputComboBoxMethod.AddAdditionalCodeParameterPair(clsColumnFunction, clsNewRParameter:=New RParameter("method", 2), iAdditionalPairNo:=1)
         ucrSaveStringDistance.AddAdditionalRCode(clsColumnFunction, iAdditionalPairNo:=1)
 
@@ -116,8 +112,9 @@ Public Class dlgStringDistance
         ucrInputPatternStringDistance.SetRCode(clsStringDistFunction, bReset)
         ucrInputComboBoxMethod.SetRCode(clsStringDistFunction, bReset)
         ucrSaveStringDistance.SetRCode(clsStringDistFunction, bReset)
-        ucrPnlStringDist.SetRCode(clsCurrentFunction, bReset)
-
+        If bReset Then
+            ucrPnlStringDist.SetRCode(clsCurrentFunction, bReset)
+        End If
         ucrReceiverColumn.SetRCode(clsColumnFunction, bReset)
     End Sub
 

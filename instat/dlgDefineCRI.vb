@@ -15,7 +15,7 @@
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports instat.Translations
-Public Class dlgDefineCRI
+Public Class dlgCorruptionDefineCRI
     Private bFirstLoad As Boolean = True
     Private bReset As Boolean = True
     Dim bUseSelectedColumn As Boolean = False
@@ -29,7 +29,6 @@ Public Class dlgDefineCRI
     Private strWeightColumn As String = "Weight"
 
     Private Sub dlgDefineCRI_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -43,6 +42,7 @@ Public Class dlgDefineCRI
         SetRCodeForControls(bReset)
         bReset = False
         TestOKEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()

@@ -68,6 +68,11 @@ Public Class ucrInputComboBox
         FillItemTypes()
     End Sub
 
+    Public Sub SetItemsTypeAsSurv()
+        strItemsType = "Surv"
+        FillItemTypes()
+    End Sub
+
     Public Sub SetItemsTypeAsTables()
         strItemsType = "Tables"
         FillItemTypes()
@@ -106,6 +111,11 @@ Public Class ucrInputComboBox
                     cboInput.Items.Clear()
                     cboInput.Items.AddRange(frmMain.clsRLink.GetGraphNames(ucrDataFrameSelector.cboAvailableDataFrames.Text).ToArray())
                 End If
+            Case "Surv"
+                If ucrDataFrameSelector IsNot Nothing Then
+                    cboInput.Items.Clear()
+                    cboInput.Items.AddRange(frmMain.clsRLink.GetSurvNames(ucrDataFrameSelector.cboAvailableDataFrames.Text).ToArray())
+                End If
             Case "Filters"
                 If ucrDataFrameSelector IsNot Nothing Then
                     cboInput.Items.Clear()
@@ -143,6 +153,29 @@ Public Class ucrInputComboBox
         Return cboInput.Text
     End Function
 
+    Public Overrides Function GetValue() As Object
+        If cboInput.SelectedValue IsNot Nothing Then
+            Return cboInput.SelectedValue
+        Else
+            Return GetText()
+        End If
+    End Function
+
+    Public Property GetSetSelectedIndex As Integer
+        Get
+            Return cboInput.SelectedIndex
+        End Get
+        Set(value As Integer)
+            cboInput.SelectedIndex = value
+        End Set
+    End Property
+
+    Public ReadOnly Property GetItemsCount As Integer
+        Get
+            Return cboInput.Items.Count
+        End Get
+    End Property
+
     Public Sub SetItems(Optional strItems As String() = Nothing, Optional bClearExisting As Boolean = True, Optional bAddConditions As Boolean = False, Optional bAddQuotes As Boolean = True)
         Dim dctValues As New Dictionary(Of String, String)
         If bAddConditions Then
@@ -165,14 +198,14 @@ Public Class ucrInputComboBox
         End If
     End Sub
 
-    Public Sub SetItems(dctItemParameterValuePairs As Dictionary(Of String, String), Optional bClearExisting As Boolean = True, Optional bSetCondtions As Boolean = True)
+    Public Sub SetItems(dctItemParameterValuePairs As Dictionary(Of String, String), Optional bClearExisting As Boolean = True, Optional bSetConditions As Boolean = True)
         Dim kvpTemp As KeyValuePair(Of String, String)
 
         If bClearExisting Then
             cboInput.Items.Clear()
             dctDisplayParameterValues.Clear()
         End If
-        If bSetCondtions Then
+        If bSetConditions Then
             If GetParameter() Is Nothing Then
                 MsgBox("Developer error: Parameter must be set before items can be set. Modify setup for " & Name & " so that the parameter is set first.")
             End If
@@ -180,7 +213,7 @@ Public Class ucrInputComboBox
         For Each kvpTemp In dctItemParameterValuePairs
             cboInput.Items.Add(kvpTemp.Key)
             dctDisplayParameterValues.Add(kvpTemp.Key, kvpTemp.Value)
-            If bSetCondtions Then
+            If bSetConditions AndAlso GetParameter() IsNot Nothing Then
                 AddParameterValuesCondition(kvpTemp.Key, GetParameter().strArgumentName, kvpTemp.Value)
             End If
         Next
@@ -232,9 +265,16 @@ Public Class ucrInputComboBox
     Private Sub cboInput_TextChanged(sender As Object, e As EventArgs) Handles cboInput.TextChanged
         OnContentsChanged()
     End Sub
+    Private Sub cboInput_Click(sender As Object, e As EventArgs) Handles cboInput.Click
+        OnControlClicked()
+    End Sub
 
     Private Sub mnuRightClickCopy_Click(sender As Object, e As EventArgs) Handles mnuRightClickCopy.Click
-        Clipboard.SetText(cboInput.SelectedText)
+        If cboInput.SelectedText <> "" Then
+            Clipboard.SetText(cboInput.SelectedText)
+        ElseIf cboInput.DropDownStyle = ComboBoxStyle.DropDownList AndAlso cboInput.Text <> "" Then
+            Clipboard.SetText(cboInput.Text)
+        End If
     End Sub
 
     'This seems overly complicated, but appears only way to auto size
@@ -283,5 +323,19 @@ Public Class ucrInputComboBox
         Else
 
         End If
+    End Sub
+
+    Public Sub SetDataSource(objDataSource As Object, Optional strDisplayMember As String = "", Optional strValueMember As String = "")
+        cboInput.DataSource = objDataSource
+        If strDisplayMember <> "" Then
+            cboInput.DisplayMember = strDisplayMember
+        End If
+        If strValueMember <> "" Then
+            cboInput.ValueMember = strValueMember
+        End If
+    End Sub
+
+    Friend Sub AddToReceiverAtCursorPosition(v As String)
+        Throw New NotImplementedException()
     End Sub
 End Class

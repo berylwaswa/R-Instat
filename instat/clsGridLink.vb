@@ -79,6 +79,7 @@ Public Class clsGridLink
         clsMetadataChanged.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_metadata_changed")
         clsVariablesMetadataChanged.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_variables_metadata_changed")
         clsGetDataNames.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_data_names")
+        clsGetDataNames.AddParameter("include_hidden", "FALSE")
         clsGetDataFrame.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_data_frame")
         clsGetDataFrame.AddParameter("convert_to_character", "TRUE")
         clsGetDataFrame.AddParameter("include_hidden_columns", "FALSE")
@@ -93,7 +94,7 @@ Public Class clsGridLink
         clsGetCombinedMetadata.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_combined_metadata")
         clsSetMetadataChanged.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$set_metadata_changed")
 
-        If frmMain.clsRLink.bInstatObjectExists Then
+        If frmMain.clsRLink.bInstatObjectExists AndAlso frmMain.clsRLink.GetDataFrameCount() > 0 Then
             expTemp = frmMain.clsRLink.RunInternalScriptGetValue(clsDataChanged.ToScript())
             If expTemp IsNot Nothing AndAlso expTemp.Type <> Internals.SymbolicExpressionType.Null Then
                 bRDataChanged = expTemp.AsLogical(0)
@@ -137,6 +138,46 @@ Public Class clsGridLink
                     lstDataNames = Nothing
                 End If
                 If lstDataNames IsNot Nothing Then
+                    'delete old sheets
+                    'TODO look at this code to improve it (simplify)
+                    If bGrdDataExists Then
+                        k = 0
+                        For i = 0 To grdData.Worksheets.Count - 1
+                            ' look up convert genericvector to string list to avoid this loop
+                            bFoundName = False
+                            For j = 0 To lstDataNames.Length - 1
+                                strDataName = lstDataNames.AsCharacter(j)
+                                If strDataName = grdData.Worksheets(i - k).Name Then
+                                    bFoundName = True
+                                    Exit For
+                                End If
+                            Next
+                            If Not bFoundName Then
+                                shtTemp = grdData.Worksheets(i - k)
+                                grdData.Worksheets.Remove(shtTemp)
+                                k = k + 1
+                            End If
+                        Next
+                    End If
+                    If bGrdVariablesMetadataExists Then
+                        k = 0
+                        For i = 0 To grdVariablesMetadata.Worksheets.Count - 1
+                            ' look up convert genericvector to string list to avoid this loop
+                            bFoundName = False
+                            For j = 0 To lstDataNames.Length - 1
+                                strDataName = lstDataNames.AsCharacter(j)
+                                If strDataName = grdVariablesMetadata.Worksheets(i - k).Name Then
+                                    bFoundName = True
+                                    Exit For
+                                End If
+                            Next
+                            If Not bFoundName Then
+                                shtTemp = grdVariablesMetadata.Worksheets(i - k)
+                                grdVariablesMetadata.Worksheets.Remove(shtTemp)
+                                k = k + 1
+                            End If
+                        Next
+                    End If
                     For i = 0 To lstDataNames.Length - 1
                         strDataName = lstDataNames.AsCharacter(i)
                         clsDataChanged.AddParameter("data_name", Chr(34) & strDataName & Chr(34))
@@ -211,48 +252,6 @@ Public Class clsGridLink
                             End If
                         End If
                     Next
-
-                    'delete old sheets
-                    'TODO look at this code to improve it (simplify)
-                    If bGrdDataExists Then
-                        k = 0
-                        For i = 0 To grdData.Worksheets.Count - 1
-                            ' look up convert genericvector to string list to avoid this loop
-                            bFoundName = False
-                            For j = 0 To lstDataNames.Length - 1
-                                strDataName = lstDataNames.AsCharacter(j)
-                                If strDataName = grdData.Worksheets(i - k).Name Then
-                                    bFoundName = True
-                                    Exit For
-                                End If
-                            Next
-                            If Not bFoundName Then
-                                shtTemp = grdData.Worksheets(i - k)
-                                grdData.Worksheets.Remove(shtTemp)
-                                k = k + 1
-                            End If
-                        Next
-                    End If
-
-                    If bGrdVariablesMetadataExists Then
-                        k = 0
-                        For i = 0 To grdVariablesMetadata.Worksheets.Count - 1
-                            ' look up convert genericvector to string list to avoid this loop
-                            bFoundName = False
-                            For j = 0 To lstDataNames.Length - 1
-                                strDataName = lstDataNames.AsCharacter(j)
-                                If strDataName = grdVariablesMetadata.Worksheets(i - k).Name Then
-                                    bFoundName = True
-                                    Exit For
-                                End If
-                            Next
-                            If Not bFoundName Then
-                                shtTemp = grdVariablesMetadata.Worksheets(i - k)
-                                grdVariablesMetadata.Worksheets.Remove(shtTemp)
-                                k = k + 1
-                            End If
-                        Next
-                    End If
                 End If
 
                 If bGrdMetadataExists AndAlso (bGrdMetadataChanged OrElse bRMetadataChanged) Then
@@ -350,7 +349,6 @@ Public Class clsGridLink
         Dim bApplyColumnColours As Boolean
         Dim i, j, k As Integer
         Dim strCurrColNames As String = ""
-        Dim strCurrHeader As String
         Dim lstColumnNames As New List(Of String)
 
         iCount = 0
@@ -420,7 +418,7 @@ Public Class clsGridLink
             FormatDataView(fillWorkSheet)
         End If
         Try
-            lstColumnNames = dfTemp.ColumnNames.ToList
+            lstColumnNames = strColumnNames.ToList
             strCurrColNames = frmMain.clsRLink.GetListAsRString(lstColumnNames)
 
             If bInstatObjectDataFrame AndAlso frmMain.clsRLink.bInstatObjectExists AndAlso bIncludeDataTypes Then
@@ -437,29 +435,40 @@ Public Class clsGridLink
                 vecColumnDataTypes = frmMain.clsRLink.RunInternalScriptGetValue(clsGetVarMetaFunc.ToScript()).AsCharacter
 
                 For k = 0 To dfTemp.ColumnCount - 1
-                    strCurrHeader = lstColumnNames(k)
-                    If vecColumnDataTypes(k).Contains("factor") AndAlso vecColumnDataTypes(k).Contains("ordered") Then
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (o.f)"
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.Blue
-                    ElseIf vecColumnDataTypes(k).Contains("factor") Then
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (f)"
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.Blue
-                    ElseIf vecColumnDataTypes(k).Contains("character") Then
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (c)"
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.DarkBlue
-                    ElseIf vecColumnDataTypes(k).Contains("Date") Then
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (D)"
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.DarkBlue
-                    ElseIf vecColumnDataTypes(k).Contains("logical") Then
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (l)"
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.DarkBlue
-                    Else
-                        fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader
-                        fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.DarkBlue
+                    Dim strType As String
+                    Dim clsHeader As ColumnHeader
+
+                    strType = vecColumnDataTypes(k)
+                    clsHeader = fillWorkSheet.ColumnHeaders(k)
+                    clsHeader.Text = lstColumnNames(k)
+                    clsHeader.TextColor = Graphics.SolidColor.DarkBlue
+
+                    If strType.Contains("factor") AndAlso strType.Contains("ordered") Then
+                        clsHeader.Text &= " (O.F)"
+                        clsHeader.TextColor = Graphics.SolidColor.Blue
+                    ElseIf strType.Contains("factor") Then
+                        clsHeader.Text &= " (F)"
+                        clsHeader.TextColor = Graphics.SolidColor.Blue
+                    ElseIf strType.Contains("character") Then
+                        clsHeader.Text &= " (C)"
+                    ElseIf strType.Contains("Date") OrElse strType.Contains("POSIXct") OrElse strType.Contains("POSIXt") OrElse strType.Contains("hms") OrElse strType.Contains("difftime") OrElse strType.Contains("Duration") OrElse strType.Contains("Period") OrElse strType.Contains("Interval") Then
+                        clsHeader.Text &= " (D)"
+                    ElseIf strType.Contains("logical") Then
+                        clsHeader.Text &= " (L)"
+                        ' Structured columns e.g. "circular" are coded with "(S)"
+                    ElseIf strType.Contains("circular") Then
+                        clsHeader.Text &= " (S)"
+                        ' Types of data for specific Application areas e.g. survival are coded with "(A)"
+                        ' No examples implemented yet.
+                        'ElseIf strType.Contains() Then
+                        '    fillWorkSheet.ColumnHeaders(k).Text = strCurrHeader & " (A)"
+                        '    fillWorkSheet.ColumnHeaders(k).TextColor = Graphics.SolidColor.DarkBlue
                     End If
                 Next
             Else
-                For k = 0 To lstColumnNames.Count - 1
+                'worksheet columns could be less than than the data frame columns, 
+                'so use worksheet ColumnCount
+                For k = 0 To fillWorkSheet.ColumnCount - 1
                     fillWorkSheet.ColumnHeaders(k).Text = lstColumnNames(k)
                 Next
             End If

@@ -23,7 +23,6 @@ Public Class dlgReplaceValues
     Private strVarType As String = ""
 
     Private Sub dlgReplace_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -34,6 +33,7 @@ Public Class dlgReplaceValues
         SetRCodeForControls(bReset)
         bReset = False
         TestOKEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
@@ -49,7 +49,6 @@ Public Class dlgReplaceValues
         ucrReceiverReplace.SetMeAsReceiver()
         ucrReceiverReplace.SetSingleTypeStatus(True)
         ucrReceiverReplace.SetParameterIsString()
-        ucrReceiverReplace.SetExcludedDataTypes({"Date"})
 
         'Old Values
         ucrPnlOld.AddRadioButton(rdoOldValue)
@@ -71,6 +70,8 @@ Public Class dlgReplaceValues
         ucrPnlOld.AddParameterPresentCondition(rdoOldInterval, "end_value")
         ucrPnlOld.AddParameterPresentCondition(rdoOldMissing, "end_value", False)
         ucrPnlOld.AddParameterPresentCondition(rdoOldValue, "end_value", False)
+        'Temp fix otherwise you get a developer error on reopening the dialog when on rdoOldMissing
+        ucrPnlOld.bAllowNonConditionValues = True
 
         ucrPnlOld.AddToLinkedControls(ucrPnlNew, {rdoOldInterval, rdoOldValue, rdoOldMissing}, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True, objNewDefaultState:=rdoNewMissing)
         ucrPnlOld.AddToLinkedControls(ucrInputOldValue, {rdoOldValue}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True, bNewLinkedChangeToDefaultState:=True)

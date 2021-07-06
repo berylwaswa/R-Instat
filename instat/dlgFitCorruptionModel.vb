@@ -16,7 +16,7 @@
 
 Imports instat.Translations
 
-Public Class dlgFitCorruptionModel
+Public Class dlgCorruptionFitModel
     Private bFirstLoad As Boolean = True
     Private bReset As Boolean = True
     Private bResetDisplayOptions As Boolean = True
@@ -26,10 +26,13 @@ Public Class dlgFitCorruptionModel
     Private clsCorruptionModel, clsBinomialModel As New RFunction
     Private clsFormula, clsExplanatoryVariables As New ROperator
     'Function for display sub dialog
-    Public clsVisReg, clsAutoPlot, clsFormulaFunction, clsAnovaFunction, clsSummaryFunction, clsConfint As RFunction
+    Public clsVisReg, clsFormulaFunction, clsAnovaFunction, clsSummaryFunction, clsConfint As RFunction
+
+    'Saving Operators/Functions
+    Private clsRstandardFunction, clsHatvaluesFunction, clsResidualFunction, clsFittedValuesFunction As New RFunction
+    Private dctPlotFunctions As New Dictionary(Of String, RFunction)
 
     Private Sub dlgFitCorruptionModel_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -42,6 +45,7 @@ Public Class dlgFitCorruptionModel
         End If
         SetRCodeForControls(bReset)
         bReset = False
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
@@ -85,11 +89,15 @@ Public Class dlgFitCorruptionModel
         clsSummaryFunction = New RFunction
         clsConfint = New RFunction
         clsVisReg = New RFunction
-        clsAutoPlot = New RFunction
         clsAnovaFunction = New RFunction
         clsBinomialModel = New RFunction
         clsExplanatoryVariables = New ROperator
         clsFormula = New ROperator
+
+        clsRstandardFunction = New RFunction
+        clsHatvaluesFunction = New RFunction
+        clsResidualFunction = New RFunction
+        clsFittedValuesFunction = New RFunction
 
         clsBinomialModel.SetRCommand("binomial")
         clsBinomialModel.AddParameter("link", Chr(34) & "logit" & Chr(34))
@@ -100,7 +108,7 @@ Public Class dlgFitCorruptionModel
         clsFormula.AddParameter("input", clsROperatorParameter:=clsExplanatoryVariables, iPosition:=1)
 
         'Residual Plots
-        clsAutoPlot = clsRegressionDefaults.clsDefaultAutoplot.Clone
+        'clsAutoPlot = clsRegressionDefaults.clsDefaultAutoplot.Clone
 
         ucrReceiverOutput.SetMeAsReceiver()
 
@@ -110,8 +118,11 @@ Public Class dlgFitCorruptionModel
         ucrInputModelPreview.SetName("")
 
         'Residual Plots
-        clsAutoPlot = clsRegressionDefaults.clsDefaultAutoplot.Clone
-        clsAutoPlot.AddParameter("object", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+        dctPlotFunctions = New Dictionary(Of String, RFunction)(clsRegressionDefaults.dctModelPlotFunctions)
+
+        For Each kvp As KeyValuePair(Of String, RFunction) In dctPlotFunctions
+            kvp.Value.AddParameter("x", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+        Next
 
         'Display formula
         clsFormulaFunction = clsRegressionDefaults.clsDefaultFormulaFunction.Clone
@@ -140,6 +151,19 @@ Public Class dlgFitCorruptionModel
         clsVisReg.AddParameter("gg", "TRUE")
         clsVisReg.iCallType = 3
         clsVisReg.AddParameter("fit", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+        clsVisReg.bExcludeAssignedFunctionOutput = False
+
+        clsResidualFunction.SetRCommand("residuals")
+        clsResidualFunction.AddParameter("object", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+
+        clsFittedValuesFunction.SetRCommand("fitted.values")
+        clsFittedValuesFunction.AddParameter("object", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+
+        clsRstandardFunction.SetRCommand("rstandard")
+        clsRstandardFunction.AddParameter("model", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
+
+        clsHatvaluesFunction.SetRCommand("hatvalues")
+        clsHatvaluesFunction.AddParameter("model", clsRFunctionParameter:=clsCorruptionModel, iPosition:=0)
 
 
         clsCorruptionModel.SetRCommand("glm")
@@ -150,7 +174,6 @@ Public Class dlgFitCorruptionModel
 
         ucrBase.clsRsyntax.AddToAfterCodes(clsAnovaFunction, 1)
         ucrBase.clsRsyntax.AddToAfterCodes(clsSummaryFunction, 2)
-        ucrBase.clsRsyntax.AddToAfterCodes(clsAutoPlot, 5)
 
         bResetDisplayOptions = True
         SetBaseFunction()
@@ -231,13 +254,32 @@ Public Class dlgFitCorruptionModel
     End Sub
 
     Private Sub cmdDisplayOptions_Click(sender As Object, e As EventArgs) Handles cmdDisplayOptions.Click
-        sdgSimpleRegOptions.SetRCode(ucrBase.clsRsyntax, clsNewFormulaFunction:=clsFormulaFunction, clsNewAnovaFunction:=clsAnovaFunction, clsNewRSummaryFunction:=clsSummaryFunction, clsNewConfint:=clsConfint, clsNewVisReg:=clsVisReg, clsNewAutoplot:=clsAutoPlot, bReset:=bResetDisplayOptions)
+        sdgSimpleRegOptions.SetRCode(ucrBase.clsRsyntax, clsNewFormulaFunction:=clsFormulaFunction, clsNewAnovaFunction:=clsAnovaFunction, clsNewRSummaryFunction:=clsSummaryFunction, clsNewConfint:=clsConfint, clsNewVisReg:=clsVisReg, dctNewPlot:=dctPlotFunctions, clsNewResidualFunction:=clsResidualFunction, clsNewFittedValuesFunction:=clsFittedValuesFunction, clsNewRstandardFunction:=clsRstandardFunction, clsNewHatvaluesFunction:=clsHatvaluesFunction, ucrNewAvailableDatafrane:=ucrSelectorFitModel.ucrAvailableDataFrames, bReset:=bResetDisplayOptions)
         sdgSimpleRegOptions.ShowDialog()
+        GraphAssignTo()
         bResetDisplayOptions = False
     End Sub
 
     Private Sub ucrReceiverOutput_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrReceiverOutput.ControlValueChanged, ucrReceiverControlVariables.ControlValueChanged, ucrReceiverIndicators.ControlValueChanged
         SetBaseFunction()
         SetFormula()
+    End Sub
+
+    Private Sub ucrSelectorFitModel_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrSelectorFitModel.ControlValueChanged
+        GraphAssignTo()
+    End Sub
+
+    Private Sub GraphAssignTo()
+        'temp fix for graph display problem with RDotNet
+        clsVisReg.SetAssignTo("last_visreg", strTempDataframe:=ucrSelectorFitModel.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_visreg")
+        'Dim lstPlotNames As New List(Of String)
+        'Dim i As Integer = 0
+
+        'lstPlotNames = New List(Of String)({"last_residplot", "last_qqplot", "last_scaleloc", "last_cooksdist", "last_residlev", "last_cookslev"})
+
+        'For Each kvp As KeyValuePair(Of String, RFunction) In dctPlotFunctions
+        '    kvp.Value.SetAssignTo(lstPlotNames(index:=i), strTempDataframe:=ucrSelectorFitModel.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:=lstPlotNames(index:=i))
+        '    i = i + 1
+        'Next
     End Sub
 End Class

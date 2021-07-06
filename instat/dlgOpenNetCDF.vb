@@ -24,8 +24,6 @@ Public Class dlgOpenNetCDF
     Private bReset As Boolean = True
     Private clsImportNetcdfFunction, clsNcOpenFunction, clsNcCloseFunction, clsRFileDetails As New RFunction
     Private clsBoundaryListFunction, clsYLimitsFunction, clsXLimtsFunction, clsZLimtsFunction, clsSLimtsFunction, clsTLimitsFunction As New RFunction
-    Dim strFileType As String
-    Dim bComponentsInitialised As Boolean
     Public bStartOpenDialog As Boolean
     Private bResetSubdialog As Boolean = False
     Private bShowDetails As Boolean
@@ -36,19 +34,23 @@ Public Class dlgOpenNetCDF
     Private bCloseFile As Boolean = False
     Private strFileAssignName As String = "nc"
     Private iExpandedWidth As Integer
+    Private strLibraryPath As String = Path.Combine(frmMain.strStaticPath, "Library", "Climatic", "_Satellite/")
+    Private bFromLibrary As Boolean = False
+    Private bSubDialogOKEnabled As Boolean = True
+    Private bMultiImport As Boolean = False
+    Private strFiles() As String = {}
 
     Public Sub New()
         ' This call is required by the designer.
         InitializeComponent()
         bFirstLoad = True
-        bComponentsInitialised = True
-        bStartOpenDialog = True
+        bStartOpenDialog = False
         ucrInputDataName.bAutoChangeOnLeave = True
         iExpandedWidth = Me.Width
+        NFilesLabelVisible(False)
     End Sub
 
     Private Sub dlgOpenNetCDF_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
@@ -65,23 +67,24 @@ Public Class dlgOpenNetCDF
         End If
         bReset = False
         TestOkEnabled()
+        autoTranslate(Me)
     End Sub
 
     Private Sub OpenFile()
         Dim strTemp As String = ""
         Dim strScript As String = ""
 
-        If Not ucrInputFilePath.IsEmpty AndAlso File.Exists(strFilePath) Then
+        If Not ucrInputPath.IsEmpty AndAlso File.Exists(strFilePath) Then
             strScript = clsNcOpenFunction.ToScript(strTemp)
-            frmMain.clsRLink.RunScript(strTemp, strComment:="Opening Net CDF file", bUpdateGrids:=False, bSilent:=True)
+            frmMain.clsRLink.RunScript(strTemp, strComment:="Opening connection to NetCDF file", bUpdateGrids:=False, bSilent:=True)
             bCloseFile = True
         End If
     End Sub
 
     Private Sub InitialiseDialog()
-        'ucrBase.iHelpTopicID = 
+        ucrBase.iHelpTopicID = 393
 
-        ucrInputFilePath.IsReadOnly = True
+        ucrInputPath.IsReadOnly = True
 
         ucrInputFileDetails.txtInput.ScrollBars = ScrollBars.Vertical
 
@@ -100,6 +103,11 @@ Public Class dlgOpenNetCDF
         strMedium = ""
         strLong = ""
         rdoShort.Checked = True
+        bMultiImport = False
+
+        ucrInputPath.SetName("")
+        ucrInputFileDetails.SetName("")
+        NFilesLabelVisible(False)
 
         clsImportNetcdfFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$import_NetCDF")
         clsImportNetcdfFunction.AddParameter("nc", clsRFunctionParameter:=clsNcOpenFunction, iPosition:=0)
@@ -118,13 +126,14 @@ Public Class dlgOpenNetCDF
         clsNcCloseFunction.SetRCommand("nc_close")
         clsNcCloseFunction.AddParameter("nc", clsRFunctionParameter:=clsNcOpenFunction, iPosition:=0)
 
-        clsRFileDetails.SetPackageName("cmsaf")
+        clsRFileDetails.SetPackageName("cmsafops")
         clsRFileDetails.SetRCommand("ncinfo")
 
         ucrBase.clsRsyntax.ClearCodes()
         ucrBase.clsRsyntax.SetBaseRFunction(clsImportNetcdfFunction)
         ucrBase.clsRsyntax.AddToAfterCodes(clsNcCloseFunction, iPosition:=0)
         bResetSubdialog = True
+        bSubDialogOKEnabled = True
 
         bShowDetails = False
         SetDialogSize()
@@ -135,7 +144,7 @@ Public Class dlgOpenNetCDF
     End Sub
 
     Private Sub TestOkEnabled()
-        If ucrInputDataName.Text <> "" AndAlso ucrInputFilePath.Text <> "" Then
+        If (Not bMultiImport OrElse (bMultiImport AndAlso strFiles.Count > 0)) AndAlso ucrInputDataName.Text <> "" AndAlso ucrInputPath.Text <> "" AndAlso bSubDialogOKEnabled Then
             ucrBase.OKEnabled(True)
         Else
             ucrBase.OKEnabled(False)
@@ -154,49 +163,117 @@ Public Class dlgOpenNetCDF
         Dim strFileExt As String = ""
         Dim strTemp As String = ""
 
+        NFilesLabelVisible(False)
+        bMultiImport = False
+        cmdDetails.Visible = True
         Using dlgOpen As New OpenFileDialog
             dlgOpen.Filter = "All Data files|*.nc|NetCDF files|*.nc"
             dlgOpen.Title = "Open Data from file"
-            If Not ucrInputFilePath.IsEmpty() Then
-                dlgOpen.InitialDirectory = Path.GetDirectoryName(Replace(ucrInputFilePath.GetText(), "/", "\"))
+            If bFromLibrary Then
+                dlgOpen.InitialDirectory = Path.GetDirectoryName(Replace(strLibraryPath, "/", "\"))
+            ElseIf Not ucrInputPath.IsEmpty() Then
+                dlgOpen.InitialDirectory = Path.GetDirectoryName(Replace(ucrInputPath.GetText(), "/", "\"))
             Else
                 dlgOpen.InitialDirectory = frmMain.clsInstatOptions.strWorkingDirectory
             End If
 
             If dlgOpen.ShowDialog() = DialogResult.OK Then
+                clsImportNetcdfFunction.RemoveParameterByName("path")
                 ucrInputDataName.SetName("")
                 'checks if the file name is not blank'
                 If dlgOpen.FileName <> "" Then
                     strFileName = Path.GetFileNameWithoutExtension(dlgOpen.FileName)
                     strFilePath = dlgOpen.FileName
-                    strFileExt = Path.GetExtension(strFilePath)
-                    ucrInputFilePath.SetName(Replace(strFilePath, "\", "/"))
+                    strFileExt = Path.GetExtension(strFilePath).ToLower()
+                    ucrInputPath.SetName(Replace(strFilePath, "\", "/"))
                     If strFileExt = ".nc" Then
                         CheckCloseFile()
                         bCloseFile = True
                         ucrInputDataName.SetName(frmMain.clsRLink.MakeValidText(strFileName))
                         clsNcOpenFunction.AddParameter("filename", Chr(34) & Replace(strFilePath, "\", "/") & Chr(34))
                         clsNcOpenFunction.ToScript(strTemp)
-                        frmMain.clsRLink.RunScript(strTemp, strComment:="Opening netCDF file", bUpdateGrids:=False)
-                        strFileType = "nc"
+                        frmMain.clsRLink.RunScript(strTemp, strComment:="Opening connection to NetCDF file", bUpdateGrids:=False)
                         clsRFileDetails.AddParameter("infile", Chr(34) & Replace(strFilePath, "\", "/") & Chr(34), iPosition:=1)
                         FileDetails()
                         clsImportNetcdfFunction.RemoveParameterByName("boundary")
+                        clsBoundaryListFunction.ClearParameters()
                     End If
+                Else
+                    MsgBox("File type: '" & strFileExt & "' not recognised as a NetCDF file (.nc).", vbOKOnly)
+                    strShort = ""
+                    strMedium = ""
+                    strLong = ""
                 End If
             End If
         End Using
     End Sub
 
     Private Sub cmdOptions_Click(sender As Object, e As EventArgs) Handles cmdOptions.Click
-        sdgOpenNetCDF.SetRFunction(clsNewImportNetcdfFunction:=clsImportNetcdfFunction, clsNewNcOpenFunction:=clsNcOpenFunction, strNewFilePath:=strFilePath, clsNewBoundaryListFunction:=clsBoundaryListFunction, clsNewXLimitsFunction:=clsXLimtsFunction, clsNewYLimitsFunction:=clsYLimitsFunction, clsNewZLimitsFunction:=clsZLimtsFunction, clsNewSLimitsFunction:=clsSLimtsFunction, clsNewTLimitsFunction:=clsTLimitsFunction, strNewShortDescription:=strShort, bReset:=bResetSubdialog)
+        sdgOpenNetCDF.SetRFunction(clsNewImportNetcdfFunction:=clsImportNetcdfFunction, clsNewNcOpenFunction:=clsNcOpenFunction, clsNewBoundaryListFunction:=clsBoundaryListFunction, clsNewXLimitsFunction:=clsXLimtsFunction, clsNewYLimitsFunction:=clsYLimitsFunction, clsNewZLimitsFunction:=clsZLimtsFunction, clsNewSLimitsFunction:=clsSLimtsFunction, clsNewTLimitsFunction:=clsTLimitsFunction, strNewShortDescription:=strShort, bNewMultiImport:=bMultiImport, bReset:=bResetSubdialog)
         bResetSubdialog = False
         sdgOpenNetCDF.ShowDialog()
+        bSubDialogOKEnabled = sdgOpenNetCDF.bOKEnabled
         TestOkEnabled()
     End Sub
 
-    Private Sub cmdOpenDataSet_Click(sender As Object, e As EventArgs) Handles cmdOpenDataSet.Click
+    Private Sub cmdBrowseFile_Click(sender As Object, e As EventArgs) Handles cmdBrowseFile.Click
         GetFileFromOpenDialog()
+    End Sub
+
+    Private Sub cmdBrowseFolder_Click(sender As Object, e As EventArgs) Handles cmdBrowseFolder.Click
+        Dim strPath As String
+        Dim strTemp As String = ""
+
+        Using dlgFolder As New FolderBrowserDialog
+            bMultiImport = True
+            dlgFolder.Description = "Choose Folder"
+            If dlgFolder.ShowDialog() = DialogResult.OK Then
+                cmdDetails.Visible = False
+                bShowDetails = False
+                SetDialogSize()
+                ucrInputDataName.SetName("")
+                strPath = dlgFolder.SelectedPath
+                ucrInputPath.SetName(Replace(strPath, "\", "/"))
+                SetNFilesInFolder(strPath)
+                If strFiles.Count > 0 Then
+                    CheckCloseFile()
+                    clsNcOpenFunction.AddParameter("filename", Chr(34) & Replace(strFiles(0), "\", "/") & Chr(34))
+                    clsNcOpenFunction.bToBeAssigned = True
+                    clsNcOpenFunction.ToScript(strTemp)
+                    frmMain.clsRLink.RunScript(strTemp, strComment:="Opening connection to first NetCDF file", bUpdateGrids:=False)
+                    bCloseFile = True
+                    clsRFileDetails.AddParameter("infile", Chr(34) & Replace(strFiles(0), "\", "/") & Chr(34), iPosition:=1)
+                    clsImportNetcdfFunction.AddParameter("path", Chr(34) & Replace(strPath, "\", "/") & Chr(34))
+                    ucrInputDataName.SetName(frmMain.clsRLink.MakeValidText(Path.GetFileName(strPath.TrimEnd(Path.DirectorySeparatorChar))))
+                    FileDetails()
+                    clsImportNetcdfFunction.RemoveParameterByName("boundary")
+                    clsBoundaryListFunction.ClearParameters()
+                Else
+                    clsNcOpenFunction.RemoveParameterByName("filename")
+                    strShort = ""
+                    strMedium = ""
+                    strLong = ""
+                End If
+            End If
+        End Using
+        autoTranslate(Me)
+    End Sub
+
+    Private Sub SetNFilesInFolder(strPath As String)
+        strFiles = Directory.GetFiles(strPath, "*.nc")
+        lblNFiles.Text = If(strFiles.Count = 0, "No", strFiles.Count)
+        NFilesLabelVisible(True)
+    End Sub
+
+    Private Sub NFilesLabelVisible(bVisible As Boolean)
+        lblFilesFound.Visible = bVisible
+        lblNFiles.Visible = bVisible
+    End Sub
+
+    Private Sub cmdFromLibrary_Click(sender As Object, e As EventArgs) Handles cmdFromLibrary.Click
+        bFromLibrary = True
+        GetFileFromOpenDialog()
+        bFromLibrary = False
     End Sub
 
     Private Sub cmdDetails_Click(sender As Object, e As EventArgs) Handles cmdDetails.Click
@@ -212,6 +289,7 @@ Public Class dlgOpenNetCDF
             Me.Size = New Size(iExpandedWidth / 1.8, Me.Height)
             cmdDetails.Text = "Show Details >>"
         End If
+        autoTranslate(Me)
     End Sub
 
     Public Sub FileDetails()
@@ -256,13 +334,14 @@ Public Class dlgOpenNetCDF
             ucrInputFileDetails.Text = strLong
         Else
         End If
+        autoTranslate(Me)
     End Sub
 
     Private Sub DescriptionButtons_CheckedChanged(sender As Object, e As EventArgs) Handles rdoShort.CheckedChanged, rdoMedium.CheckedChanged, rdoLong.CheckedChanged
         InputDetails()
     End Sub
 
-    Private Sub CoreControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrInputFilePath.ControlContentsChanged, ucrInputDataName.ControlContentsChanged
+    Private Sub CoreControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrInputPath.ControlContentsChanged, ucrInputDataName.ControlContentsChanged
         TestOkEnabled()
     End Sub
 

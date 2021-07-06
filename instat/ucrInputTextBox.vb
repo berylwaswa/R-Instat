@@ -61,6 +61,10 @@ Public Class ucrInputTextBox
         Return txtInput.Text
     End Function
 
+    Public Overrides Function GetValue() As Object
+        Return GetText()
+    End Function
+
     Public Overrides Function IsEmpty() As Boolean
         If txtInput.Text = "" Then
             Return True
@@ -71,6 +75,10 @@ Public Class ucrInputTextBox
 
     Private Sub txtInput_TextChanged(sender As Object, e As EventArgs) Handles txtInput.TextChanged
         OnContentsChanged()
+    End Sub
+
+    Private Sub txtInput_Click(sender As Object, e As EventArgs) Handles txtInput.Click
+        OnControlClicked()
     End Sub
 
     Public Property IsMultiline As Boolean

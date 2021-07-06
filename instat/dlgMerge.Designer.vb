@@ -38,79 +38,88 @@ Partial Class dlgMerge
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgMerge))
         Me.cmdJoinOptions = New System.Windows.Forms.Button()
         Me.lnlJoinType = New System.Windows.Forms.Label()
+        Me.lblMergeBy = New System.Windows.Forms.Label()
+        Me.ucrInputMergingBy = New instat.ucrInputTextBox()
         Me.ucrSaveMerge = New instat.ucrSave()
         Me.ucrInputJoinType = New instat.ucrInputComboBox()
         Me.ucrSecondDataFrame = New instat.ucrDataFrame()
         Me.ucrFirstDataFrame = New instat.ucrDataFrame()
         Me.ucrBase = New instat.ucrButtons()
+        Me.cmdColumnOptions = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'cmdJoinOptions
         '
-        Me.cmdJoinOptions.Location = New System.Drawing.Point(8, 121)
+        resources.ApplyResources(Me.cmdJoinOptions, "cmdJoinOptions")
         Me.cmdJoinOptions.Name = "cmdJoinOptions"
-        Me.cmdJoinOptions.Size = New System.Drawing.Size(115, 23)
-        Me.cmdJoinOptions.TabIndex = 4
-        Me.cmdJoinOptions.Text = "Merge Options"
         Me.cmdJoinOptions.UseVisualStyleBackColor = True
         '
         'lnlJoinType
         '
-        Me.lnlJoinType.AutoSize = True
-        Me.lnlJoinType.Location = New System.Drawing.Point(9, 88)
+        resources.ApplyResources(Me.lnlJoinType, "lnlJoinType")
         Me.lnlJoinType.Name = "lnlJoinType"
-        Me.lnlJoinType.Size = New System.Drawing.Size(56, 13)
-        Me.lnlJoinType.TabIndex = 2
-        Me.lnlJoinType.Text = "Join Type:"
+        '
+        'lblMergeBy
+        '
+        resources.ApplyResources(Me.lblMergeBy, "lblMergeBy")
+        Me.lblMergeBy.Name = "lblMergeBy"
+        '
+        'ucrInputMergingBy
+        '
+        Me.ucrInputMergingBy.AddQuotesIfUnrecognised = True
+        Me.ucrInputMergingBy.IsMultiline = False
+        Me.ucrInputMergingBy.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputMergingBy, "ucrInputMergingBy")
+        Me.ucrInputMergingBy.Name = "ucrInputMergingBy"
         '
         'ucrSaveMerge
         '
-        Me.ucrSaveMerge.Location = New System.Drawing.Point(9, 155)
+        resources.ApplyResources(Me.ucrSaveMerge, "ucrSaveMerge")
         Me.ucrSaveMerge.Name = "ucrSaveMerge"
-        Me.ucrSaveMerge.Size = New System.Drawing.Size(301, 24)
-        Me.ucrSaveMerge.TabIndex = 5
         '
         'ucrInputJoinType
         '
         Me.ucrInputJoinType.AddQuotesIfUnrecognised = True
+        Me.ucrInputJoinType.GetSetSelectedIndex = -1
         Me.ucrInputJoinType.IsReadOnly = False
-        Me.ucrInputJoinType.Location = New System.Drawing.Point(71, 85)
+        resources.ApplyResources(Me.ucrInputJoinType, "ucrInputJoinType")
         Me.ucrInputJoinType.Name = "ucrInputJoinType"
-        Me.ucrInputJoinType.Size = New System.Drawing.Size(137, 21)
-        Me.ucrInputJoinType.TabIndex = 3
         '
         'ucrSecondDataFrame
         '
+        Me.ucrSecondDataFrame.bDropUnusedFilterLevels = False
         Me.ucrSecondDataFrame.bUseCurrentFilter = True
-        Me.ucrSecondDataFrame.Location = New System.Drawing.Point(209, 22)
-        Me.ucrSecondDataFrame.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrSecondDataFrame, "ucrSecondDataFrame")
         Me.ucrSecondDataFrame.Name = "ucrSecondDataFrame"
-        Me.ucrSecondDataFrame.Size = New System.Drawing.Size(120, 50)
-        Me.ucrSecondDataFrame.TabIndex = 1
         '
         'ucrFirstDataFrame
         '
+        Me.ucrFirstDataFrame.bDropUnusedFilterLevels = False
         Me.ucrFirstDataFrame.bUseCurrentFilter = True
-        Me.ucrFirstDataFrame.Location = New System.Drawing.Point(9, 22)
-        Me.ucrFirstDataFrame.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrFirstDataFrame, "ucrFirstDataFrame")
         Me.ucrFirstDataFrame.Name = "ucrFirstDataFrame"
-        Me.ucrFirstDataFrame.Size = New System.Drawing.Size(120, 50)
-        Me.ucrFirstDataFrame.TabIndex = 0
         '
         'ucrBase
         '
-        Me.ucrBase.Location = New System.Drawing.Point(8, 185)
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(410, 53)
-        Me.ucrBase.TabIndex = 6
+        '
+        'cmdColumnOptions
+        '
+        resources.ApplyResources(Me.cmdColumnOptions, "cmdColumnOptions")
+        Me.cmdColumnOptions.Name = "cmdColumnOptions"
+        Me.cmdColumnOptions.UseVisualStyleBackColor = True
         '
         'dlgMerge
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(418, 239)
+        Me.Controls.Add(Me.cmdColumnOptions)
+        Me.Controls.Add(Me.ucrInputMergingBy)
+        Me.Controls.Add(Me.lblMergeBy)
         Me.Controls.Add(Me.ucrSaveMerge)
         Me.Controls.Add(Me.lnlJoinType)
         Me.Controls.Add(Me.ucrInputJoinType)
@@ -122,9 +131,7 @@ Partial Class dlgMerge
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgMerge"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Tag = "Merge"
-        Me.Text = "Merge"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -137,4 +144,7 @@ Partial Class dlgMerge
     Friend WithEvents ucrInputJoinType As ucrInputComboBox
     Friend WithEvents lnlJoinType As Label
     Friend WithEvents ucrSaveMerge As ucrSave
+    Friend WithEvents lblMergeBy As Label
+    Friend WithEvents ucrInputMergingBy As ucrInputTextBox
+    Friend WithEvents cmdColumnOptions As Button
 End Class

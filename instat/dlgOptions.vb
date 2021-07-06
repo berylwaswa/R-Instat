@@ -23,6 +23,7 @@ Imports instat
 
 Public Class dlgOptions
     Public strCurrLanguageCulture As String
+    Public strPrevLanguageCulture As String
     Public strOutputWindowDisplay As String
     Public strWorkingDirectory As String
     Private strGraphDisplayOption As String
@@ -35,13 +36,13 @@ Public Class dlgOptions
     Dim clrOutput, clrCommand, clrComment, clrEditor As Color
 
     Private Sub dlgOptions_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        autoTranslate(Me)
         If bFirstLoad Then
             InitialiseDialog()
             bFirstLoad = False
         End If
         LoadInstatOptions()
         ApplyEnabled(False)
+        autoTranslate(Me)
     End Sub
 
     Private Sub InitialiseDialog()
@@ -63,12 +64,13 @@ Public Class dlgOptions
         rtbCommentPreview.Text = strPreviewText
         rtbOutputPreview.Text = strPreviewText
         SetView()
-        'temp disabled as not functioning yet
-        rdoFrench.Enabled = False
-        rdoKiswahili.Enabled = False
-        rdoSpanish.Enabled = False
+
         ucrNudDigits.SetMinMax(0, 22)
         ucrChkIncludeCommentsbyDefault.SetText("Include Comments by Default")
+        ucrChkViewStructuredMenu.SetText("Show Structured Menu")
+        ucrChkViewClimaticMenu.SetText("Show Climatic Menu")
+        ucrChkViewProcurementMenu.SetText("Show Procurement Menu")
+        ucrChkViewOptionsByContextMenu.SetText("Show Options By Context Menu")
         ucrChkShowRCommandsinOutputWindow.SetText(" Show R Commands in Output Window")
         ucrChkShowSignifStars.SetText("Show stars on summary tables for coefficients")
         ucrChkShowDataonGrid.SetText("Display dialog's selected data frame in grid")
@@ -80,13 +82,12 @@ Public Class dlgOptions
         ucrPnlGraphDisplay.AddRadioButton(rdoDisplayinOutputWindow)
         ucrPnlGraphDisplay.AddRadioButton(rdoDisplayinRViewer)
         ucrPnlGraphDisplay.AddRadioButton(rdoDisplayinSeparateWindows)
-        ucrPnlLanguage.AddRadioButton(rdoKiswahili)
-        ucrPnlLanguage.AddRadioButton(rdoEnglish)
-        ucrPnlLanguage.AddRadioButton(rdoSpanish)
-        ucrPnlLanguage.AddRadioButton(rdoFrench)
+        ucrInputLanguage.SetLinkedDisplayControl(lblLanguage)
+        ucrInputLanguage.SetItems({"English", "French", "Portuguese", "Kiswahili"})
+        ucrInputLanguage.SetDropDownStyleAsNonEditable()
     End Sub
 
-    Private Sub LoadInstatOptions()
+     Private Sub LoadInstatOptions()
         ucrChkIncludeDefaultParams.Checked = frmMain.clsInstatOptions.bIncludeRDefaultParameters
         ucrChkAutoSave.Checked = frmMain.clsInstatOptions.bAutoSaveData
         SetOutputFont(frmMain.clsInstatOptions.fntOutput, frmMain.clsInstatOptions.clrOutput)
@@ -100,25 +101,32 @@ Public Class dlgOptions
         ucrInputComment.SetName(frmMain.clsInstatOptions.strComment)
         ucrWorkingDirectory.SetName(frmMain.clsInstatOptions.strWorkingDirectory)
         ucrChkIncludeCommentsbyDefault.Checked = frmMain.clsInstatOptions.bIncludeCommentDefault
+        ucrChkViewOptionsByContextMenu.Checked = frmMain.clsInstatOptions.bShowOptionsByContextMenu
+        ucrChkViewProcurementMenu.Checked = frmMain.clsInstatOptions.bShowProcurementMenu
+        ucrChkViewStructuredMenu.Checked = frmMain.clsInstatOptions.bShowStructuredMenu
+        ucrChkViewClimaticMenu.Checked = frmMain.clsInstatOptions.bShowClimaticMenu
         ucrChkShowRCommandsinOutputWindow.Checked = frmMain.clsInstatOptions.bCommandsinOutput
         ucrNudDigits.Value = frmMain.clsInstatOptions.iDigits
         ucrChkShowSignifStars.Checked = frmMain.clsInstatOptions.bShowSignifStars
         ucrChkShowDataonGrid.Checked = frmMain.clsInstatOptions.bChangeDataFrame
         ucrChkShowWaitDialog.Checked = frmMain.clsInstatOptions.bShowWaitDialog
         ucrNudWaitSeconds.Value = frmMain.clsInstatOptions.iWaitTimeDelaySeconds
+        ucrInputDatabaseName.SetName(frmMain.clsInstatOptions.strClimsoftDatabaseName)
+        ucrInputHost.SetName(frmMain.clsInstatOptions.strClimsoftHost)
+        ucrInputPort.SetName(frmMain.clsInstatOptions.strClimsoftPort)
+        ucrInputUserName.SetName(frmMain.clsInstatOptions.strClimsoftUsername)
         Select Case frmMain.clsInstatOptions.strLanguageCultureCode
             Case "en-GB"
-                rdoEnglish.Checked = True
-                ' temp disabled as not functioning
-                'Case "fr-FR"
-                '    rdoFrench.Checked = True
-                'Case "sw-KE"
-                '    rdoKiswahili.Checked = True
-                'Case "es-ES"
-                '    rdoSpanish.Checked = True
-            Case Else
-                rdoEnglish.Checked = True
+                ucrInputLanguage.SetText("English")
+            Case "fr-FR"
+                ucrInputLanguage.SetText("French")
+            Case "pt-PT"
+                ucrInputLanguage.SetText("Portuguese")
+            Case "sw-KE"
+                ucrInputLanguage.SetText("Kiswahili")
         End Select
+
+        strPrevLanguageCulture = frmMain.clsInstatOptions.strLanguageCultureCode
 
         If frmMain.clsInstatOptions.strGraphDisplayOption = "view_output_window" Then
             rdoDisplayinOutputWindow.Checked = True
@@ -145,12 +153,20 @@ Public Class dlgOptions
         frmMain.clsInstatOptions.SetWorkingDirectory(strWorkingDirectory)
         frmMain.clsInstatOptions.SetGraphDisplayOption(strGraphDisplayOption)
         frmMain.clsInstatOptions.bIncludeCommentDefault = ucrChkIncludeCommentsbyDefault.Checked
+        frmMain.clsInstatOptions.SetShowOptionsByContextMenu(ucrChkViewOptionsByContextMenu.Checked)
+        frmMain.clsInstatOptions.SetShowProcurementMenu(ucrChkViewProcurementMenu.Checked)
+        frmMain.clsInstatOptions.SetShowStructuredMenu(ucrChkViewStructuredMenu.Checked)
+        frmMain.clsInstatOptions.SetShowClimaticMenu(ucrChkViewClimaticMenu.Checked)
         frmMain.clsInstatOptions.SetCommandInOutpt(ucrChkShowRCommandsinOutputWindow.Checked)
         frmMain.clsInstatOptions.SetDigits(ucrNudDigits.Value)
         frmMain.clsInstatOptions.SetSignifStars(ucrChkShowSignifStars.Checked)
         frmMain.clsInstatOptions.SetChangeDataFrame(ucrChkShowDataonGrid.Checked)
         frmMain.clsInstatOptions.SetShowWaitDialog(ucrChkShowWaitDialog.Checked)
         frmMain.clsInstatOptions.SetWaitTimeDelaySeconds(ucrNudWaitSeconds.Value)
+        frmMain.clsInstatOptions.SetClimsoftDatabaseName(ucrInputDatabaseName.GetText())
+        frmMain.clsInstatOptions.SetClimsoftHost(ucrInputHost.GetText())
+        frmMain.clsInstatOptions.SetClimsoftPort(ucrInputPort.GetText())
+        frmMain.clsInstatOptions.SetClimsoftUsername(ucrInputUserName.GetText())
     End Sub
 
     Private Sub SetView()
@@ -217,34 +233,12 @@ Public Class dlgOptions
         cmdHelp.Enabled = False
         SetInstatOptions()
         autoTranslate(Me)
+        SetView() 'needed to ensure that the tree view in the left panel correctly displays translated text
 
-        If frmMain.Visible Then
-            autoTranslate(frmMain)
+        If frmMain.Visible AndAlso strCurrLanguageCulture <> strPrevLanguageCulture Then
+            frmMain.TranslateFrmMainMenu()
         End If
-
-        If frmCommand.Visible Then
-            autoTranslate(frmCommand)
-        End If
-
-        If frmEditor.Visible Then
-            autoTranslate(frmEditor)
-        End If
-
-        If frmLog.Visible Then
-            autoTranslate(frmLog)
-        End If
-
-        If frmMetaData.Visible Then
-            autoTranslate(frmMetaData)
-        End If
-
-        If frmScript.Visible Then
-            autoTranslate(frmScript)
-        End If
-
-        If frmVariables.Visible Then
-            autoTranslate(frmVariables)
-        End If
+        strPrevLanguageCulture = strCurrLanguageCulture
         'disables the command after running it
         cmdApply.Enabled = True
         cmdOk.Enabled = True
@@ -254,19 +248,20 @@ Public Class dlgOptions
         Cursor = Cursors.Default
     End Sub
 
-    Private Sub ucrPnlLanguage_ControlValueChanged() Handles ucrPnlLanguage.ControlValueChanged
-        If rdoKiswahili.Checked Then
-            strCurrLanguageCulture = "sw-KE"
-        ElseIf rdoFrench.Checked Then
-            strCurrLanguageCulture = "fr-FR"
-        ElseIf rdoEnglish.Checked Then
-            strCurrLanguageCulture = "en-GB"
-        ElseIf rdoSpanish.Checked Then
-            strCurrLanguageCulture = "es-ES"
-        End If
+    Private Sub ucrInputLanguage_ControlValueChanged() Handles ucrInputLanguage.ControlValueChanged
+        Select Case ucrInputLanguage.GetText
+            Case "English"
+                strCurrLanguageCulture = "en-GB"
+            Case "French"
+                strCurrLanguageCulture = "fr-FR"
+            Case "Portuguese"
+                strCurrLanguageCulture = "pt-PT"
+            Case "Kiswahili"
+                strCurrLanguageCulture = "sw-KE"
+        End Select
         ApplyEnabled(True)
     End Sub
-
+  
     Private Sub cmdScriptChange_Click(sender As Object, e As EventArgs) Handles cmdCommandFormat.Click
         dlgFont.ShowColor = True
         dlgFont.MaxSize = 50
@@ -321,7 +316,7 @@ Public Class dlgOptions
 
     End Sub
 
-    Private Sub AllControls_ControlValueChanged() Handles ucrNudMaxCols.ControlValueChanged, ucrNudAutoSaveMinutes.ControlValueChanged, ucrNudPreviewRows.ControlValueChanged, ucrInputComment.ControlContentsChanged, ucrChkIncludeCommentsbyDefault.ControlValueChanged, ucrNudMaxRows.ControlValueChanged, ucrChkIncludeDefaultParams.ControlValueChanged, ucrChkShowRCommandsinOutputWindow.ControlValueChanged, ucrNudDigits.ControlValueChanged, ucrChkShowSignifStars.ControlValueChanged, ucrChkShowDataonGrid.ControlValueChanged, ucrChkAutoSave.ControlValueChanged, ucrChkShowWaitDialog.ControlValueChanged, ucrNudWaitSeconds.ControlValueChanged
+    Private Sub AllControls_ControlValueChanged() Handles ucrNudMaxCols.ControlValueChanged, ucrNudAutoSaveMinutes.ControlValueChanged, ucrNudPreviewRows.ControlValueChanged, ucrInputComment.ControlContentsChanged, ucrChkIncludeCommentsbyDefault.ControlValueChanged, ucrNudMaxRows.ControlValueChanged, ucrChkIncludeDefaultParams.ControlValueChanged, ucrChkShowRCommandsinOutputWindow.ControlValueChanged, ucrNudDigits.ControlValueChanged, ucrChkShowSignifStars.ControlValueChanged, ucrChkShowDataonGrid.ControlValueChanged, ucrChkAutoSave.ControlValueChanged, ucrChkShowWaitDialog.ControlValueChanged, ucrNudWaitSeconds.ControlValueChanged, ucrChkViewClimaticMenu.ControlValueChanged, ucrChkViewStructuredMenu.ControlValueChanged, ucrChkViewProcurementMenu.ControlValueChanged, ucrChkViewOptionsByContextMenu.ControlValueChanged, ucrInputDatabaseName.ControlValueChanged, ucrInputHost.ControlValueChanged, ucrInputPort.ControlValueChanged, ucrInputUserName.ControlValueChanged
         ApplyEnabled(True)
     End Sub
 

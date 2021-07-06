@@ -15,6 +15,7 @@
 ' along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Imports instat
+Imports RDotNet
 
 Public Class ucrInput
     Public bUserTyped As Boolean = False
@@ -37,6 +38,9 @@ Public Class ucrInput
     Protected dctDisplayParameterValues As New Dictionary(Of String, String)
     Protected bFirstLoad As Boolean = True
 
+    'used to determine if valid expressions are allowed for numeric validations e.g 20/2, 30-1
+    Protected bNumericExpressionAllowed As Boolean = True
+
     Public Sub New()
 
         ' This call is required by the designer.
@@ -52,6 +56,10 @@ Public Class ucrInput
 
     Public Overridable Function GetText() As String
         Return ""
+    End Function
+
+    Public Overridable Function GetValue() As Object
+        Return Nothing
     End Function
 
     Public Overridable Sub Reset()
@@ -94,6 +102,11 @@ Public Class ucrInput
 
     Public Sub SetDefaultTypeAsModel()
         strDefaultType = "Model"
+        SetDefaultName()
+    End Sub
+
+    Public Sub SetDefaultTypeAsSurv()
+        strDefaultType = "Surv"
         SetDefaultName()
     End Sub
 
@@ -171,12 +184,19 @@ Public Class ucrInput
                 Else
                     SetName("")
                 End If
+            ElseIf strDefaultType = "Surv" Then
+                If ucrDataFrameSelector IsNot Nothing AndAlso ucrDataFrameSelector.cboAvailableDataFrames.Text <> "" Then
+                    SetName(frmMain.clsRLink.GetNextDefault(strDefaultPrefix, frmMain.clsRLink.GetSurvNames(ucrDataFrameSelector.cboAvailableDataFrames.Text)))
+                Else
+                    SetName("")
+                End If
             End If
         End If
     End Sub
 
-    Public Sub SetValidationTypeAsNumeric(Optional dcmMin As Decimal = Decimal.MinValue, Optional bIncludeMin As Boolean = True, Optional dcmMax As Decimal = Decimal.MaxValue, Optional bIncludeMax As Boolean = True)
+    Public Sub SetValidationTypeAsNumeric(Optional dcmMin As Decimal = Decimal.MinValue, Optional bIncludeMin As Boolean = True, Optional dcmMax As Decimal = Decimal.MaxValue, Optional bIncludeMax As Boolean = True, Optional bNumericExpressionAllowed As Boolean = True)
         strValidationType = "Numeric"
+        Me.bNumericExpressionAllowed = bNumericExpressionAllowed
         If dcmMin <> Decimal.MinValue Then
             dcmMinimum = dcmMin
             bMinimumIncluded = bIncludeMin
@@ -326,9 +346,19 @@ Public Class ucrInput
         Dim dcmText As Decimal
         Dim iType As Integer = 0
 
-        If strText <> "" Then
+        If strText <> "" AndAlso (strValuesToIgnore Is Nothing OrElse (strValuesToIgnore IsNot Nothing AndAlso Not strValuesToIgnore.Contains(strText))) Then
             If Not IsNumeric(strText) Then
-                iType = 1
+                iType = 1 'reset as invalid entry 
+                'if numeric expressions are allowed check the expression results to a valid numeric
+                If bNumericExpressionAllowed Then
+                    Dim vecOutput As CharacterVector
+                    'is.numeric(x) returns true if the x expression is a valid one. 
+                    'So we use it here to check validity of the entry
+                    vecOutput = frmMain.clsRLink.RunInternalScriptGetOutput("is.numeric(" & strText & ")", bSilent:=True)
+                    If vecOutput IsNot Nothing AndAlso vecOutput.Length > 0 AndAlso Mid(vecOutput(0), 5).ToUpper = "TRUE" Then
+                        iType = 0 'set as valid entry
+                    End If
+                End If
             Else
                 dcmText = Convert.ToDecimal(strText)
                 If (dcmText < dcmMinimum) OrElse (dcmText > dcmMaximum) OrElse (Not bMinimumIncluded And dcmText <= dcmMinimum) OrElse (Not bMaximumIncluded And dcmText >= dcmMaximum) Then
@@ -452,7 +482,7 @@ Public Class ucrInput
         End Set
     End Property
 
-    Protected Overrides Sub SetToValue(objTemp As Object)
+    Public Overrides Sub SetToValue(objTemp As Object)
         If objTemp IsNot Nothing Then
             SetName(objTemp.ToString())
         Else

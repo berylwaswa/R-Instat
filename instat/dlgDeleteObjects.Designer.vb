@@ -38,56 +38,61 @@ Partial Class dlgDeleteObjects
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(dlgDeleteObjects))
         Me.lblObjectsToDelete = New System.Windows.Forms.Label()
         Me.ucrReceiverObjectsToDelete = New instat.ucrReceiverMultiple()
         Me.ucrSelectorDeleteObject = New instat.ucrSelectorByDataFrameAddRemove()
         Me.ucrBase = New instat.ucrButtons()
+        Me.ucrInputComboType = New instat.ucrInputComboBox()
+        Me.lblType = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'lblObjectsToDelete
         '
-        Me.lblObjectsToDelete.AutoSize = True
-        Me.lblObjectsToDelete.Location = New System.Drawing.Point(254, 45)
+        resources.ApplyResources(Me.lblObjectsToDelete, "lblObjectsToDelete")
         Me.lblObjectsToDelete.Name = "lblObjectsToDelete"
-        Me.lblObjectsToDelete.Size = New System.Drawing.Size(92, 13)
-        Me.lblObjectsToDelete.TabIndex = 1
         Me.lblObjectsToDelete.Tag = "Objects_to_Delete"
-        Me.lblObjectsToDelete.Text = "Objects to Delete:"
         '
         'ucrReceiverObjectsToDelete
         '
         Me.ucrReceiverObjectsToDelete.frmParent = Me
-        Me.ucrReceiverObjectsToDelete.Location = New System.Drawing.Point(254, 60)
-        Me.ucrReceiverObjectsToDelete.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrReceiverObjectsToDelete, "ucrReceiverObjectsToDelete")
         Me.ucrReceiverObjectsToDelete.Name = "ucrReceiverObjectsToDelete"
         Me.ucrReceiverObjectsToDelete.Selector = Nothing
-        Me.ucrReceiverObjectsToDelete.Size = New System.Drawing.Size(120, 100)
         Me.ucrReceiverObjectsToDelete.strNcFilePath = ""
-        Me.ucrReceiverObjectsToDelete.TabIndex = 2
         Me.ucrReceiverObjectsToDelete.ucrSelector = Nothing
         '
         'ucrSelectorDeleteObject
         '
+        Me.ucrSelectorDeleteObject.bDropUnusedFilterLevels = False
         Me.ucrSelectorDeleteObject.bShowHiddenColumns = False
         Me.ucrSelectorDeleteObject.bUseCurrentFilter = True
-        Me.ucrSelectorDeleteObject.Location = New System.Drawing.Point(10, 10)
-        Me.ucrSelectorDeleteObject.Margin = New System.Windows.Forms.Padding(0)
+        resources.ApplyResources(Me.ucrSelectorDeleteObject, "ucrSelectorDeleteObject")
         Me.ucrSelectorDeleteObject.Name = "ucrSelectorDeleteObject"
-        Me.ucrSelectorDeleteObject.Size = New System.Drawing.Size(210, 180)
-        Me.ucrSelectorDeleteObject.TabIndex = 0
         '
         'ucrBase
         '
-        Me.ucrBase.Location = New System.Drawing.Point(10, 204)
+        resources.ApplyResources(Me.ucrBase, "ucrBase")
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(410, 52)
-        Me.ucrBase.TabIndex = 3
+        '
+        'ucrInputComboType
+        '
+        Me.ucrInputComboType.AddQuotesIfUnrecognised = True
+        Me.ucrInputComboType.IsReadOnly = False
+        resources.ApplyResources(Me.ucrInputComboType, "ucrInputComboType")
+        Me.ucrInputComboType.Name = "ucrInputComboType"
+        '
+        'lblType
+        '
+        resources.ApplyResources(Me.lblType, "lblType")
+        Me.lblType.Name = "lblType"
         '
         'dlgDeleteObjects
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(416, 260)
+        Me.Controls.Add(Me.lblType)
+        Me.Controls.Add(Me.ucrInputComboType)
         Me.Controls.Add(Me.ucrReceiverObjectsToDelete)
         Me.Controls.Add(Me.lblObjectsToDelete)
         Me.Controls.Add(Me.ucrSelectorDeleteObject)
@@ -96,9 +101,7 @@ Partial Class dlgDeleteObjects
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgDeleteObjects"
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Tag = "Delete_Objects"
-        Me.Text = "Delete Objects"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -108,4 +111,6 @@ Partial Class dlgDeleteObjects
     Friend WithEvents ucrSelectorDeleteObject As ucrSelectorByDataFrameAddRemove
     Friend WithEvents lblObjectsToDelete As Label
     Friend WithEvents ucrReceiverObjectsToDelete As ucrReceiverMultiple
+    Friend WithEvents lblType As Label
+    Friend WithEvents ucrInputComboType As ucrInputComboBox
 End Class
