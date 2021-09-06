@@ -363,6 +363,7 @@ Partial Class frmMain
         Me.mnuEditCopy = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditCopySpecial = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditPaste = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuPasteSpecial = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditPasteNewDataFrame = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditSelectAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
@@ -373,8 +374,12 @@ Partial Class frmMain
         Me.mnuTbOpenFromLibrary = New System.Windows.Forms.ToolStripButton()
         Me.mnuTbSave = New System.Windows.Forms.ToolStripButton()
         Me.toolStripSeparator = New System.Windows.Forms.ToolStripSeparator()
-        Me.mnuTbCopy = New System.Windows.Forms.ToolStripButton()
-        Me.mnuTbPaste = New System.Windows.Forms.ToolStripButton()
+        Me.mnuTbCopy = New System.Windows.Forms.ToolStripSplitButton()
+        Me.mnuSubTbCopy = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSubTbCopySpecial = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuTbPaste = New System.Windows.Forms.ToolStripSplitButton()
+        Me.mnuSubTbPaste = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSubTbPasteSpecial = New System.Windows.Forms.ToolStripMenuItem()
         Me.separator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.mnuTbEditLastDialog = New System.Windows.Forms.ToolStripButton()
         Me.mnuTbLast10Dialogs = New System.Windows.Forms.ToolStripDropDownButton()
@@ -395,6 +400,7 @@ Partial Class frmMain
         Me.mnuTbResetLayout = New System.Windows.Forms.ToolStripButton()
         Me.separator3 = New System.Windows.Forms.ToolStripSeparator()
         Me.mnuTbHelp = New System.Windows.Forms.ToolStripButton()
+        Me.mnuTbLan = New System.Windows.Forms.ToolStripButton()
         Me.mnuBar = New System.Windows.Forms.MenuStrip()
         Me.mnuFile = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuFileNewDataFrame = New System.Windows.Forms.ToolStripMenuItem()
@@ -2417,7 +2423,7 @@ Partial Class frmMain
         '
         'mnuEdit
         '
-        Me.mnuEdit.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditFind, Me.mnuEditFindNext, Me.mnuEditReplace, Me.mnuEditCut, Me.mnuEditCopy, Me.mnuEditCopySpecial, Me.mnuEditPaste, Me.mnuEditPasteNewDataFrame, Me.mnuEditSelectAll})
+        Me.mnuEdit.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditFind, Me.mnuEditFindNext, Me.mnuEditReplace, Me.mnuEditCut, Me.mnuEditCopy, Me.mnuEditCopySpecial, Me.mnuEditPaste, Me.mnuPasteSpecial, Me.mnuEditPasteNewDataFrame, Me.mnuEditSelectAll})
         Me.mnuEdit.Name = "mnuEdit"
         resources.ApplyResources(Me.mnuEdit, "mnuEdit")
         Me.mnuEdit.Tag = "Edit"
@@ -2453,15 +2459,21 @@ Partial Class frmMain
         '
         'mnuEditCopySpecial
         '
-        resources.ApplyResources(Me.mnuEditCopySpecial, "mnuEditCopySpecial")
         Me.mnuEditCopySpecial.Name = "mnuEditCopySpecial"
+        resources.ApplyResources(Me.mnuEditCopySpecial, "mnuEditCopySpecial")
         Me.mnuEditCopySpecial.Tag = "Copy_Special"
         '
         'mnuEditPaste
         '
-        resources.ApplyResources(Me.mnuEditPaste, "mnuEditPaste")
         Me.mnuEditPaste.Name = "mnuEditPaste"
+        resources.ApplyResources(Me.mnuEditPaste, "mnuEditPaste")
         Me.mnuEditPaste.Tag = "Paste"
+        '
+        'mnuPasteSpecial
+        '
+        Me.mnuPasteSpecial.Name = "mnuPasteSpecial"
+        resources.ApplyResources(Me.mnuPasteSpecial, "mnuPasteSpecial")
+        Me.mnuPasteSpecial.Tag = "Paste"
         '
         'mnuEditPasteNewDataFrame
         '
@@ -2493,7 +2505,7 @@ Partial Class frmMain
         Me.Tool_strip.BackColor = System.Drawing.SystemColors.ControlLightLight
         Me.Tool_strip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.Tool_strip.ImageScalingSize = New System.Drawing.Size(30, 30)
-        Me.Tool_strip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuTbOpen, Me.mnuTbOpenFromLibrary, Me.mnuTbSave, Me.toolStripSeparator, Me.mnuTbCopy, Me.mnuTbPaste, Me.separator1, Me.mnuTbEditLastDialog, Me.mnuTbLast10Dialogs, Me.mnuLastGraph, Me.separator2, Me.mnuTbDataView, Me.mnuTbOutput, Me.mnuMetadata, Me.mnuTbLog, Me.mnuTbResetLayout, Me.separator3, Me.mnuTbHelp})
+        Me.Tool_strip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuTbOpen, Me.mnuTbOpenFromLibrary, Me.mnuTbSave, Me.toolStripSeparator, Me.mnuTbCopy, Me.mnuTbPaste, Me.separator1, Me.mnuTbEditLastDialog, Me.mnuTbLast10Dialogs, Me.mnuLastGraph, Me.separator2, Me.mnuTbDataView, Me.mnuTbOutput, Me.mnuMetadata, Me.mnuTbLog, Me.mnuTbResetLayout, Me.separator3, Me.mnuTbHelp, Me.mnuTbLan})
         resources.ApplyResources(Me.Tool_strip, "Tool_strip")
         Me.Tool_strip.Name = "Tool_strip"
         Me.Tool_strip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional
@@ -2530,18 +2542,38 @@ Partial Class frmMain
         'mnuTbCopy
         '
         Me.mnuTbCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.mnuTbCopy.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuSubTbCopy, Me.mnuSubTbCopySpecial})
         Me.mnuTbCopy.Image = Global.instat.My.Resources.Resources.copy2
         resources.ApplyResources(Me.mnuTbCopy, "mnuTbCopy")
-        Me.mnuTbCopy.Margin = New System.Windows.Forms.Padding(2, 1, 2, 2)
         Me.mnuTbCopy.Name = "mnuTbCopy"
+        '
+        'mnuSubTbCopy
+        '
+        Me.mnuSubTbCopy.Name = "mnuSubTbCopy"
+        resources.ApplyResources(Me.mnuSubTbCopy, "mnuSubTbCopy")
+        '
+        'mnuSubTbCopySpecial
+        '
+        Me.mnuSubTbCopySpecial.Name = "mnuSubTbCopySpecial"
+        resources.ApplyResources(Me.mnuSubTbCopySpecial, "mnuSubTbCopySpecial")
         '
         'mnuTbPaste
         '
         Me.mnuTbPaste.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        resources.ApplyResources(Me.mnuTbPaste, "mnuTbPaste")
+        Me.mnuTbPaste.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuSubTbPaste, Me.mnuSubTbPasteSpecial})
         Me.mnuTbPaste.Image = Global.instat.My.Resources.Resources.paste2
-        Me.mnuTbPaste.Margin = New System.Windows.Forms.Padding(2, 1, 2, 2)
+        resources.ApplyResources(Me.mnuTbPaste, "mnuTbPaste")
         Me.mnuTbPaste.Name = "mnuTbPaste"
+        '
+        'mnuSubTbPaste
+        '
+        Me.mnuSubTbPaste.Name = "mnuSubTbPaste"
+        resources.ApplyResources(Me.mnuSubTbPaste, "mnuSubTbPaste")
+        '
+        'mnuSubTbPasteSpecial
+        '
+        Me.mnuSubTbPasteSpecial.Name = "mnuSubTbPasteSpecial"
+        resources.ApplyResources(Me.mnuSubTbPasteSpecial, "mnuSubTbPasteSpecial")
         '
         'separator1
         '
@@ -2669,6 +2701,14 @@ Partial Class frmMain
         resources.ApplyResources(Me.mnuTbHelp, "mnuTbHelp")
         Me.mnuTbHelp.Margin = New System.Windows.Forms.Padding(2, 1, 2, 2)
         Me.mnuTbHelp.Name = "mnuTbHelp"
+        '
+        'mnuTbLan
+        '
+        Me.mnuTbLan.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.mnuTbLan.Image = Global.instat.My.Resources.Resources.lan_btn
+        resources.ApplyResources(Me.mnuTbLan, "mnuTbLan")
+        Me.mnuTbLan.Margin = New System.Windows.Forms.Padding(2, 1, 2, 2)
+        Me.mnuTbLan.Name = "mnuTbLan"
         '
         'mnuBar
         '
@@ -4252,8 +4292,6 @@ Partial Class frmMain
     Private WithEvents Tool_strip As ToolStrip
     Friend WithEvents mnuTbSave As ToolStripButton
     Friend WithEvents toolStripSeparator As ToolStripSeparator
-    Friend WithEvents mnuTbCopy As ToolStripButton
-    Friend WithEvents mnuTbPaste As ToolStripButton
     Friend WithEvents separator1 As ToolStripSeparator
     Friend WithEvents mnuTbEditLastDialog As ToolStripButton
     Friend WithEvents separator2 As ToolStripSeparator
@@ -4729,11 +4767,8 @@ Partial Class frmMain
     Friend WithEvents mnuScriptWindow As ToolStripMenuItem
     Friend WithEvents mnuLogWindow As ToolStripMenuItem
     Friend WithEvents mnuMetadata As ToolStripSplitButton
-    Friend WithEvents mnuLastGraph As ToolStripSplitButton
     Friend WithEvents mnuColumnMetadat As ToolStripMenuItem
     Friend WithEvents mnuDataFrameMetadat As ToolStripMenuItem
-    Friend WithEvents mnuViewer As ToolStripMenuItem
-    Friend WithEvents mnuploty As ToolStripMenuItem
     Friend WithEvents mnuRViewer As ToolStripMenuItem
     Friend WithEvents mnuPlotly As ToolStripMenuItem
     Friend WithEvents mnuColumnMetadata As ToolStripMenuItem
@@ -4832,4 +4867,15 @@ Partial Class frmMain
     Friend WithEvents mnuClimaticFileImportfromClimateDataStore As ToolStripMenuItem
     Friend WithEvents mnuSetupForDataEntry As ToolStripMenuItem
     Friend WithEvents mnuEditPasteNewDataFrame As ToolStripMenuItem
+    Friend WithEvents mnuTbLan As ToolStripButton
+    Friend WithEvents mnuPasteSpecial As ToolStripMenuItem
+    Friend WithEvents mnuTbCopy As ToolStripSplitButton
+    Friend WithEvents mnuSubTbCopy As ToolStripMenuItem
+    Friend WithEvents mnuSubTbCopySpecial As ToolStripMenuItem
+    Friend WithEvents mnuTbPaste As ToolStripSplitButton
+    Friend WithEvents mnuSubTbPaste As ToolStripMenuItem
+    Friend WithEvents mnuSubTbPasteSpecial As ToolStripMenuItem
+    Friend WithEvents mnuLastGraph As ToolStripSplitButton
+    Friend WithEvents mnuViewer As ToolStripMenuItem
+    Friend WithEvents mnuploty As ToolStripMenuItem
 End Class
