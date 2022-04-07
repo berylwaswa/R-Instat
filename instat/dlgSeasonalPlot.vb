@@ -179,7 +179,7 @@ Public Class dlgSeasonalPlot
         ucrChkMovingAverage.AddParameterPresentCondition(True, "moving_mutate")
         ucrChkMovingAverage.AddParameterPresentCondition(False, "moving_mutate", False)
 
-        ucrSaveGraph.SetPrefix("seasonalityplot")
+        ucrSaveGraph.SetPrefix("seasonality_plot")
         ucrSaveGraph.SetIsComboBox()
         ucrSaveGraph.SetSaveTypeAsGraph()
         ucrSaveGraph.SetCheckBoxText("Save Graph")
@@ -192,7 +192,7 @@ Public Class dlgSeasonalPlot
         ucrInputSmoothing.AddRCodeIsRFunctionCondition("Periodic Splines", bNewIsPositive:=False)
         ucrInputSmoothing.AddParameterValueFunctionNamesCondition("Periodic Splines", strParameterName:="1", strFunctionName:="pbs")
         ucrInputSmoothing.AddRCodeIsRFunctionCondition("Natural Splines", bNewIsPositive:=False)
-        ucrInputSmoothing.AddParameterValueFunctionNamesCondition("Natural Splines", strParameterName:="1", strFunctionName:="ns")
+        ucrInputSmoothing.AddParameterValueFunctionNamesCondition("Natural Splines", strParameterName:="1", strFunctionName:="naturalSpline")
         ucrInputSmoothing.AddRCodeIsRFunctionCondition("LOESS", bNewIsPositive:=False)
         ucrInputSmoothing.AddParameterIsStringCondition("LOESS", "1")
 
@@ -450,8 +450,8 @@ Public Class dlgSeasonalPlot
         clsPbsFunction.AddParameter("x", "x", bIncludeArgumentName:=False, iPosition:=0)
         clsPbsFunction.AddParameter("df", 6, iPosition:=1)
 
-        clsNsFunction.SetPackageName("splines")
-        clsNsFunction.SetRCommand("ns")
+        clsNsFunction.SetPackageName("splines2")
+        clsNsFunction.SetRCommand("naturalSpline")
         clsNsFunction.AddParameter("x", "x", bIncludeArgumentName:=False, iPosition:=0)
         clsNsFunction.AddParameter("df", 6, iPosition:=1)
 

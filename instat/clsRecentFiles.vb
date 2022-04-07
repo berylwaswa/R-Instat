@@ -64,14 +64,12 @@ Public Class clsRecentFiles
         'read file contents
         Dim arrStrPaths() As String = File.ReadAllLines(strRecentFilesPath)
         For Each strPath As String In arrStrPaths
-            If Not String.IsNullOrEmpty(strPath) Then
-                ' Disabled this so that you can still see files that don't exist in the list
-                ' only add files that still exist...
-                'If File.Exists(sPath) Then
-                '    ' add to the list of recently opened files
-                '    strListMRU.Add(sPath)
-                'End If
-                lstRecentOpenedFiles.Add(strPath)
+            If String.IsNullOrEmpty(strPath) Then
+                Continue For
+            End If
+            Dim strNewPath As String = strPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            If Not lstRecentOpenedFiles.Contains(strNewPath) Then
+                lstRecentOpenedFiles.Add(strNewPath)
             End If
         Next
         'display the recently opened files if there are any items to display in the file
@@ -112,7 +110,8 @@ Public Class clsRecentFiles
     ''' </summary>
     ''' <param name="strFilePath">file path to add to menu items</param>
     Public Sub addToMenu(strFilePath As String)
-        'remove file if it exists(helps with making sure displayed file names are rearranged)
+        strFilePath = strFilePath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+        'remove file if already in lists(helps with making sure displayed file names are rearranged)
         lstRecentOpenedFiles.Remove(strFilePath)
         'add to recent opened files list..
         lstRecentOpenedFiles.Add(strFilePath)
@@ -191,16 +190,18 @@ Public Class clsRecentFiles
             End If
         End If
 
-        If File.Exists(strFilePath) Then
-            dlgImportDataset.strFileToOpenOn = strFilePath
+        Dim strFilePathTmp As String = strFilePath.Replace("MRU:", "")
+        If File.Exists(strFilePathTmp) Then
+            dlgImportDataset.strFileToOpenOn = strFilePathTmp
             dlgImportDataset.ShowDialog()
-        Else
-            'removes the path to the non existent file
-            If DialogResult.Yes = MessageBox.Show(frmMain, "File not accessible. It may have been renamed, moved or deleted." & Environment.NewLine & Environment.NewLine & "Would you like to remove this file from the list?", "Cannot access file", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) Then
-                lstRecentOpenedFiles.Remove(strFilePath)
-                'update recent file menu items controls to not show the file name and path
-                UpdateRecentFilesMenuItems()
-            End If
+        ElseIf DialogResult.Yes = MessageBox.Show(    'else allow the user to remove file from list
+                    frmMain, "File not accessible. It may have been renamed, moved or deleted." &
+                    Environment.NewLine & Environment.NewLine &
+                    "Would you like to remove this file from the list?", "Cannot access file",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) Then
+            lstRecentOpenedFiles.Remove(strFilePathTmp)
+            'update recent file menu items controls to not show the file name and path
+            UpdateRecentFilesMenuItems()
         End If
     End Sub
 

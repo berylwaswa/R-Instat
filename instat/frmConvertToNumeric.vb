@@ -30,19 +30,23 @@
         strDataFrameName = strDataFrame
     End Sub
 
+    Public Sub CheckLabels(bCheck As Boolean)
+        If bCheck Then
+            cmdLabelledConvert.Text = "Labelled Convert"
+        Else
+            cmdLabelledConvert.Text = "Ordinal Convert"
+        End If
+        lblOrdinal.Visible = Not bCheck
+    End Sub
+
     Private Sub frmConvertToNumeric_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         If e.CloseReason = CloseReason.UserClosing Then
             Me.DialogResult = DialogResult.Cancel
         End If
     End Sub
 
-    Private Sub ConvertButtons_Click(sender As Object, e As EventArgs) Handles cmdNormalConvert.Click, cmdLabelledConvert.Click
-        Me.Hide()
-    End Sub
-
     Private Sub cmdCancel_Click(sender As Object, e As EventArgs) Handles cmdCancel.Click
         Me.DialogResult = DialogResult.Cancel
-        Me.Hide()
     End Sub
 
     Private Sub cmdHelp_Click(sender As Object, e As EventArgs) Handles cmdHelp.Click
@@ -52,7 +56,7 @@
     End Sub
 
     Private Sub cmdInspectValues_Click(sender As Object, e As EventArgs) Handles cmdInspectValues.Click
-        Me.Hide()
+        Me.Close()
         dlgFindNonnumericValues.SetCurrentColumn(strColumnName, strDataFrameName)
         dlgFindNonnumericValues.ShowDialog()
     End Sub

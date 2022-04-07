@@ -4,6 +4,7 @@ DataBook <- R6::R6Class("DataBook",
                                                 data_tables_variables_metadata = rep(list(data.frame()),length(data_tables)),
                                                 data_tables_metadata = rep(list(list()),length(data_tables)),
                                                 data_tables_filters = rep(list(list()),length(data_tables)),
+                                                data_tables_column_selections = rep(list(list()),length(data_tables)),
                                                 imported_from = as.list(rep("",length(data_tables))),
                                                 messages=TRUE, convert=TRUE, create=TRUE)
                           { 
@@ -17,7 +18,8 @@ DataBook <- R6::R6Class("DataBook",
                             else {
                               self$import_data(data_tables=data_tables, data_tables_variables_metadata=data_tables_variables_metadata, 
                                                data_tables_metadata=data_tables_metadata, 
-                                               imported_from=imported_from, messages=messages, convert=convert, create=create, data_tables_filters = data_tables_filters)
+                                               imported_from=imported_from, messages=messages, convert=convert, create=create, data_tables_filters = data_tables_filters,
+                                               data_tables_column_selections = data_tables_column_selections)
                             }
                             
                             private$.data_sheets_changed <- FALSE
@@ -48,6 +50,7 @@ DataBook <- R6::R6Class("DataBook",
 DataBook$set("public", "import_data", function(data_tables = list(), data_tables_variables_metadata = rep(list(data.frame()),length(data_tables)),
                                                data_tables_metadata = rep(list(list()),length(data_tables)),
                                                data_tables_filters = rep(list(list()),length(data_tables)),
+                                               data_tables_column_selections = rep(list(list()),length(data_tables)),
                                                imported_from = as.list(rep("",length(data_tables))), 
                                                data_names = NULL,
                                                messages=TRUE, convert=TRUE, create=TRUE,
@@ -100,7 +103,8 @@ DataBook$set("public", "import_data", function(data_tables = list(), data_tables
                                imported_from = imported_from[[i]], 
                                start_point = i, 
                                messages = messages, convert = convert, create = create, 
-                               filters = data_tables_filters[[i]])
+                               filters = data_tables_filters[[i]],
+                               column_selections = data_tables_column_selections[[i]])
       # Add this new data object to our list of data objects
       self$append_data_object(new_data$get_metadata(data_name_label), new_data, add_to_graph_book = add_to_graph_book)
     }
@@ -128,12 +132,17 @@ DataBook$set("public", "set_data_objects", function(new_data_objects) {
 }
 )
 
-DataBook$set("public", "copy_data_object", function(data_name, new_name, filter_name = "", reset_row_names = TRUE) {
+DataBook$set("public", "copy_data_object", function(data_name, new_name, filter_name = "", column_selection_name = "", reset_row_names = TRUE) {
   new_obj <- self$get_data_objects(data_name)$data_clone()
   if(filter_name != "") {
     subset_data <- self$get_data_objects(data_name)$get_data_frame(use_current_filter = FALSE, filter_name = filter_name, retain_attr = TRUE)
     if(reset_row_names) rownames(subset_data) <- 1:nrow(subset_data)
     new_obj$remove_current_filter()
+    new_obj$set_data(subset_data)
+  }
+  if(column_selection_name != "") {
+    subset_data <- self$get_data_objects(data_name)$get_data_frame(use_current_filter = FALSE, filter_name = filter_name, column_selection_name = column_selection_name, use_column_selection = FALSE, retain_attr = TRUE)
+    new_obj$remove_current_column_selection()
     new_obj$set_data(subset_data)
   }
   self$append_data_object(new_name, new_obj)
@@ -142,12 +151,12 @@ DataBook$set("public", "copy_data_object", function(data_name, new_name, filter_
 
 
 DataBook$set("public", "import_RDS", function(data_RDS, keep_existing = TRUE, overwrite_existing = FALSE, include_objects = TRUE,
-                                              include_metadata = TRUE, include_logs = TRUE, include_filters = TRUE, include_calculations = TRUE, include_comments = TRUE)
+                                              include_metadata = TRUE, include_logs = TRUE, include_filters = TRUE, include_column_selections = TRUE, include_calculations = TRUE, include_comments = TRUE)
   # TODO add include_calcuations options
 {
   # 'instat_object' is previously used class name, some files may have this name.
   if(any(c("instat_object", "DataBook") %in% class(data_RDS))) {
-    if(!keep_existing && include_objects && include_metadata && include_logs && include_filters && include_calculations && include_comments) {
+    if(!keep_existing && include_objects && include_metadata && include_logs && include_filters && include_column_selections && include_calculations && include_comments) {
       self$replace_instat_object(new_instat_object = data_RDS)
     }
     else {
@@ -160,9 +169,10 @@ DataBook$set("public", "import_RDS", function(data_RDS, keep_existing = TRUE, ov
       }
       new_links_list <- data_RDS$get_links()
       for(data_obj_name in data_RDS$get_data_names()) {
-        data_obj_clone <- self$clone_data_object(data_RDS$get_data_objects(data_obj_name), include_objects = include_objects, include_metadata = include_metadata, include_logs = include_logs, include_filters = include_filters, include_calculations = include_calculations, include_comments = include_comments)
-        if(data_obj_name %in% self$get_data_names() && !overwrite_existing) {
-          new_name <- next_default_item(data_obj_name, self$get_data_names())
+        data_obj_clone <- self$clone_data_object(data_RDS$get_data_objects(data_obj_name), include_objects = include_objects, include_metadata = include_metadata, include_logs = include_logs, include_filters = include_filters, include_column_selections = include_column_selections, include_calculations = include_calculations, include_comments = include_comments)
+        if(tolower(data_obj_name) %in% tolower(self$get_data_names()) && !overwrite_existing) {
+          warning("Cannot have data frames with the same name only differing by case. Data frame will be renamed.")
+          new_name <- next_default_item(tolower(data_obj_name), tolower(self$get_data_names()))
           data_obj_clone$append_to_metadata(data_name_label, new_name)
           if(new_name != data_obj_name) {
             for(i in seq_along(new_links_list)) {
@@ -208,15 +218,19 @@ DataBook$set("public", "import_RDS", function(data_RDS, keep_existing = TRUE, ov
 }
 )
 
-DataBook$set("public", "clone_data_object", function(curr_data_object, include_objects = TRUE, include_metadata = TRUE, include_logs = TRUE, include_filters = TRUE, include_calculations = TRUE, include_comments = TRUE, ...) {
+DataBook$set("public", "clone_data_object", function(curr_data_object, include_objects = TRUE, include_metadata = TRUE, include_logs = TRUE, include_filters = TRUE, include_column_selections = TRUE, include_calculations = TRUE, include_comments = TRUE, ...) {
   curr_names <- names(curr_data_object)
   if("get_data_frame" %in% curr_names) new_data <- curr_data_object$get_data_frame(use_current_filter = FALSE)
   else stop("Cannot import data. No 'get_data_frame' method.")
   if("get_metadata" %in% curr_names) new_data_name <- curr_data_object$get_metadata(data_name_label)
   if(include_objects && "get_objects" %in% curr_names) new_objects <- curr_data_object$get_objects()
   else new_objects <- list()
-  if(include_filters && "get_filter" %in% curr_names) new_filters <- lapply(curr_data_object$get_filter(), function(x) x$data_clone())
-  else new_filters <- list()
+  if(include_filters && "get_filter" %in% curr_names) {
+    new_filters <- lapply(curr_data_object$get_filter(), function(x) x$data_clone())
+    new_filters <- lapply(new_filters, function(x) check_filter(x))
+  } else new_filters <- list()
+  if(include_column_selections && "get_column_selection" %in% curr_names) new_column_selections <- curr_data_object$get_column_selection()
+  else new_column_selections <- list()
   if(include_calculations && "get_calculations" %in% curr_names) new_calculations <- lapply(curr_data_object$get_calculations(), function(x) self$clone_instat_calculation(x))
   else new_calculations <- list()
   if(include_comments && "get_comments" %in% curr_names) new_comments <- lapply(curr_data_object$get_comments(), function(x) x$data_clone())
@@ -224,7 +238,7 @@ DataBook$set("public", "clone_data_object", function(curr_data_object, include_o
   if("get_keys" %in% curr_names) new_keys <- curr_data_object$get_keys()
   else new_keys <- list()
   
-  new_data_object <- DataSheet$new(data = new_data, data_name = new_data_name, filters = new_filters, objects = new_objects, calculations = new_calculations, keys = new_keys, comments = new_comments, keep_attributes = include_metadata)
+  new_data_object <- DataSheet$new(data = new_data, data_name = new_data_name, filters = new_filters, column_selections = new_column_selections, objects = new_objects, calculations = new_calculations, keys = new_keys, comments = new_comments, keep_attributes = include_metadata)
   if(include_logs && "get_changes" %in% curr_names) {
     new_changes <- curr_data_object$get_changes()
   }
@@ -232,6 +246,8 @@ DataBook$set("public", "clone_data_object", function(curr_data_object, include_o
   new_data_object$set_changes(new_changes)
   if(include_filters && "current_filter" %in% curr_names) new_data_object$current_filter <- curr_data_object$get_current_filter()
   else new_data_object$remove_current_filter()
+  if(include_column_selections && "current_column_selection" %in% curr_names) new_data_object$current_column_selection <- curr_data_object$get_current_column_selection()
+  else new_data_object$remove_current_column_selection()
   if(!include_metadata) {
     new_data_object$clear_metadata()
     new_data_object$clear_variables_metadata()
@@ -318,22 +334,22 @@ DataBook$set("public", "get_data_objects", function(data_name, as_list = FALSE, 
 }
 )
 
-DataBook$set("public", "get_data_frame", function(data_name, convert_to_character = FALSE, stack_data = FALSE, include_hidden_columns = TRUE, use_current_filter = TRUE, filter_name = "", remove_attr = FALSE, retain_attr = FALSE, max_cols, max_rows, drop_unused_filter_levels = FALSE, ...) {
+DataBook$set("public", "get_data_frame", function(data_name, convert_to_character = FALSE, stack_data = FALSE, include_hidden_columns = TRUE, use_current_filter = TRUE, filter_name = "", use_column_selection = TRUE, column_selection_name = "", remove_attr = FALSE, retain_attr = FALSE, max_cols, max_rows, drop_unused_filter_levels = FALSE, start_row, start_col, ...) {
   if(!stack_data) {
     if(missing(data_name)) data_name <- self$get_data_names()
     if(length(data_name) > 1) {
       retlist <- list()
       for (curr_name in data_name) {
-        retlist[[curr_name]] = self$get_data_objects(curr_name)$get_data_frame(convert_to_character = convert_to_character, include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, filter_name = filter_name, remove_attr = remove_attr, retain_attr = retain_attr, max_cols = max_cols, max_rows = max_rows, drop_unused_filter_levels = drop_unused_filter_levels)
+        retlist[[curr_name]] = self$get_data_objects(curr_name)$get_data_frame(convert_to_character = convert_to_character, include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, use_column_selection = use_column_selection, filter_name = filter_name, column_selection_name = column_selection_name, remove_attr = remove_attr, retain_attr = retain_attr, max_cols = max_cols, max_rows = max_rows, drop_unused_filter_levels = drop_unused_filter_levels, start_row = start_row, start_col = start_col)
       }
       return(retlist)
     }
-    else return(self$get_data_objects(data_name)$get_data_frame(convert_to_character = convert_to_character, include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, filter_name = filter_name, remove_attr = remove_attr, retain_attr = retain_attr, max_cols = max_cols, max_rows = max_rows, drop_unused_filter_levels = drop_unused_filter_levels))
+    else return(self$get_data_objects(data_name)$get_data_frame(convert_to_character = convert_to_character, include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, use_column_selection = use_column_selection, filter_name = filter_name, column_selection_name = column_selection_name, remove_attr = remove_attr, retain_attr = retain_attr, max_cols = max_cols, max_rows = max_rows, drop_unused_filter_levels = drop_unused_filter_levels, start_row = start_row, start_col = start_col))
   }
   else {
     if(missing(data_name)) stop("data to be stacked is missing")
     if(!data_name %in% names(private$.data_sheets)) stop(paste(data_name, "not found."))
-    return(self$get_data_objects(data_name)$get_data_frame(include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, filter_name = filter_name, stack_data = TRUE, ...))
+    return(self$get_data_objects(data_name)$get_data_frame(include_hidden_columns = include_hidden_columns, use_current_filter = use_current_filter, use_column_selection = use_column_selection, filter_name = filter_name, stack_data = TRUE, ...))
   }
 }
 )
@@ -752,9 +768,12 @@ DataBook$set("public", "get_table_names", function(data_name, include_overall = 
 }
 )
 
-DataBook$set("public", "add_filter", function(data_name, filter, filter_name = "", replace = TRUE, set_as_current_filter = FALSE, na.rm = TRUE, is_no_filter = FALSE, and_or = "&") {
+
+# Filters -----------------------------------------------------------------
+
+DataBook$set("public", "add_filter", function(data_name, filter, filter_name = "", replace = TRUE, set_as_current_filter = FALSE, na.rm = TRUE, is_no_filter = FALSE, and_or = "&", inner_not = FALSE, outer_not = FALSE) {
   if(missing(filter)) stop("filter is required")
-  self$get_data_objects(data_name)$add_filter(filter, filter_name, replace, set_as_current_filter, na.rm = na.rm, is_no_filter = is_no_filter, and_or = and_or)
+  self$get_data_objects(data_name)$add_filter(filter, filter_name, replace, set_as_current_filter, na.rm = na.rm, is_no_filter = is_no_filter, and_or = and_or, inner_not = inner_not, outer_not =  outer_not)
 }
 ) 
 
@@ -824,6 +843,65 @@ DataBook$set("public", "get_filter_as_instat_calculation", function(data_name, f
 }
 )
 
+
+# Column Selections -------------------------------------------------------
+
+DataBook$set("public", "add_column_selection", function(data_name, column_selection, name = "", replace = TRUE, set_as_current = FALSE, is_everything = FALSE, and_or = "|") {
+  self$get_data_objects(data_name)$add_column_selection(column_selection = column_selection, name = name, replace = replace, set_as_current = set_as_current, is_everything = is_everything, and_or = and_or)
+}
+)
+
+DataBook$set("public", "current_column_selection", function(data_name) {
+  return(self$get_data_objects(data_name)$current_column_selection)
+}
+)
+
+DataBook$set("public", "set_current_column_selection", function(data_name, name = "") {
+  self$get_data_objects(data_name)$set_current_column_selection(name)
+}
+)
+
+DataBook$set("public", "get_column_selection", function(data_name, name) {
+  return(self$get_data_objects(data_name)$get_column_selection(name))
+}
+)
+
+DataBook$set("public", "get_column_selection_column_names", function(data_name, filter_name) {
+  return(self$get_data_objects(data_name)$get_filter_as_logical(filter_name))
+}
+)
+
+DataBook$set("public", "get_current_column_selection", function(data_name) {
+  self$get_data_objects(data_name)$get_current_column_selection()
+}
+)
+
+DataBook$set("public", "get_current_column_selection_name", function(data_name) {
+  self$get_data_objects(data_name)$get_current_column_selection()$name
+}
+)
+
+DataBook$set("public", "get_column_selection_names", function(data_name, as_list = FALSE, include = list(), exclude = list(), excluded_items = c()) {
+  if(missing(data_name)) {
+    #TODO what to do with excluded_items in this case
+    return(lapply(self$get_data_objects(), function(x) x$get_column_selection_names(include = include, exclude = exclude)))
+  } 
+  else {
+    return(self$get_data_objects(data_name)$get_column_selection_names(as_list = as_list, include = include, exclude = exclude, excluded_items = excluded_items))
+  }
+}
+)
+
+DataBook$set("public", "remove_current_column_selection", function(data_name) {
+  self$get_data_objects(data_name)$remove_current_column_selection()
+}
+)
+
+DataBook$set("public", "column_selection_applied", function(data_name) {
+  self$get_data_objects(data_name)$column_selection_applied()
+}
+)
+
 DataBook$set("public", "replace_value_in_data", function(data_name, col_names, rows, old_value, old_is_missing = FALSE, start_value = NA, end_value = NA, new_value, new_is_missing = FALSE, closed_start_value = TRUE, closed_end_value = TRUE, locf = FALSE, from_last = FALSE) {
   self$get_data_objects(data_name)$replace_value_in_data(col_names, rows, old_value, old_is_missing, start_value, end_value, new_value, new_is_missing, closed_start_value, closed_end_value, locf, from_last)
 }
@@ -834,11 +912,10 @@ DataBook$set("public", "paste_from_clipboard", function(data_name, col_names, st
 }
 )
 
-DataBook$set("public", "rename_column_in_data", function(data_name, column_name, new_val, label = "") {
-  self$get_data_objects(data_name)$rename_column_in_data(column_name, new_val, label)
+DataBook$set("public", "rename_column_in_data", function(data_name, column_name = NULL, new_val = NULL, label = "", type = "single", .fn, .cols = everything(), new_column_names_df, new_labels_df, ...) {
+  self$get_data_objects(data_name)$rename_column_in_data(column_name, new_val, label, type, .fn, .cols, new_column_names_df, new_labels_df, ...)
   self$update_links_rename_column(data_name = data_name, old_column_name = column_name, new_column_name = new_val)
-} 
-)
+})
 
 DataBook$set("public", "frequency_tables", function(data_name, x_col_names, y_col_name, n_column_factors = 1, store_results = TRUE, drop = TRUE, na.rm = FALSE, summary_name = NA, include_margins = FALSE, return_output = TRUE, treat_columns_as_factor = FALSE, page_by = "default", as_html = TRUE, signif_fig = 2, na_display = "", na_level_display = "NA", weights = NULL, caption = NULL, result_names = NULL, percentage_type = "none", perc_total_columns = NULL, perc_total_factors = c(), perc_total_filter = NULL, perc_decimal = FALSE, margin_name = "(All)", additional_filter, ...) {
   for(i in seq_along(x_col_names)) {
@@ -883,13 +960,13 @@ DataBook$set("public", "get_next_default_column_name", function(data_name, prefi
 } 
 )
 
-DataBook$set("public", "get_column_names", function(data_name, as_list = FALSE, include = list(), exclude = list(), excluded_items = c(), max_no) {
+DataBook$set("public", "get_column_names", function(data_name, as_list = FALSE, include = list(), exclude = list(), excluded_items = c(), max_no, use_current_column_selection = TRUE) {
   if(missing(data_name)) {
     #TODO what to do with excluded items in this case?
-    return(lapply(self$get_data_objects(), function(x) x$get_column_names(include = include, exclude = exclude, max_no = max_no)))
+    return(lapply(self$get_data_objects(), function(x) x$get_column_names(include = include, exclude = exclude, max_no = max_no, use_current_column_selection = use_current_column_selection)))
   } 
   else {
-    return(self$get_data_objects(data_name)$get_column_names(as_list, include, exclude, excluded_items = excluded_items, max_no = max_no))
+    return(self$get_data_objects(data_name)$get_column_names(as_list, include, exclude, excluded_items = excluded_items, max_no = max_no, use_current_column_selection = use_current_column_selection))
   }
 }
 )
@@ -919,7 +996,7 @@ DataBook$set("public", "delete_dataframes", function(data_names, delete_graph_bo
   # TODO need a set or append
   for(name in data_names) {
     private$.data_sheets[[name]] <- NULL
-    data_objects_changed <- TRUE
+    self$data_objects_changed <- TRUE
     link_names <- c()
     for(i in seq_along(private$.links)) {
       if(private$.links[[i]]$from_data_frame == name || private$.links[[i]]$to_data_frame == name) {
@@ -1022,8 +1099,14 @@ DataBook$set("public", "reorder_dataframes", function(data_frames_order) {
 } 
 )
 
-DataBook$set("public", "copy_columns", function(data_name, col_names = "") {
-  self$get_data_objects(data_name)$copy_columns(col_names = col_names)
+DataBook$set("public", "copy_columns", function(data_name, col_names = "", copy_to_clipboard = FALSE) {
+  if(copy_to_clipboard){
+    col_data_obj <- self$get_columns_from_data(data_name = data_name, col_names = col_names, force_as_data_frame = TRUE)
+    self$copy_to_clipboard(content = col_data_obj)
+  }else{
+    self$get_data_objects(data_name)$copy_columns(col_names = col_names)
+  }
+
 } 
 )
 
@@ -1062,20 +1145,47 @@ DataBook$set("public","get_data_type", function(data_name, col_name) {
 } 
 )
 
-DataBook$set("public","copy_data_frame", function(data_name, new_name, label = "") {
-  if(new_name %in% names(private$.data_sheets)) stop("Cannot copy data frame since ", new_name, " is an existing data frame.")
-  curr_obj <- self$get_data_objects(data_name)$clone(deep = TRUE)
-  
-  if(missing(new_name)) new_name <- next_default_item(data_name, self$get_data_names())
-  self$append_data_object(new_name, curr_obj)
-  new_data_obj <- self$get_data_objects(new_name)
-  new_data_obj$data_changed <- TRUE
-  new_data_obj$set_data_changed(TRUE)
-  if(label != "") {
-    new_data_obj$append_to_metadata(property = "label" , new_val = label)
-    new_data_obj$set_metadata_changed(TRUE)
+DataBook$set("public","copy_data_frame", function(data_name, new_name, label = "", copy_to_clipboard = FALSE) {
+  if(copy_to_clipboard){ 
+    self$copy_to_clipboard(content = self$get_data_frame(data_name))
+  }else{
+    if(new_name %in% names(private$.data_sheets)) stop("Cannot copy data frame since ", new_name, " is an existing data frame.")
+    curr_obj <- self$get_data_objects(data_name)$clone(deep = TRUE)
+    
+    if(missing(new_name)) new_name <- next_default_item(data_name, self$get_data_names())
+    self$append_data_object(new_name, curr_obj)
+    new_data_obj <- self$get_data_objects(new_name)
+    new_data_obj$data_changed <- TRUE
+    new_data_obj$set_data_changed(TRUE)
+    if(label != "") {
+      new_data_obj$append_to_metadata(property = "label" , new_val = label)
+      new_data_obj$set_metadata_changed(TRUE)
+    }
   }
 } 
+)
+
+DataBook$set("public","copy_col_metadata_to_clipboard", function(data_name, property_names) {
+  if(missing(property_names)){
+    self$copy_to_clipboard(content = self$get_variables_metadata(data_name = data_name))
+  }else{
+    self$copy_to_clipboard(content = self$get_variables_metadata(data_name = data_name, property = property_names))
+  }
+}
+)
+
+DataBook$set("public","copy_data_frame_metadata_to_clipboard", function(data_name, property_names) {
+  if(missing(property_names)){
+    self$copy_to_clipboard(content = self$get_data_frame_metadata(data_name = data_name))
+  }else{
+    self$copy_to_clipboard(content = self$get_data_frame_metadata(data_name = data_name, label = property_names))
+  }
+}
+)
+
+DataBook$set("public","copy_to_clipboard", function(content) {
+  clipr::write_clip(content = content)
+}
 )
 
 DataBook$set("public","set_hidden_columns", function(data_name, col_names = c()) {
@@ -1293,11 +1403,10 @@ DataBook$set("public","set_contrasts_of_factor", function(data_name, col_name, n
 }
 )
 
-DataBook$set("public","create_factor_data_frame", function(data_name, factor, factor_data_frame_name, include_contrasts = TRUE, replace = FALSE) {
+DataBook$set("public","create_factor_data_frame", function(data_name, factor, factor_data_frame_name, include_contrasts = FALSE, replace = FALSE, summary_count = TRUE) {
   curr_data_obj <- self$get_data_objects(data_name)
   if(!factor %in% names(curr_data_obj$get_data_frame())) stop(factor, " not found in the data")
   if(!is.factor(curr_data_obj$get_columns_from_data(factor))) stop(factor, " is not a factor column.")
-  create <- TRUE
   if(self$link_exists_from(data_name, factor)) {
     message("Factor data frame already exists.")
     if(replace) {
@@ -1306,14 +1415,13 @@ DataBook$set("public","create_factor_data_frame", function(data_name, factor, fa
       names(factor_named) <- factor
       curr_factor_df_name <- self$get_linked_to_data_name(data_name, factor_named)
       # TODO what if there is more than 1?
-      if(length(curr_factor_df_name) > 0) self$delete_dataframe(curr_factor_df_name[1])
+      if(length(curr_factor_df_name) > 0) self$delete_dataframes(curr_factor_df_name[1])
     }
     else {
       warning("replace = FALSE so no action will be taken.")
-      create <- FALSE
     }
   }
-  if(create) {
+
     data_frame_list <- list()
     if(missing(factor_data_frame_name)) factor_data_frame_name <- paste0(data_name, "_", factor)
     factor_data_frame_name <- make.names(factor_data_frame_name)
@@ -1322,11 +1430,12 @@ DataBook$set("public","create_factor_data_frame", function(data_name, factor, fa
     factor_column <- curr_data_obj$get_columns_from_data(factor)
     factor_data_frame <- data.frame(levels(factor_column))
     names(factor_data_frame) <- factor
-    if(include_contrasts) {
-      factor_data_frame <- cbind(factor_data_frame, contrasts(factor_column))
-    }
+    if(include_contrasts) factor_data_frame <- cbind(factor_data_frame, contrasts(factor_column))
+    if(summary_count) factor_data_frame <- cbind(factor_data_frame, summary(factor_column))
+
     row.names(factor_data_frame) <- 1:nrow(factor_data_frame)
     names(factor_data_frame)[2:ncol(factor_data_frame)] <- paste0("C", 1:(ncol(factor_data_frame)-1))
+    if(summary_count) colnames(factor_data_frame)[ncol(factor_data_frame)] <- "Frequencies"
     data_frame_list[[factor_data_frame_name]] <- factor_data_frame
     self$import_data(data_frame_list)
     factor_data_obj <- self$get_data_objects(factor_data_frame_name)
@@ -1335,7 +1444,6 @@ DataBook$set("public","create_factor_data_frame", function(data_name, factor, fa
     names(factor) <- factor
     self$add_link(from_data_frame = data_name, to_data_frame = factor_data_frame_name, link_pairs = factor, type = keyed_link_label)
   }
-}
 )
 
 DataBook$set("public","split_date", function(data_name, col_name = "", year_val = FALSE, year_name = FALSE, leap_year = FALSE,  month_val = FALSE, month_abbr = FALSE, month_name = FALSE, week_val = FALSE, week_abbr = FALSE, week_name = FALSE, weekday_val = FALSE, weekday_abbr = FALSE, weekday_name = FALSE,  day = FALSE, day_in_month = FALSE, day_in_year = FALSE, day_in_year_366 = FALSE, pentad_val = FALSE, pentad_abbr = FALSE, dekad_val = FALSE, dekad_abbr = FALSE, quarter_val = FALSE, quarter_abbr = FALSE, with_year = FALSE, s_start_month = 1, s_start_day_in_month = 1, days_in_month = FALSE) {
@@ -1353,8 +1461,18 @@ DataBook$set("public", "import_SST", function(dataset, data_from = 5, data_names
 }
 )
 
-DataBook$set("public","make_inventory_plot", function(data_name, date_col, station_col = NULL, year_col = NULL, doy_col = NULL, element_cols = NULL, add_to_data = FALSE, year_doy_plot = FALSE, coord_flip = FALSE, facet_by = NULL, graph_title = "Inventory Plot", graph_subtitle = NULL, graph_caption = NULL, title_size = NULL, subtitle_size = NULL, caption_size = NULL, labelXAxis, labelYAxis, xSize = NULL, ySize = NULL, Xangle = NULL, Yangle = NULL, scale_xdate, fromXAxis = NULL, toXAxis = NULL, byXaxis = NULL, date_ylabels, legend_position = NULL, xlabelsize = NULL, ylabelsize = NULL, scale = NULL, dir = "", row_col_number, nrow = NULL, ncol = NULL, key_colours = c("red", "grey"), display_rain_days = FALSE, facet_xsize = 7, facet_ysize = 11, scale_ydate = FALSE, date_ybreaks, step = 1, rain_cats = list(breaks = c(0, 0.85, Inf), labels = c("Dry", "Rain"), key_colours = c("tan3", "blue"))) {
-  self$get_data_objects(data_name)$make_inventory_plot(date_col = date_col, station_col = station_col, year_col = year_col, doy_col = doy_col, element_cols = element_cols, add_to_data = add_to_data, year_doy_plot = year_doy_plot, coord_flip = coord_flip, facet_by = facet_by, graph_title = graph_title, key_colours = key_colours, display_rain_days = display_rain_days, rain_cats = rain_cats, graph_subtitle = graph_subtitle, graph_caption = graph_caption, title_size = title_size, subtitle_size = subtitle_size, caption_size = caption_size, labelXAxis = labelXAxis, labelYAxis = labelYAxis, xSize = xSize, ySize = ySize, Xangle = Xangle, Yangle = Yangle, scale_xdate = scale_xdate, fromXAxis = fromXAxis, toXAxis = toXAxis, byXaxis = byXaxis, xlabelsize = xlabelsize, scale_ydate = scale_ydate, date_ybreaks = date_ybreaks, step = step, ylabelsize = ylabelsize, date_ylabels = date_ylabels, legend_position = legend_position, dir = dir, row_col_number = row_col_number, nrow = nrow, ncol = ncol, scale = scale, facet_xsize = facet_xsize, facet_ysize = facet_ysize)
+DataBook$set("public","make_inventory_plot", function(data_name, date_col, station_col = NULL, year_col = NULL, doy_col = NULL, element_cols = NULL, add_to_data = FALSE, year_doy_plot = FALSE, coord_flip = FALSE, facet_by = NULL, graph_title = "Inventory Plot", graph_subtitle = NULL, graph_caption = NULL, title_size = NULL, subtitle_size = NULL, caption_size = NULL, labelXAxis, labelYAxis, xSize = NULL, ySize = NULL, Xangle = NULL, Yangle = NULL, scale_xdate, fromXAxis = NULL, toXAxis = NULL, byXaxis = NULL, date_ylabels, legend_position = NULL, xlabelsize = NULL, ylabelsize = NULL, scale = NULL, dir = "", row_col_number, nrow = NULL, ncol = NULL, key_colours = c("red", "grey"), display_rain_days = FALSE, facet_xsize = 9, facet_ysize = 9, facet_xangle = 90, facet_yangle = 90, scale_ydate = FALSE, date_ybreaks, step = 1, rain_cats = list(breaks = c(0, 0.85, Inf), labels = c("Dry", "Rain"), key_colours = c("tan3", "blue"))) {
+  self$get_data_objects(data_name)$make_inventory_plot(date_col = date_col, station_col = station_col, year_col = year_col, doy_col = doy_col,
+                                                       element_cols = element_cols, add_to_data = add_to_data, year_doy_plot = year_doy_plot, 
+                                                       coord_flip = coord_flip, facet_by = facet_by, graph_title = graph_title, key_colours = key_colours, 
+                                                       display_rain_days = display_rain_days, rain_cats = rain_cats, graph_subtitle = graph_subtitle, 
+                                                       graph_caption = graph_caption, title_size = title_size, subtitle_size = subtitle_size, 
+                                                       caption_size = caption_size, labelXAxis = labelXAxis, labelYAxis = labelYAxis, xSize = xSize, 
+                                                       ySize = ySize, Xangle = Xangle, Yangle = Yangle, scale_xdate = scale_xdate, fromXAxis = fromXAxis, 
+                                                       toXAxis = toXAxis, byXaxis = byXaxis, xlabelsize = xlabelsize, scale_ydate = scale_ydate, date_ybreaks = date_ybreaks,
+                                                       step = step, ylabelsize = ylabelsize, date_ylabels = date_ylabels, legend_position = legend_position, 
+                                                       dir = dir, row_col_number = row_col_number, nrow = nrow, ncol = ncol, scale = scale, facet_xsize = facet_xsize,
+                                                       facet_ysize = facet_ysize, facet_xangle = facet_xangle, facet_yangle = facet_yangle)
 }
 )
 
@@ -2526,8 +2644,8 @@ DataBook$set("public", "download_from_IRI", function(source, data, path = tempdi
   }
 })
 
-DataBook$set("public", "patch_climate_element", function(data_name, date_col_name = "", var = "", vars = c(), max_mean_bias = NA, max_stdev_bias = NA, column_name, station_col_name = station_col_name) {
-  self$get_data_objects(data_name)$patch_climate_element(date_col_name = date_col_name, var = var, vars = vars, max_mean_bias = max_mean_bias, max_stdev_bias = max_stdev_bias, column_name = column_name, station_col_name = station_col_name)
+DataBook$set("public", "patch_climate_element", function(data_name, date_col_name = "", var = "", vars = c(), max_mean_bias = NA, max_stdev_bias = NA, time_interval = "month", column_name, station_col_name = station_col_name) {
+  self$get_data_objects(data_name)$patch_climate_element(date_col_name = date_col_name, var = var, vars = vars, max_mean_bias = max_mean_bias, max_stdev_bias = max_stdev_bias, time_interval = time_interval, column_name = column_name, station_col_name = station_col_name)
 })
 
 DataBook$set("public", "visualize_element_na", function(data_name, element_col_name, element_col_name_imputed, station_col_name, x_axis_labels_col_name, ncol = 2, type = "distribution", xlab = NULL, ylab = NULL, legend = TRUE, orientation = "horizontal", interval_size = interval_size, x_with_truth = NULL, measure = "percent") {
@@ -2559,7 +2677,8 @@ DataBook$set("public", "import_from_cds", function(user, dataset, elements, star
   all_dates <- seq(start_date, end_date, by = 1)
   all_periods <- unique(paste(lubridate::year(all_dates), sprintf("%02d", lubridate::month(all_dates)), sep = "-"))
   area <- c(lat[2], lon[1], lat[1], lon[2])
-  pb <- winProgressBar(title = "Requesting data from CDS", min = 0, max = length(all_periods))
+  is_win <- Sys.info()['sysname'] == "Windows"
+  if (is_win) pb <- winProgressBar(title = "Requesting data from CDS", min = 0, max = length(all_periods))
   nc_files <- vector(mode = "character", length = length(all_periods))
   for (i in seq_along(all_periods)) {
     y <- substr(all_periods[i], 1, 4)
@@ -2579,7 +2698,7 @@ DataBook$set("public", "import_from_cds", function(user, dataset, elements, star
       target = paste0(dataset, "-", paste(elements, collapse = "_"), "-", all_periods[i], ".nc")
     )
     info <- paste0("Requesting data for ", all_periods[i], " - ", round(100 * i / length(all_periods)), "%")
-    setWinProgressBar(pb, value = i, title = info, label = info)
+    if (is_win) setWinProgressBar(pb, value = i, title = info, label = info)
     ncfile <- ecmwfr::wf_request(user = user, request = request,
                                  transfer = TRUE, path = path,
                                  time_out = 3 * 3600)
@@ -2589,7 +2708,7 @@ DataBook$set("public", "import_from_cds", function(user, dataset, elements, star
       ncdf4::nc_close(nc = nc)
     }
   }
-  close(pb)
+  if (is_win) close(pb)
 })
 
 DataBook$set("public", "add_flag_fields", function(data_name, col_names, key_column_names) {
@@ -2597,5 +2716,18 @@ DataBook$set("public", "add_flag_fields", function(data_name, col_names, key_col
     self$add_key(data_name, key_column_names)
     }
   self$get_data_objects(data_name)$add_flag_fields(col_names = col_names)
+}
+)
+
+DataBook$set("public", "remove_empty", function(data_name,  which = c("rows","cols")) {
+  self$get_data_objects(data_name)$remove_empty(which = which)
+})
+
+DataBook$set("public", "replace_values_with_NA", function(data_name, row_index, column_index) {
+  self$get_data_objects(data_name)$replace_values_with_NA(row_index = row_index, column_index = column_index)
+})
+
+DataBook$set("public","has_labels", function(data_name, col_names) {
+  self$get_data_objects(data_name)$has_labels(col_names)
 }
 )

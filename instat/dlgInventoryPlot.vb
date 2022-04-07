@@ -99,7 +99,7 @@ Public Class dlgInventoryPlot
         ucrChkDay.SetValuesCheckedAndUnchecked("TRUE", "FALSE")
         ucrChkDay.SetRDefault("TRUE")
 
-        ucrSaveDetails.SetPrefix("climatic_details")
+        ucrSaveDetails.SetPrefix("details")
         ucrSaveDetails.SetCheckBoxText("Save Details")
         ucrSaveDetails.SetSaveTypeAsDataFrame()
         ucrSaveDetails.SetDataFrameSelector(ucrInventoryPlotSelector.ucrAvailableDataFrames)
@@ -153,7 +153,7 @@ Public Class dlgInventoryPlot
         ucrInputFacetBy.SetRDefault("NULL")
         ucrInputFacetBy.SetDropDownStyleAsNonEditable()
 
-        ucrSaveGraph.SetPrefix("Inventory")
+        ucrSaveGraph.SetPrefix("inventory")
         ucrSaveGraph.SetSaveTypeAsGraph()
         ucrSaveGraph.SetDataFrameSelector(ucrInventoryPlotSelector.ucrAvailableDataFrames)
         ucrSaveGraph.SetCheckBoxText("Save Graph")
@@ -170,6 +170,7 @@ Public Class dlgInventoryPlot
         ucrChkDetails.AddToLinkedControls({ucrChkDay}, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrChkDetails.AddToLinkedControls({ucrPnlOrder}, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrChkSummary.AddToLinkedControls({ucrChkOmitStart, ucrChkOmitEnd}, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
+        ucrChkDetails.AddToLinkedControls({ucrSaveDetails}, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedHideIfParameterMissing:=True)
         ucrChkDay.SetLinkedDisplayControl(grpDetailsOptions)
         ucrChkSummary.SetLinkedDisplayControl(grpOptions)
         ucrPnlPlotType.SetLinkedDisplayControl(grpPlotType)

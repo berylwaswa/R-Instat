@@ -178,19 +178,19 @@ Public Class ucrFactor
                     iLabelsCol = GetColumnIndex(strLabelsName)
                     iFreqCol = GetColumnIndex(strFreqName)
                     If bIncludeCopyOfLevels Then
-                        shtCurrSheet.AppendCols(1)
+                        shtCurrSheet.AppendColumns(1)
                         shtCurrSheet.ColumnHeaders(shtCurrSheet.ColumnCount - 1).Text = "New Label"
                         For i = 0 To shtCurrSheet.RowCount - 1
                             shtCurrSheet(i, shtCurrSheet.ColumnCount - 1) = shtCurrSheet(i, iLabelsCol)
                         Next
                     End If
                     If strExtraColumn <> "" Then
-                        shtCurrSheet.AppendCols(1)
+                        shtCurrSheet.AppendColumns(1)
                         shtCurrSheet.ColumnHeaders(shtCurrSheet.ColumnCount - 1).Text = strExtraColumn
                     End If
                     If bIsSelector Then
                         iSelectorColumnIndex = shtCurrSheet.ColumnCount
-                        shtCurrSheet.AppendCols(1)
+                        shtCurrSheet.AppendColumns(1)
                         If bIsMultipleSelector Then
                             shtCurrSheet.ColumnHeaders(iSelectorColumnIndex).DefaultCellBody = GetType(CheckBoxCell)
                             shtCurrSheet.ColumnHeaders(iSelectorColumnIndex).Text = strSelectorColumnName
@@ -624,6 +624,7 @@ Public Class ucrFactor
     Private Sub shtCurrSheet_AfterPaste(sender As Object, e As RangeEventArgs) Handles shtCurrSheet.AfterPaste
         'This is needed because pasting carries cell properties e.g. overrides readonly properties
         ApplyColumnSettings()
+        RaiseEvent GridContentChanged()
     End Sub
 
     Public Sub SetLevelsCheckbox(ucrChkAddLevels As ucrCheck)

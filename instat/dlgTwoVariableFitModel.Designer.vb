@@ -109,9 +109,9 @@ Partial Class dlgTwoVariableFitModel
         'cmdDisplayOptions
         '
         Me.cmdDisplayOptions.ImeMode = System.Windows.Forms.ImeMode.NoControl
-        Me.cmdDisplayOptions.Location = New System.Drawing.Point(341, 413)
+        Me.cmdDisplayOptions.Location = New System.Drawing.Point(325, 413)
         Me.cmdDisplayOptions.Name = "cmdDisplayOptions"
-        Me.cmdDisplayOptions.Size = New System.Drawing.Size(110, 23)
+        Me.cmdDisplayOptions.Size = New System.Drawing.Size(131, 23)
         Me.cmdDisplayOptions.TabIndex = 16
         Me.cmdDisplayOptions.Tag = "Display_Options..."
         Me.cmdDisplayOptions.Text = "Display Options..."
@@ -120,9 +120,9 @@ Partial Class dlgTwoVariableFitModel
         'cmdModelOptions
         '
         Me.cmdModelOptions.ImeMode = System.Windows.Forms.ImeMode.NoControl
-        Me.cmdModelOptions.Location = New System.Drawing.Point(341, 385)
+        Me.cmdModelOptions.Location = New System.Drawing.Point(325, 385)
         Me.cmdModelOptions.Name = "cmdModelOptions"
-        Me.cmdModelOptions.Size = New System.Drawing.Size(110, 23)
+        Me.cmdModelOptions.Size = New System.Drawing.Size(131, 23)
         Me.cmdModelOptions.TabIndex = 15
         Me.cmdModelOptions.Tag = "Model_Options..."
         Me.cmdModelOptions.Text = "Model Options..."
@@ -229,7 +229,7 @@ Partial Class dlgTwoVariableFitModel
         '
         Me.cmdExplanatoryFunction.Location = New System.Drawing.Point(268, 186)
         Me.cmdExplanatoryFunction.Name = "cmdExplanatoryFunction"
-        Me.cmdExplanatoryFunction.Size = New System.Drawing.Size(103, 23)
+        Me.cmdExplanatoryFunction.Size = New System.Drawing.Size(122, 23)
         Me.cmdExplanatoryFunction.TabIndex = 10
         Me.cmdExplanatoryFunction.Text = "Function..."
         Me.cmdExplanatoryFunction.UseVisualStyleBackColor = True
@@ -244,6 +244,7 @@ Partial Class dlgTwoVariableFitModel
         '
         'ucrDistributionChoice
         '
+        Me.ucrDistributionChoice.AutoSize = True
         Me.ucrDistributionChoice.Location = New System.Drawing.Point(10, 242)
         Me.ucrDistributionChoice.Name = "ucrDistributionChoice"
         Me.ucrDistributionChoice.Size = New System.Drawing.Size(208, 27)
@@ -252,6 +253,7 @@ Partial Class dlgTwoVariableFitModel
         'ucrInputTest
         '
         Me.ucrInputTest.AddQuotesIfUnrecognised = True
+        Me.ucrInputTest.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.ucrInputTest.GetSetSelectedIndex = -1
         Me.ucrInputTest.IsReadOnly = False
         Me.ucrInputTest.Location = New System.Drawing.Point(44, 247)
@@ -261,41 +263,47 @@ Partial Class dlgTwoVariableFitModel
         '
         'ucrTryModelling
         '
+        Me.ucrTryModelling.AutoSize = True
         Me.ucrTryModelling.Location = New System.Drawing.Point(-3, 351)
         Me.ucrTryModelling.Name = "ucrTryModelling"
-        Me.ucrTryModelling.Size = New System.Drawing.Size(396, 29)
+        Me.ucrTryModelling.RunCommandAsMultipleLines = False
+        Me.ucrTryModelling.Size = New System.Drawing.Size(396, 30)
         Me.ucrTryModelling.TabIndex = 20
         '
         'ucrSaveModels
         '
+        Me.ucrSaveModels.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.ucrSaveModels.Location = New System.Drawing.Point(10, 415)
         Me.ucrSaveModels.Margin = New System.Windows.Forms.Padding(4, 5, 4, 5)
         Me.ucrSaveModels.Name = "ucrSaveModels"
-        Me.ucrSaveModels.Size = New System.Drawing.Size(258, 24)
+        Me.ucrSaveModels.Size = New System.Drawing.Size(309, 24)
         Me.ucrSaveModels.TabIndex = 14
         '
         'ucrChkConvertToVariate
         '
+        Me.ucrChkConvertToVariate.AutoSize = True
         Me.ucrChkConvertToVariate.Checked = False
         Me.ucrChkConvertToVariate.Location = New System.Drawing.Point(270, 122)
         Me.ucrChkConvertToVariate.Name = "ucrChkConvertToVariate"
-        Me.ucrChkConvertToVariate.Size = New System.Drawing.Size(120, 20)
+        Me.ucrChkConvertToVariate.Size = New System.Drawing.Size(160, 23)
         Me.ucrChkConvertToVariate.TabIndex = 6
         '
         'ucrReceiverExplanatory
         '
+        Me.ucrReceiverExplanatory.AutoSize = True
         Me.ucrReceiverExplanatory.frmParent = Me
         Me.ucrReceiverExplanatory.Location = New System.Drawing.Point(268, 163)
         Me.ucrReceiverExplanatory.Margin = New System.Windows.Forms.Padding(0)
         Me.ucrReceiverExplanatory.Name = "ucrReceiverExplanatory"
         Me.ucrReceiverExplanatory.Selector = Nothing
-        Me.ucrReceiverExplanatory.Size = New System.Drawing.Size(120, 20)
+        Me.ucrReceiverExplanatory.Size = New System.Drawing.Size(122, 20)
         Me.ucrReceiverExplanatory.strNcFilePath = ""
         Me.ucrReceiverExplanatory.TabIndex = 8
         Me.ucrReceiverExplanatory.ucrSelector = Nothing
         '
         'ucrReceiverResponse
         '
+        Me.ucrReceiverResponse.AutoSize = True
         Me.ucrReceiverResponse.frmParent = Me
         Me.ucrReceiverResponse.Location = New System.Drawing.Point(270, 98)
         Me.ucrReceiverResponse.Margin = New System.Windows.Forms.Padding(0)
@@ -308,6 +316,7 @@ Partial Class dlgTwoVariableFitModel
         '
         'ucrSelectorSimpleReg
         '
+        Me.ucrSelectorSimpleReg.AutoSize = True
         Me.ucrSelectorSimpleReg.bDropUnusedFilterLevels = False
         Me.ucrSelectorSimpleReg.bShowHiddenColumns = False
         Me.ucrSelectorSimpleReg.bUseCurrentFilter = True
@@ -319,6 +328,7 @@ Partial Class dlgTwoVariableFitModel
         '
         'ucrPnlModelType
         '
+        Me.ucrPnlModelType.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.ucrPnlModelType.Location = New System.Drawing.Point(93, 3)
         Me.ucrPnlModelType.Name = "ucrPnlModelType"
         Me.ucrPnlModelType.Size = New System.Drawing.Size(267, 43)
@@ -327,23 +337,27 @@ Partial Class dlgTwoVariableFitModel
         'ucrModelPreview
         '
         Me.ucrModelPreview.AddQuotesIfUnrecognised = True
+        Me.ucrModelPreview.AutoSize = True
         Me.ucrModelPreview.IsMultiline = False
         Me.ucrModelPreview.IsReadOnly = False
-        Me.ucrModelPreview.Location = New System.Drawing.Point(97, 386)
+        Me.ucrModelPreview.Location = New System.Drawing.Point(115, 386)
         Me.ucrModelPreview.Name = "ucrModelPreview"
         Me.ucrModelPreview.Size = New System.Drawing.Size(204, 21)
         Me.ucrModelPreview.TabIndex = 13
         '
         'ucrBase
         '
+        Me.ucrBase.AutoSize = True
+        Me.ucrBase.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.ucrBase.Location = New System.Drawing.Point(10, 449)
         Me.ucrBase.Name = "ucrBase"
-        Me.ucrBase.Size = New System.Drawing.Size(406, 54)
+        Me.ucrBase.Size = New System.Drawing.Size(405, 52)
         Me.ucrBase.TabIndex = 17
         '
         'ucrInputConfidenceInterval
         '
         Me.ucrInputConfidenceInterval.AddQuotesIfUnrecognised = True
+        Me.ucrInputConfidenceInterval.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.ucrInputConfidenceInterval.GetSetSelectedIndex = -1
         Me.ucrInputConfidenceInterval.IsReadOnly = False
         Me.ucrInputConfidenceInterval.Location = New System.Drawing.Point(336, 233)
@@ -364,6 +378,7 @@ Partial Class dlgTwoVariableFitModel
         'ucrInputNullHypothesis
         '
         Me.ucrInputNullHypothesis.AddQuotesIfUnrecognised = True
+        Me.ucrInputNullHypothesis.AutoSize = True
         Me.ucrInputNullHypothesis.IsMultiline = False
         Me.ucrInputNullHypothesis.IsReadOnly = False
         Me.ucrInputNullHypothesis.Location = New System.Drawing.Point(336, 262)
@@ -374,7 +389,7 @@ Partial Class dlgTwoVariableFitModel
         'lblNullHypothesis
         '
         Me.lblNullHypothesis.AutoSize = True
-        Me.lblNullHypothesis.Location = New System.Drawing.Point(236, 265)
+        Me.lblNullHypothesis.Location = New System.Drawing.Point(238, 265)
         Me.lblNullHypothesis.Name = "lblNullHypothesis"
         Me.lblNullHypothesis.Size = New System.Drawing.Size(83, 13)
         Me.lblNullHypothesis.TabIndex = 89
@@ -382,8 +397,9 @@ Partial Class dlgTwoVariableFitModel
         '
         'dlgTwoVariableFitModel
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
-        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(96.0!, 96.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi
+        Me.AutoSize = True
         Me.ClientSize = New System.Drawing.Size(462, 510)
         Me.Controls.Add(Me.lblNullHypothesis)
         Me.Controls.Add(Me.ucrInputNullHypothesis)

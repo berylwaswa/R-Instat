@@ -39,7 +39,7 @@ Public Class ucrButtons
     End Sub
 
     Private Sub cmdCancel_Click(sender As Object, e As EventArgs) Handles cmdCancel.Click
-        Me.ParentForm.Hide()
+        Me.ParentForm.Close()
         RaiseEvent ClickClose(sender, e)
     End Sub
 
@@ -72,7 +72,7 @@ Public Class ucrButtons
         'Indeed, the events BeforeClickOk and ClickOk enables for the moment to insert R-commands before and after the Base R-command handle. 
         'In the process, we want the RSyntax parameters to be set as at the end of GetScript. Hence the reset needs to come after.
         'Eventually, all this should be more neatly incorporated in the RSyntax machinery...
-        ParentForm.Hide()
+        ParentForm.Close()
         j = 0
         For Each ctrTempControl In ParentForm.Controls
             ctrTempControl.Enabled = lstCurrentEnabled(j)
@@ -278,14 +278,12 @@ Public Class ucrButtons
         End If
     End Sub
 
-    Private iMyCode As Integer = 0
-
     Private Sub AddButtonInCommentTextbox()
         Dim btnMoreComment As New Button
         'add the button to the comment textbox first
         txtComment.Controls.Clear()
         txtComment.Controls.Add(btnMoreComment)
-        
+
         'then set the  button properties
         btnMoreComment.Text = ":::" 'temp. This will be shown as centered ... An image as below commended code is preferred
         'btn.Image = Image.FromFile("C:\patowhiz\3dots.png")
