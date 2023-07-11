@@ -83,6 +83,7 @@ Public Class ucrAxes
         ucrInputMajorBreaksCustom.AddQuotesIfUnrecognised = False
         ucrInputMajorBreaksCustom.SetValidationTypeAsNumericList()
 
+
         ucrPnlMinorBreaks.AddRadioButton(rdoMinorBreaksAuto)
         ucrPnlMinorBreaks.AddRadioButton(rdoMinorBreaksCustom)
         ucrPnlMinorBreaks.AddRadioButton(rdoMinorBreaksSeq)
