@@ -318,9 +318,9 @@ Public Class ucrReceiverMultiple
         Return lstColumnFunctions
     End Function
 
-    Public Overrides Function GetVariableNames(Optional bWithQuotes As Boolean = True, Optional strQuotes As String = """") As String
+    Public Overrides Function GetVariableNames(Optional bWithQuotes As Boolean = True) As String
         Dim strTempBuilder As New Text.StringBuilder
-        Dim strQuoteHolder As String = If(bWithQuotes, strQuotes, "")
+        Dim strQuoteHolder As String = If(bWithQuotes, Chr(34), "")
 
         If lstSelectedVariables.Items.Count = 1 AndAlso Not bForceVariablesAsList Then
             strTempBuilder.Append(strQuoteHolder).Append(lstSelectedVariables.Items(0).Text).Append(strQuoteHolder)

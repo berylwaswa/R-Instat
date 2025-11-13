@@ -11,13 +11,13 @@ Public Class ucrStub
         rdoVariables.Checked = True
     End Sub
 
-    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator, Optional strTableName As String = "")
+    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator)
         If bFirstload Then
             initialiseDialog()
             bFirstload = False
         End If
 
-        ucrStubOptions.Setup(strDataFrameName, clsOperator, strTableName)
+        ucrStubOptions.Setup(strDataFrameName, clsOperator)
         ucrStubStyle.Setup(strDataFrameName, clsOperator)
     End Sub
 

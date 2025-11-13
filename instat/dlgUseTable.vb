@@ -125,14 +125,7 @@ Public Class dlgUseTable
     End Sub
 
     Private Sub btnTableOptions_Click(sender As Object, e As EventArgs) Handles btnTableOptions.Click
-        sdgTableOptions.Setup(ucrTablesSelector.strCurrentDataFrame,
-                              clsGtTableROperator, {
-                              EnumTableSubDialogTab.Header,
-                              EnumTableSubDialogTab.Columns, EnumTableSubDialogTab.Rows,
-                              EnumTableSubDialogTab.Cells, EnumTableSubDialogTab.SourceNotes,
-                              EnumTableSubDialogTab.Themes, EnumTableSubDialogTab.OtherStyle,
-                              EnumTableSubDialogTab.Table},
-                              strTableName:=ucrTablesReceiver.GetVariableNames(bWithQuotes:=False))
+        sdgTableOptions.Setup(ucrTablesSelector.strCurrentDataFrame, clsGtTableROperator)
         sdgTableOptions.ShowDialog(Me)
     End Sub
 

@@ -157,7 +157,8 @@ Public Class dlgTricotModellingGeneral
 
         ucrTraitsReceiver.SetMeAsReceiver()
 
-        clsPackageCheck.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$check_variety_data_level")
+        clsPackageCheck.SetPackageName("databook")
+        clsPackageCheck.SetRCommand("check_variety_data_level")
         clsPackageCheck.AddParameter("data", Chr(34) & ucrSelectorVarietyLevel.strCurrentDataFrame & Chr(34))
         clsPackageCheck.AddParameter("col", ucrReceiverMultipleExplanatoryVariables.GetVariableNames())
 

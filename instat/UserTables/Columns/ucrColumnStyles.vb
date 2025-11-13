@@ -1,30 +1,32 @@
-﻿Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+﻿Public Class ucrColumnStyles
 
-Public Class ucrColumnStyles
     Private clsOperator As New ROperator
+    Private bFirstload As Boolean = True
 
-    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator, strTableName As String)
-        ' Set up the selector and receiver
-        ucrReceiverMultipleCols.strObjectName = strTableName
-        If String.IsNullOrEmpty(strTableName) Then
-            ucrSelectorByDF.Visible = True
-            ucrSelectorByTableDF.Visible = False
-            ucrSelectorByDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverMultipleCols.Selector = ucrSelectorByDF
-        Else
-            ucrSelectorByDF.Visible = False
-            ucrSelectorByTableDF.Visible = True
-            ucrSelectorByTableDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverMultipleCols.Selector = ucrSelectorByTableDF
+    Private Sub ucrColumnStyles_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If bFirstload Then
+            InitialiseControl()
+            bFirstload = False
         End If
+    End Sub
+
+    Private Sub InitialiseControl()
+        ucrReceiverMultipleCols.Selector = ucrSelectorCols
         ucrReceiverMultipleCols.SetMeAsReceiver()
-        ucrReceiverMultipleCols.Clear()
+    End Sub
+
+    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator)
+
 
         Me.clsOperator = clsOperator
+
+        ' Set up the selector
+        ucrSelectorCols.SetDataframe(strDataFrameName, bEnableDataframe:=False)
 
         ' Clear and Set up the data grid with contents
         dataGridFormats.Rows.Clear()
         SetupDataGrid(clsTablesUtils.FindRFunctionsParamsWithRParamValue({"tab_style"}, "locations", "cells_column_labels", clsOperator))
+
     End Sub
 
     Private Sub SetupDataGrid(lstRParams As List(Of RParameter))
@@ -57,7 +59,7 @@ Public Class ucrColumnStyles
         Dim clsLocationsRFunction As New RFunction
         clsLocationsRFunction.SetPackageName("gt")
         clsLocationsRFunction.SetRCommand("cells_column_labels")
-        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="columns", strParamValue:=ucrReceiverMultipleCols.GetVariableNames(bWithQuotes:=True, strQuotes:="`"), iNewPosition:=0))
+        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="columns", strParamValue:=ucrReceiverMultipleCols.GetVariableNames(bWithQuotes:=False), iNewPosition:=0))
 
         Dim clsTabStyleRFunction As RFunction = clsTablesUtils.GetNewStyleRFunction(clsListStyleRFunction, clsLocationsRFunction)
 
@@ -86,5 +88,6 @@ Public Class ucrColumnStyles
         clsTablesUtils.RemoveRParams(clsTablesUtils.FindRFunctionsParamsWithRParamValue({"tab_style"}, "locations", "cells_column_labels", clsOperator), clsOperator)
         clsTablesUtils.AddGridRowTagsRParamsToROperator(dataGridFormats, clsOperator)
     End Sub
+
 
 End Class

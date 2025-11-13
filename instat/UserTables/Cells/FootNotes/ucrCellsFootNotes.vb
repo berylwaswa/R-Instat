@@ -1,31 +1,25 @@
-﻿Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+﻿Public Class ucrCellsFootNotes
 
-Public Class ucrCellsFootNotes
     Private clsOperator As New ROperator
+    Private bFirstload As Boolean = True
 
-    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator, strTableName As String)
-        ' Set up the selector and receiver
-        ucrReceiverSingleCol.strObjectName = strTableName
-        If String.IsNullOrEmpty(strTableName) Then
-            ucrSelectorByDF.Visible = True
-            ucrSelectorByTableDF.Visible = False
-            ucrSelectorByDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverSingleCol.Selector = ucrSelectorByDF
-        Else
-            ucrSelectorByDF.Visible = False
-            ucrSelectorByTableDF.Visible = True
-            ucrSelectorByTableDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverSingleCol.Selector = ucrSelectorByTableDF
-        End If
+    Private Sub InitialiseControl()
+        ucrReceiverSingleCol.Selector = ucrSelectorCols
         ucrReceiverSingleCol.SetMeAsReceiver()
-        ucrReceiverSingleCol.Clear()
+    End Sub
+
+    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator)
+        If bFirstload Then
+            InitialiseControl()
+            bFirstload = False
+        End If
 
         Me.clsOperator = clsOperator
 
         ' Set up the controls
-        ucrSelectorByDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-        ucrRowExpression.Setup(strDataFrameName)
+        ucrSelectorCols.SetDataframe(strDataFrameName, bEnableDataframe:=False)
         SetupDataGrid(clsOperator)
+
     End Sub
 
 
@@ -46,8 +40,8 @@ Public Class ucrCellsFootNotes
         Next
     End Sub
 
-    Private Sub ucrInputControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverSingleCol.ControlContentsChanged, ucrRowExpression.ControlContentsChanged
-        btnAdd.Enabled = Not ucrReceiverSingleCol.IsEmpty AndAlso Not ucrRowExpression.IsEmpty
+    Private Sub ucrInputControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrInputRows.ControlContentsChanged, ucrReceiverSingleCol.ControlContentsChanged
+        btnAdd.Enabled = Not ucrReceiverSingleCol.IsEmpty AndAlso Not ucrInputRows.IsEmpty
     End Sub
 
     Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
@@ -58,8 +52,8 @@ Public Class ucrCellsFootNotes
 
         clsLocationsRFunction.SetPackageName("gt")
         clsLocationsRFunction.SetRCommand("cells_body")
-        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="columns", strParamValue:=ucrReceiverSingleCol.GetVariableNames(bWithQuotes:=True, strQuotes:="`"), iNewPosition:=0))
-        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="rows", strParamValue:=ucrRowExpression.GetText, iNewPosition:=1))
+        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="columns", strParamValue:=ucrReceiverSingleCol.GetVariableNames(bWithQuotes:=False), iNewPosition:=0))
+        clsLocationsRFunction.AddParameter(New RParameter(strParameterName:="rows", strParamValue:=ucrInputRows.GetText, iNewPosition:=1))
 
         clsTabFootNoteRFunction.SetPackageName("gt")
         clsTabFootNoteRFunction.SetRCommand("tab_footnote")

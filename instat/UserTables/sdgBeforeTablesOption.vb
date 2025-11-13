@@ -16,7 +16,8 @@
 
 Imports instat.Translations
 
-Public Class sdgTableOptions
+Public Class sdgBeforeTablesOption
+    Private lstFormatRFunctions As New List(Of RFunction)
 
     Private clsOperator As ROperator
     Private clsThemeRFunction, clsSubMissingRFunction As RFunction
@@ -27,7 +28,7 @@ Public Class sdgTableOptions
     Private ReadOnly strMissing As String = "missing"
     Private ReadOnly strStar As String = "***"
 
-    Private Sub sdgTableOptions_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    Private Sub sdgBeforeTablesOption_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstload Then
             InitialiseDialog()
             bFirstload = False
@@ -39,7 +40,6 @@ Public Class sdgTableOptions
 
     Private Sub InitialiseDialog()
         ucrSdgBaseButtons.iHelpTopicID = 146
-
         ucrChkSelectTheme.Checked = True
         ucrChkSelectTheme.SetText("Select Theme")
         ucrChkManualTheme.SetText("Manual Theme")
@@ -60,13 +60,12 @@ Public Class sdgTableOptions
         ucrPnlFormat.AddRadioButton(rdoText)
 
         ucrTxtMissingText.SetItems({strZero, strMultipleDashes, strMissing, strStar})
-
         ucrCboSelectThemes.SetItems({"None", "Dark Theme", "538 Theme", "Dot Matrix Theme", "Espn Theme", "Excel Theme", "Guardian Theme", "NY Times Theme", "PFF Theme"})
         ucrCboSelectThemes.SetDropDownStyleAsNonEditable()
     End Sub
 
     ''' <summary>
-    ''' Sets up the sub dialog.
+    ''' Sets up the sub dialog, this is the simpler version of the main sdgTableOptions dialog but has only 4 options.
     ''' Expected to be called before showing the dialog. 
     ''' </summary>
     ''' <param name="strDataFrameName">Name of the data frame contained in the data book</param>
@@ -75,10 +74,6 @@ Public Class sdgTableOptions
         clsOperator = clsNewOperator
 
         ucrHeader.Setup(clsOperator)
-        ucrStub.Setup(strDataFrameName, clsOperator)
-        ucrRows.Setup(strDataFrameName, clsOperator)
-        ucrColumns.Setup(strDataFrameName, clsOperator)
-        ucrCells.Setup(strDataFrameName, clsOperator)
         ucrSourceNotes.Setup(clsOperator)
         ucrOtherStyles.Setup(clsOperator)
 
@@ -89,21 +84,16 @@ Public Class sdgTableOptions
         sdgTableStyles.GetNewUserInputAsRFunction()
         SetupTheme(clsOperator)
         SetupSubMissing(clsOperator)
+        SetupFormatFunctions(clsOperator)
     End Sub
 
     Private Sub ucrSdgBaseButtons_ClickReturn(sender As Object, e As EventArgs) Handles ucrSdgBaseButtons.ClickReturn
         ucrHeader.SetValuesToOperator()
-        ucrStub.SetValuesToOperator()
-        ucrColumns.SetValuesToOperator()
-        ucrRows.SetValuesToOperator()
-        ucrCells.SetValuesToOperator()
         ucrSourceNotes.SetValuesToOperator()
         ucrOtherStyles.SetValuesToOperator()
-
         SetThemeValuesOnReturn(clsOperator)
         SetSubMissingValuesOnReturn(clsOperator)
     End Sub
-
 
     '-----------------------------------------
     ' Themes
@@ -119,47 +109,6 @@ Public Class sdgTableOptions
             sdgSummaryThemes.SetRCode(bReset:=True, clsNewThemesTabOption:=clsThemeRFunction)
         End If
     End Sub
-
-    Private Sub ucrChkDataFormat_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkDataFormat.ControlValueChanged
-        If ucrChkDataFormat.Checked Then
-            ucrPnlFormat.Visible = True
-            rdoNumber.Visible = True
-            rdoDate.Visible = True
-            rdoText.Visible = True
-        Else
-            rdoNumber.Visible = False
-            rdoDate.Visible = False
-            rdoText.Visible = False
-        End If
-
-    End Sub
-
-    Private Sub ucrChkMissingValues_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkMissingValues.ControlValueChanged
-        If ucrChkMissingValues.Checked Then
-            grpMissingValues.Visible = True
-        Else
-            grpMissingValues.Visible = False
-        End If
-    End Sub
-
-    Private Sub ucrPnlFormat_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlFormat.ControlValueChanged
-        If rdoNumber.Checked Then
-            btnNumberFormat.Visible = True
-        Else
-            btnNumberFormat.Visible = False
-        End If
-        If rdoDate.Checked Then
-            btnDateFormat.Visible = True
-        Else
-            btnDateFormat.Visible = False
-        End If
-        If rdoText.Checked Then
-            btnTextFormat.Visible = True
-        Else
-            btnTextFormat.Visible = False
-        End If
-    End Sub
-
 
     Private Sub ucrChkSelectTheme_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkSelectTheme.ControlValueChanged
         If ucrChkSelectTheme.Checked Then
@@ -217,6 +166,46 @@ Public Class sdgTableOptions
         clsThemeRFunction.SetRCommand(strCommand)
     End Sub
 
+    Private Sub ucrChkDataFormat_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkDataFormat.ControlValueChanged
+        If ucrChkDataFormat.Checked Then
+            ucrPnlFormat.Visible = True
+            rdoNumber.Visible = True
+            rdoDate.Visible = True
+            rdoText.Visible = True
+        Else
+            rdoNumber.Visible = False
+            rdoDate.Visible = False
+            rdoText.Visible = False
+        End If
+
+    End Sub
+
+    Private Sub ucrChkMissingValues_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkMissingValues.ControlValueChanged
+        If ucrChkMissingValues.Checked Then
+            grpMissingValues.Visible = True
+        Else
+            grpMissingValues.Visible = False
+        End If
+    End Sub
+
+    Private Sub ucrPnlFormat_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlFormat.ControlValueChanged
+        If rdoNumber.Checked Then
+            btnNumberFormat.Visible = True
+        Else
+            btnNumberFormat.Visible = False
+        End If
+        If rdoDate.Checked Then
+            btnDateFormat.Visible = True
+        Else
+            btnDateFormat.Visible = False
+        End If
+        If rdoText.Checked Then
+            btnTextFormat.Visible = True
+        Else
+            btnTextFormat.Visible = False
+        End If
+    End Sub
+
     Private Sub SetThemeValuesOnReturn(clsOperator As ROperator)
         ' Set the themes parameter if there was a theme selected
         If ucrChkManualTheme.Checked Then
@@ -235,7 +224,10 @@ Public Class sdgTableOptions
         clsFormatRFunction = sdgCellFormatTextOptions.GetNewUserInputAsRFunction()
         If clsFormatRFunction Is Nothing Then
             Exit Sub
+        Else
+            lstFormatRFunctions.Add(clsFormatRFunction)
         End If
+
     End Sub
 
     Private Sub btnDateFormat_Click(sender As Object, e As EventArgs) Handles btnDateFormat.Click
@@ -244,6 +236,8 @@ Public Class sdgTableOptions
         clsFormatRFunction = sdgCellFormatDateOptions.GetNewUserInputAsRFunction()
         If clsFormatRFunction Is Nothing Then
             Exit Sub
+        Else
+            lstFormatRFunctions.Add(clsFormatRFunction)
         End If
     End Sub
 
@@ -254,7 +248,10 @@ Public Class sdgTableOptions
 
         If clsFormatRFunction Is Nothing Then
             Exit Sub
+        Else
+            lstFormatRFunctions.Add(clsFormatRFunction)
         End If
+
     End Sub
 
     Private Sub SetupSubMissing(clsOperator As ROperator)
@@ -290,7 +287,38 @@ Public Class sdgTableOptions
 
     Private Sub ucrTxtMissingText_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrTxtMissingText.ControlValueChanged
         UpdateSubMissingParam(ucrTxtMissingText.GetText())
-    End Sub
-    '-----------------------------------------
 
+    End Sub
+
+    Private Sub SetupFormatFunctions(clsOperator As ROperator)
+        lstFormatRFunctions.Clear()
+
+        Dim clsFormatParams = clsTablesUtils.FindRFunctionsParamsWithRCommand(
+        {"fmt", "fmt_units", "fmt_number", "fmt_currency"}, clsOperator)
+
+        For Each clsParam In clsFormatParams
+            Dim clsFunc As RFunction = clsParam.clsArgumentCodeStructure
+            If clsFunc IsNot Nothing Then
+                lstFormatRFunctions.Add(clsFunc)
+            End If
+        Next
+    End Sub
+
+    Private Sub SetFormatFunctionsOnReturn(clsOperator As ROperator)
+        ' Remove existing
+        clsTablesUtils.RemoveRFunctionsParamsWithRCommand(
+        {"fmt", "fmt_units", "fmt_number", "fmt_currency"}, clsOperator)
+
+        ' Add new
+        For i = 0 To lstFormatRFunctions.Count - 1
+            Dim clsFunc = lstFormatRFunctions(i)
+            Dim strParamName = "fmt_param" & (i + 1)
+
+            Dim clsParam As New RParameter(strParamName, clsFunc, bNewIncludeArgumentName:=False)
+            clsOperator.AddParameter(strParameterName:=strParamName, clsRFunctionParameter:=clsFunc)
+
+        Next
+    End Sub
+
+    '-----------------------------------------
 End Class

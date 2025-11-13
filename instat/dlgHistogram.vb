@@ -50,7 +50,8 @@ Public Class dlgHistogram
 
     Private clsFacetFunction As New RFunction
     Private clsFacetVariablesOperator As New ROperator
-    Private clsVarsFunction As New RFunction
+    Private clsFacetRowOp As New ROperator
+    Private clsFacetColOp As New ROperator
     Private clsPipeOperator As New ROperator
     Private clsGroupByFunction As New RFunction
 
@@ -219,7 +220,8 @@ Public Class dlgHistogram
         clsForecatsReverseValue = New RFunction
         clsFacetFunction = New RFunction
         clsFacetVariablesOperator = New ROperator
-        clsVarsFunction = New RFunction
+        clsFacetRowOp = New ROperator
+        clsFacetColOp = New ROperator
         clsPipeOperator = New ROperator
         clsGroupByFunction = New RFunction
 
@@ -273,14 +275,14 @@ Public Class dlgHistogram
         clsYlabScalesFunction.AddParameter("breaks", "NULL", iPosition:=1)
 
         clsFacetFunction.SetPackageName("ggplot2")
-        clsFacetFunction.AddParameter("facets", clsROperatorParameter:=clsFacetVariablesOperator, iPosition:=0)
-
+        clsFacetRowOp.SetOperation("+")
+        clsFacetRowOp.bBrackets = False
+        clsFacetColOp.SetOperation("+")
+        clsFacetColOp.bBrackets = False
         clsFacetVariablesOperator.SetOperation("~")
         clsFacetVariablesOperator.bForceIncludeOperation = True
         clsFacetVariablesOperator.bBrackets = False
-
-        clsVarsFunction.SetPackageName("ggplot2")
-        clsVarsFunction.SetRCommand("vars")
+        clsFacetFunction.AddParameter("facets", clsROperatorParameter:=clsFacetVariablesOperator, iPosition:=0)
 
         clsPipeOperator.SetOperation("%>%")
         SetPipeAssignTo()
@@ -679,6 +681,8 @@ Public Class dlgHistogram
 
     Private Sub UpdateParameters()
         clsFacetVariablesOperator.RemoveParameterByName("var1")
+        clsFacetColOp.RemoveParameterByName("col" & ucrInputStation.Name)
+        clsFacetRowOp.RemoveParameterByName("row" & ucrInputStation.Name)
         clsBaseOperator.RemoveParameterByName("facets")
         bUpdatingParameters = True
         ucr1stFactorReceiver.SetRCode(Nothing)
@@ -687,11 +691,11 @@ Public Class dlgHistogram
                 ucr1stFactorReceiver.ChangeParameterName("var1")
                 ucr1stFactorReceiver.SetRCode(clsFacetVariablesOperator)
             Case strFacetCol, strFacetColAll
-                ucr1stFactorReceiver.ChangeParameterName("cols" & ucrInputStation.Name)
-                ucr1stFactorReceiver.SetRCode(clsVarsFunction)
+                ucr1stFactorReceiver.ChangeParameterName("col" & ucrInputStation.Name)
+                ucr1stFactorReceiver.SetRCode(clsFacetColOp)
             Case strFacetRow, strFacetRowAll
-                ucr1stFactorReceiver.ChangeParameterName("rows" & ucrInputStation.Name)
-                ucr1stFactorReceiver.SetRCode(clsVarsFunction)
+                ucr1stFactorReceiver.ChangeParameterName("row" & ucrInputStation.Name)
+                ucr1stFactorReceiver.SetRCode(clsFacetRowOp)
         End Select
         If Not clsRaesFunction.ContainsParameter("x") Then
             clsRaesFunction.AddParameter("x", Chr(34) & Chr(34))
@@ -734,7 +738,6 @@ Public Class dlgHistogram
 
         If bRow OrElse bCol OrElse bRowAll OrElse bColAll Then
             clsFacetFunction.SetRCommand("facet_grid")
-            clsFacetFunction.RemoveParameterByName("facets")
         End If
 
         If bRowAll OrElse bColAll Then
@@ -744,15 +747,19 @@ Public Class dlgHistogram
         End If
 
         If bRow OrElse bRowAll Then
-            clsFacetFunction.AddParameter("rows", clsRFunctionParameter:=clsVarsFunction, iPosition:=0)
+            clsFacetVariablesOperator.AddParameter("left", clsROperatorParameter:=clsFacetRowOp, iPosition:=0)
+        ElseIf (bCol OrElse bColAll) AndAlso bWrap = False Then
+            clsFacetVariablesOperator.AddParameter("left", ".", iPosition:=0)
         Else
-            clsFacetFunction.RemoveParameterByName("rows")
+            clsFacetVariablesOperator.RemoveParameterByName("left")
         End If
 
         If bCol OrElse bColAll Then
-            clsFacetFunction.AddParameter("cols", clsRFunctionParameter:=clsVarsFunction, iPosition:=0)
+            clsFacetVariablesOperator.AddParameter("right", clsROperatorParameter:=clsFacetColOp, iPosition:=1)
+        ElseIf (bRow OrElse bColAll) AndAlso bWrap = False Then
+            clsFacetVariablesOperator.AddParameter("right", ".", iPosition:=1)
         Else
-            clsFacetFunction.RemoveParameterByName("cols")
+            clsFacetVariablesOperator.RemoveParameterByName("right")
         End If
     End Sub
 
@@ -803,14 +810,10 @@ Public Class dlgHistogram
                 Select Case ucrInputStation.GetText()
                     Case strFacetWrap
                         GetParameterValue(clsFacetVariablesOperator)
-                    Case strFacetCol, strFacetColAll, strFacetRow, strFacetRowAll
-                        Dim i As Integer = clsGroupByFunction.iParameterCount
-                        For Each clsTempParam As RParameter In clsVarsFunction.clsParameters
-                            If clsTempParam.strArgumentValue <> "" AndAlso clsTempParam.strArgumentValue <> "." Then
-                                clsGroupByFunction.AddParameter(i, clsTempParam.strArgumentValue, bIncludeArgumentName:=False, iPosition:=i)
-                                i = i + 1
-                            End If
-                        Next
+                    Case strFacetCol, strFacetColAll
+                        GetParameterValue(clsFacetColOp)
+                    Case strFacetRow, strFacetRowAll
+                        GetParameterValue(clsFacetRowOp)
                 End Select
             End If
 

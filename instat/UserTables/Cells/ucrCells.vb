@@ -1,22 +1,22 @@
 ﻿Public Class ucrCells
-    Private bFirstload As Boolean = True
 
-    Private Sub InitialiseControl()
+    Private bFirstload As Boolean = True
+    Private Sub InitialiseDialog()
         ucrPnlCells.AddRadioButton(rdoFormat)
         ucrPnlCells.AddRadioButton(rdoFootNotes)
         ucrPnlCells.AddRadioButton(rdoStyles)
         rdoFormat.Checked = True
     End Sub
 
-    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator, strTableName As String)
+    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator)
         If bFirstload Then
-            InitialiseControl()
+            InitialiseDialog()
             bFirstload = False
         End If
 
-        ucrCellFormats.Setup(strDataFrameName, clsOperator, strTableName)
-        ucrCellsFootNotes.Setup(strDataFrameName, clsOperator, strTableName)
-        ucrCellStyles.Setup(strDataFrameName, clsOperator, strTableName)
+        ucrCellFormats.Setup(strDataFrameName, clsOperator)
+        ucrCellsFootNotes.Setup(strDataFrameName, clsOperator)
+        ucrCellStyles.Setup(strDataFrameName, clsOperator)
 
     End Sub
 

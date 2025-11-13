@@ -41,8 +41,6 @@ Public Class ucrReceiver
 
     Private strPrvNcFilePath As String = ""
 
-    Public strObjectName As String = ""
-
     'Should the receiver attempt to autofill items based on lstIncludedAutoFillProperties?
     Public bAutoFill As Boolean = False
     Public lstIncludedAutoFillProperties As Dictionary(Of String, String())
@@ -156,7 +154,7 @@ Public Class ucrReceiver
         Return New RFunction
     End Function
 
-    Public Overridable Function GetVariableNames(Optional bWithQuotes As Boolean = True, Optional strQuotes As String = """") As String
+    Public Overridable Function GetVariableNames(Optional bWithQuotes As Boolean = True) As String
         Return ""
     End Function
 

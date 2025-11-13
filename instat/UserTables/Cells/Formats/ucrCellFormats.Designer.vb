@@ -26,17 +26,16 @@ Partial Class ucrCellFormats
         Me.btnClearFormats = New System.Windows.Forms.Button()
         Me.btnEnterFormat = New System.Windows.Forms.Button()
         Me.dataGridFormats = New System.Windows.Forms.DataGridView()
-        Me.colCodnition = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colLabel = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.colRow = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.lblColumns = New System.Windows.Forms.Label()
         Me.cboSelectFormat = New System.Windows.Forms.ComboBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.ucrReceiverMultipleCols = New instat.ucrReceiverMultiple()
-        Me.ucrSelectorByDF = New instat.ucrSelectorByDataFrameAddRemove()
+        Me.ucrSelectorCols = New instat.ucrSelectorByDataFrameAddRemove()
         Me.ucrRowExpression = New instat.ucrRowExpression()
         Me.Label1 = New System.Windows.Forms.Label()
-        Me.ucrSelectorByTableDF = New instat.ucrSelectorByOutputObject()
+        Me.colCodnition = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colLabel = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.colRow = New System.Windows.Forms.DataGridViewTextBoxColumn()
         CType(Me.dataGridFormats, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -85,30 +84,6 @@ Partial Class ucrCellFormats
         Me.dataGridFormats.Size = New System.Drawing.Size(361, 73)
         Me.dataGridFormats.TabIndex = 307
         '
-        'colCodnition
-        '
-        Me.colCodnition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
-        Me.colCodnition.HeaderText = "Format"
-        Me.colCodnition.MinimumWidth = 8
-        Me.colCodnition.Name = "colCodnition"
-        Me.colCodnition.ReadOnly = True
-        Me.colCodnition.Width = 64
-        '
-        'colLabel
-        '
-        Me.colLabel.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
-        Me.colLabel.HeaderText = "Column(s)"
-        Me.colLabel.MinimumWidth = 8
-        Me.colLabel.Name = "colLabel"
-        Me.colLabel.ReadOnly = True
-        Me.colLabel.Width = 78
-        '
-        'colRow
-        '
-        Me.colRow.HeaderText = "Row Expression"
-        Me.colRow.Name = "colRow"
-        Me.colRow.ReadOnly = True
-        '
         'lblColumns
         '
         Me.lblColumns.AutoSize = True
@@ -152,17 +127,17 @@ Partial Class ucrCellFormats
         Me.ucrReceiverMultipleCols.TabIndex = 317
         Me.ucrReceiverMultipleCols.ucrSelector = Nothing
         '
-        'ucrSelectorByDF
+        'ucrSelectorCols
         '
-        Me.ucrSelectorByDF.AutoSize = True
-        Me.ucrSelectorByDF.bDropUnusedFilterLevels = False
-        Me.ucrSelectorByDF.bShowHiddenColumns = False
-        Me.ucrSelectorByDF.bUseCurrentFilter = True
-        Me.ucrSelectorByDF.Location = New System.Drawing.Point(4, 6)
-        Me.ucrSelectorByDF.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrSelectorByDF.Name = "ucrSelectorByDF"
-        Me.ucrSelectorByDF.Size = New System.Drawing.Size(213, 183)
-        Me.ucrSelectorByDF.TabIndex = 308
+        Me.ucrSelectorCols.AutoSize = True
+        Me.ucrSelectorCols.bDropUnusedFilterLevels = False
+        Me.ucrSelectorCols.bShowHiddenColumns = False
+        Me.ucrSelectorCols.bUseCurrentFilter = True
+        Me.ucrSelectorCols.Location = New System.Drawing.Point(4, 6)
+        Me.ucrSelectorCols.Margin = New System.Windows.Forms.Padding(0)
+        Me.ucrSelectorCols.Name = "ucrSelectorCols"
+        Me.ucrSelectorCols.Size = New System.Drawing.Size(213, 183)
+        Me.ucrSelectorCols.TabIndex = 308
         '
         'ucrRowExpression
         '
@@ -181,21 +156,34 @@ Partial Class ucrCellFormats
         Me.Label1.TabIndex = 333
         Me.Label1.Text = "Row Expression (Optional):"
         '
-        'ucrSelectorByTableDF
+        'colCodnition
         '
-        Me.ucrSelectorByTableDF.AutoSize = True
-        Me.ucrSelectorByTableDF.bShowHiddenColumns = False
-        Me.ucrSelectorByTableDF.Location = New System.Drawing.Point(4, 7)
-        Me.ucrSelectorByTableDF.Margin = New System.Windows.Forms.Padding(0)
-        Me.ucrSelectorByTableDF.Name = "ucrSelectorByTableDF"
-        Me.ucrSelectorByTableDF.Size = New System.Drawing.Size(216, 194)
-        Me.ucrSelectorByTableDF.TabIndex = 362
+        Me.colCodnition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
+        Me.colCodnition.HeaderText = "Format"
+        Me.colCodnition.MinimumWidth = 8
+        Me.colCodnition.Name = "colCodnition"
+        Me.colCodnition.ReadOnly = True
+        Me.colCodnition.Width = 64
+        '
+        'colLabel
+        '
+        Me.colLabel.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
+        Me.colLabel.HeaderText = "Column(s)"
+        Me.colLabel.MinimumWidth = 8
+        Me.colLabel.Name = "colLabel"
+        Me.colLabel.ReadOnly = True
+        Me.colLabel.Width = 78
+        '
+        'colRow
+        '
+        Me.colRow.HeaderText = "Row Expression"
+        Me.colRow.Name = "colRow"
+        Me.colRow.ReadOnly = True
         '
         'ucrCellFormats
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Controls.Add(Me.ucrSelectorByTableDF)
         Me.Controls.Add(Me.ucrRowExpression)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.Label2)
@@ -205,7 +193,7 @@ Partial Class ucrCellFormats
         Me.Controls.Add(Me.btnClearFormats)
         Me.Controls.Add(Me.lblColumns)
         Me.Controls.Add(Me.btnEnterFormat)
-        Me.Controls.Add(Me.ucrSelectorByDF)
+        Me.Controls.Add(Me.ucrSelectorCols)
         Me.Controls.Add(Me.dataGridFormats)
         Me.Name = "ucrCellFormats"
         Me.Size = New System.Drawing.Size(602, 312)
@@ -220,7 +208,7 @@ Partial Class ucrCellFormats
     Friend WithEvents dataGridFormats As DataGridView
     Friend WithEvents ucrReceiverMultipleCols As ucrReceiverMultiple
     Friend WithEvents lblColumns As Label
-    Friend WithEvents ucrSelectorByDF As ucrSelectorByDataFrameAddRemove
+    Friend WithEvents ucrSelectorCols As ucrSelectorByDataFrameAddRemove
     Friend WithEvents cboSelectFormat As ComboBox
     Friend WithEvents Label2 As Label
     Friend WithEvents ucrRowExpression As ucrRowExpression
@@ -228,5 +216,4 @@ Partial Class ucrCellFormats
     Friend WithEvents colCodnition As DataGridViewTextBoxColumn
     Friend WithEvents colLabel As DataGridViewTextBoxColumn
     Friend WithEvents colRow As DataGridViewTextBoxColumn
-    Friend WithEvents ucrSelectorByTableDF As ucrSelectorByOutputObject
 End Class

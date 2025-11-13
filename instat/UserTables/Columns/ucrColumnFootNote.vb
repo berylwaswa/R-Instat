@@ -1,24 +1,24 @@
 ﻿Public Class ucrColumnFootNote
     Private clsOperator As New ROperator
+    Private bFirstload As Boolean = True
 
-    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator, strTableName As String)
-        ' Set up the selector and receiver
-        ucrReceiverMultipleCols.strObjectName = strTableName
-        If String.IsNullOrEmpty(strTableName) Then
-            ucrSelectorByDF.Visible = True
-            ucrSelectorByTableDF.Visible = False
-            ucrSelectorByDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverMultipleCols.Selector = ucrSelectorByDF
-        Else
-            ucrSelectorByDF.Visible = False
-            ucrSelectorByTableDF.Visible = True
-            ucrSelectorByTableDF.SetDataframe(strDataFrameName, bEnableDataframe:=False)
-            ucrReceiverMultipleCols.Selector = ucrSelectorByTableDF
+    Private Sub ucrColumnFootNote_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If bFirstload Then
+            InitialiseControl()
+            bFirstload = False
         End If
-        ucrReceiverMultipleCols.SetMeAsReceiver()
-        ucrReceiverMultipleCols.Clear()
+    End Sub
 
+    Private Sub InitialiseControl()
+        ucrReceiverMultipleCols.Selector = ucrSelectorCols
+        ucrReceiverMultipleCols.SetMeAsReceiver()
+    End Sub
+
+    Public Sub Setup(strDataFrameName As String, clsOperator As ROperator)
         Me.clsOperator = clsOperator
+
+        ' Set up the selector
+        ucrSelectorCols.SetDataframe(strDataFrameName, bEnableDataframe:=False)
 
         ' Clear and Set up the data grid with contents
         dataGrid.Rows.Clear()
