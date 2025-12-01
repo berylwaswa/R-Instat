@@ -484,13 +484,14 @@ Partial Class dlgClimaticStationMaps
         '
         'ucrChkLegend
         '
-        Me.ucrChkLegend.AutoSize = True
-        Me.ucrChkLegend.Checked = False
-        Me.ucrChkLegend.Location = New System.Drawing.Point(146, 232)
-        Me.ucrChkLegend.Margin = New System.Windows.Forms.Padding(6)
-        Me.ucrChkLegend.Name = "ucrChkLegend"
-        Me.ucrChkLegend.Size = New System.Drawing.Size(98, 24)
-        Me.ucrChkLegend.TabIndex = 29
+        Me.ucrInputColour.AddQuotesIfUnrecognised = True
+        Me.ucrInputColour.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
+        Me.ucrInputColour.GetSetSelectedIndex = -1
+        Me.ucrInputColour.IsReadOnly = False
+        Me.ucrInputColour.Location = New System.Drawing.Point(86, 94)
+        Me.ucrInputColour.Name = "ucrInputColour"
+        Me.ucrInputColour.Size = New System.Drawing.Size(122, 21)
+        Me.ucrInputColour.TabIndex = 11
         '
         'dlgClimaticStationMaps
         '
