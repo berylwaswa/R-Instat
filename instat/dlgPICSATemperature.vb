@@ -128,6 +128,7 @@ Public Class dlgPICSATemperature
     Private clsAsNumericY As New RFunction
     Private clsCoordPolarFunction As New RFunction
     Private clsCoordPolarStartOperator As New ROperator
+
     Private Sub dlgPICSATemperature_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If bFirstLoad Then
             InitialiseDialog()
@@ -331,9 +332,6 @@ Public Class dlgPICSATemperature
         clsCLimitsYDate.SetRCommand("c")
         clsCLimitsYDate.AddParameter("lowerlimit", "NA", bIncludeArgumentName:=False, iPosition:=0)
         clsCLimitsYDate.AddParameter("upperlimit", "NA", bIncludeArgumentName:=False, iPosition:=1)
-
-        'TODO Not yet implemented so do not add
-        'clsYScaleDateFunction.AddParameter("limits", clsRFunctionParameter:=clsCLimitsYDate, iPosition:=8)
 
         clsThemeFunction = GgplotDefaults.clsDefaultThemeFunction
         clsLocalRaesFunction = GgplotDefaults.clsAesFunction.Clone()
@@ -704,7 +702,6 @@ Public Class dlgPICSATemperature
         clsBaseOperator.SetAssignTo("last_graph", strTempDataframe:=ucrSelectorPICSATemperature.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strTempGraph:="last_graph")
         ucrBase.clsRsyntax.SetBaseROperator(clsBaseOperator)
 
-
         TestOkEnabled()
     End Sub
 
@@ -1060,15 +1057,14 @@ Public Class dlgPICSATemperature
     End Sub
 
     Private Sub cmdOptions_Click(sender As Object, e As EventArgs) Handles cmdOptions.Click
-        OpenSubMenu()
+        OpenPlotOptionsDialog()
     End Sub
-
 
     Private Sub PlotOptionsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PlotOptionsToolStripMenuItem.Click
-        OpenSubMenu()
+        OpenPlotOptionsDialog()
     End Sub
 
-    Private Sub OpenSubMenu()
+    Private Sub OpenPlotOptionsDialog()
         sdgPlots.SetRCode(clsNewOperator:=ucrBase.clsRsyntax.clsBaseOperator, clsNewCoordPolarFunction:=clsCoordPolarFunction, clsNewCoordPolarStartOperator:=clsCoordPolarStartOperator, clsNewXScaleDateFunction:=clsXScaleDateFunction, clsNewYScaleDateFunction:=clsYScaleDateFunction,
                           clsNewYScalecontinuousFunction:=clsYScalecontinuousFunction, clsNewXScalecontinuousFunction:=clsXScalecontinuousFunction, clsNewXLabsTitleFunction:=clsXLabsFunction, clsNewYLabTitleFunction:=clsYLabsFunction, clsNewLabsFunction:=clsLabsFunction,
                           clsNewFacetFunction:=clsFacetFunction, clsNewThemeFunction:=clsThemeFunction, clsNewScaleFillViridisFunction:=clsScaleFillViridisFunction, clsNewScaleColourViridisFunction:=clsScaleColourViridisFunction, dctNewThemeFunctions:=dctThemeFunctions,
@@ -1076,7 +1072,6 @@ Public Class dlgPICSATemperature
         sdgPlots.ShowDialog()
         UpdatingFacetOptions()
         bResetSubdialog = False
-        'AddRemoveGroupByAndHlines()
     End Sub
 
     Private Sub ucrChkLineofBestFit_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkLineofBestFit.ControlValueChanged
