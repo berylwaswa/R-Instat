@@ -197,6 +197,7 @@ Public Class dlgClimaticSummary
         clsDayFilterCalcFromList = New RFunction
         Dim strLinkeddata As String = "linked_data_name"
 
+        clsDayFilterCalcFromConvert.SetPackageName("databook")
         clsDayFilterCalcFromConvert.SetRCommand("calc_from_convert")
         clsDayFilterCalcFromList.SetRCommand("list")
         clsDayFilterCalcFromConvert.AddParameter("x", clsRFunctionParameter:=clsDayFilterCalcFromList, iPosition:=0)
@@ -207,7 +208,6 @@ Public Class dlgClimaticSummary
 
         clsDummyFunction.AddParameter("checked", "annual", iPosition:=0)
         clsDummyFunction.AddParameter("day", "False", iPosition:=1)
-
         clsDummyFunction.AddParameter("def", "false", iPosition:=2)
 
         'TODO: this changes to from >= receiver and to <= receiver if annual-variable is checekd.
@@ -373,8 +373,7 @@ Public Class dlgClimaticSummary
 
     Private Sub cmdDoyRange_Click(sender As Object, e As EventArgs) Handles cmdDoyRange.Click
         Dim bUseDate As Boolean = rdoStation.Checked
-        sdgDoyRange.Setup(clsNewDoyFilterCalc:=clsDayFilterCalc, clsNewIfElseFirstDoyFilledFunction:=clsIfElseFirstDoyFilledFunction, clsNewDayFromOperator:=clsFromConditionOperator, clsNewDayToOperator:=clsToConditionOperator, clsNewCalcFromList:=clsDayFilterCalcFromList, strNewMainDataFrame:=ucrSelectorVariable.ucrAvailableDataFrames.Text, strNewDoyColumn:=ucrReceiverDOY.GetVariableNames(False), bSetUseDateVisible:=True, bReset:=bResetSubdialog)
-        sdgDoyRange.SetUseDateVisibility(bUseDate)
+        sdgDoyRange.Setup(clsNewDoyFilterCalc:=clsDayFilterCalc, clsNewIfElseFirstDoyFilledFunction:=clsIfElseFirstDoyFilledFunction, clsNewDayFromOperator:=clsFromConditionOperator, clsNewDayToOperator:=clsToConditionOperator, clsNewCalcFromList:=clsDayFilterCalcFromList, strNewMainDataFrame:=ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strNewDoyColumn:=ucrReceiverDOY.GetVariableNames(False), bSetUseDateVisible:=True, bReset:=bResetSubdialog)      sdgDoyRange.SetUseDateVisibility(bUseDate)
         If Not bUseDate Then
             sdgDoyRange.ucrChkUseDate.Checked = False
         End If
@@ -425,7 +424,7 @@ Public Class dlgClimaticSummary
     Private Sub ucrReceiverStation_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrReceiverDOY.ControlValueChanged, ucrSelectorVariable.ControlValueChanged, ucrChkAddDateColumn.ControlValueChanged, ucrReceiverDate.ControlValueChanged
         UpdateDateDoy()
         If ucrChkAddDateColumn.Checked AndAlso Not ucrReceiverDate.IsEmpty Then
-            clsAddDateFunction.AddParameter("data_name", Chr(34) & ucrSelectorVariable.ucrAvailableDataFrames.Text & Chr(34), iPosition:=0)
+            clsAddDateFunction.AddParameter("data_name", Chr(34) & ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text & Chr(34), iPosition:=0)
         Else
             clsAddDateFunction.RemoveParameterByName("data_name")
         End If
@@ -649,7 +648,7 @@ Public Class dlgClimaticSummary
             If Not ucrReceiverDOY.IsEmpty Then
                 clsDayFilterCalcFromList.AddParameter(ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strParameterValue:=ucrReceiverDOY.GetVariableNames(), iPosition:=0)
             Else
-                clsDayFilterCalcFromList.RemoveParameterByName(ucrSelectorVariable.ucrAvailableDataFrames.Text)
+                clsDayFilterCalcFromList.RemoveParameterByName(ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text)
             End If
         End If
     End Sub
