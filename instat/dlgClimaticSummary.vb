@@ -412,10 +412,6 @@ Public Class dlgClimaticSummary
         AddSaveDefinitionOptions()
     End Sub
 
-    Private Sub Receivers_controlValueChanged(ucrChangedControl As ucrCore) Handles ucrReceiverYear.ControlValueChanged, ucrReceiverWithinYear.ControlValueChanged, ucrReceiverStation.ControlValueChanged, ucrReceiverElements.ControlValueChanged
-
-    End Sub
-
     Private Sub cmdMissingOptions_Click(sender As Object, e As EventArgs) Handles cmdMissingOptions.Click
         sdgMissingOptions.SetRFunction(clsNewSummaryFunction:=clsDefaultFunction, clsNewConcFunction:=clsConcFunction, bReset:=bResetSubdialog)
         bResetSubdialog = False
