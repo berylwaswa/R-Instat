@@ -373,7 +373,8 @@ Public Class dlgClimaticSummary
 
     Private Sub cmdDoyRange_Click(sender As Object, e As EventArgs) Handles cmdDoyRange.Click
         Dim bUseDate As Boolean = rdoStation.Checked
-        sdgDoyRange.Setup(clsNewDoyFilterCalc:=clsDayFilterCalc, clsNewIfElseFirstDoyFilledFunction:=clsIfElseFirstDoyFilledFunction, clsNewDayFromOperator:=clsFromConditionOperator, clsNewDayToOperator:=clsToConditionOperator, clsNewCalcFromList:=clsDayFilterCalcFromList, strNewMainDataFrame:=ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strNewDoyColumn:=ucrReceiverDOY.GetVariableNames(False), bSetUseDateVisible:=True, bReset:=bResetSubdialog)      sdgDoyRange.SetUseDateVisibility(bUseDate)
+        sdgDoyRange.Setup(clsNewDoyFilterCalc:=clsDayFilterCalc, clsNewIfElseFirstDoyFilledFunction:=clsIfElseFirstDoyFilledFunction, clsNewDayFromOperator:=clsFromConditionOperator, clsNewDayToOperator:=clsToConditionOperator, clsNewCalcFromList:=clsDayFilterCalcFromList, strNewMainDataFrame:=ucrSelectorVariable.ucrAvailableDataFrames.cboAvailableDataFrames.Text, strNewDoyColumn:=ucrReceiverDOY.GetVariableNames(False), bSetUseDateVisible:=True, bReset:=bResetSubdialog)
+        sdgDoyRange.SetUseDateVisibility(bUseDate)
         If Not bUseDate Then
             sdgDoyRange.ucrChkUseDate.Checked = False
         End If
