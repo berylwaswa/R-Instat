@@ -997,7 +997,6 @@ Public Class dlgPICSATemperature
         bResetLineLayerSubdialog = False
         'Coming from the sdgLayerOptions, clsRaesFunction and others have been modified. 
         '  One then needs to display these modifications on the dlgScatteredPlot.
-
         'The aesthetics parameters on the main dialog are repopulated as required.
         For Each clsParam In clsRaesFunction.clsParameters
             If clsParam.strArgumentName = "x" Then
