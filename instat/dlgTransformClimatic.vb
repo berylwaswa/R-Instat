@@ -21,7 +21,7 @@ Public Class dlgTransformClimatic
     Private bFirstload As Boolean = True
     Private bReset As Boolean = True
     Private clsRTransform, clsAsNumericFunction, clsWaterBalanceFunction, clsOverallTransformFunction, clsTransformManipulationsFunc, clsGroupByYear, clsGroupByStation, clsReplaceNAasElement, clsRTransformCountSpellSub As New RFunction
-    Private clsTransformCheck As New RFunction
+    Private clsTransformCheck, clsConcatenateFunction, clsDefineAsClimaticFunction As New RFunction
 
     Private bDialogJustShown As Boolean = False
     'dummy
@@ -416,6 +416,9 @@ Public Class dlgTransformClimatic
         clsRTransformCountSpellSub = New RFunction
 
         clsDummyFunction = New RFunction
+
+        clsConcatenateFunction = New RFunction
+        clsDefineAsClimaticFunction = New RFunction
 
         clsCumulativeSum = New RFunction
         clsCumulativeMaximum = New RFunction
@@ -923,7 +926,15 @@ Public Class dlgTransformClimatic
         clsOverallTransformFunction.AddParameter("calc", clsRFunctionParameter:=clsRTransform, iPosition:=0)
         clsOverallTransformFunction.AddParameter("display", "FALSE", iPosition:=1)
 
+        clsConcatenateFunction.SetRCommand("c")
+
+        clsDefineAsClimaticFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$define_as_climatic")
+        clsDefineAsClimaticFunction.AddParameter("key_col_names", "NULL", iPosition:=1)
+        clsDefineAsClimaticFunction.AddParameter("types", clsRFunctionParameter:=clsConcatenateFunction, iPosition:=2)
+        clsDefineAsClimaticFunction.AddParameter("overwrite", "FALSE", iPosition:=3)
+
         'Base Function
+        ChangeCodes()
         ucrBase.clsRsyntax.SetBaseRFunction(clsOverallTransformFunction)
     End Sub
 
@@ -1068,6 +1079,20 @@ Public Class dlgTransformClimatic
     End Sub
 
     Private Sub ucrPnlTransform_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlTransform.ControlValueChanged, ucrPnlDegree.ControlValueChanged ', ucrPnlEvap.ControlValueChanged
+        ChangeCodes()
+        AddCalculate()
+        AutoFill()
+        SetAssignName()
+        GroupByStation()
+        GroupByYear()
+        SetAsReceiver()
+        ChangeFunctions()
+        AddRemoveMeanOperator()
+        ShowGroups()
+        InputConditionOptions()
+    End Sub
+
+    Private Sub ChangeCodes()
         ucrBase.clsRsyntax.ClearCodes()
 
         If rdoCumulative.Checked Then
@@ -1081,6 +1106,7 @@ Public Class dlgTransformClimatic
             clsRTransform.RemoveParameterByName("calculated_from")
             clsTransformCheck = clsRTransform
             ucrBase.clsRsyntax.SetBaseRFunction(clsOverallTransformFunction)
+            ucrBase.clsRsyntax.AddToAfterCodes(clsDefineAsClimaticFunction, iPosition:=1)
         ElseIf rdoMoving.Checked Then
             RasterFunction()
             clsRTransform.RemoveParameterByName("sub_calculations")
@@ -1115,16 +1141,6 @@ Public Class dlgTransformClimatic
             clsTransformCheck = clsRTransform
             ucrBase.clsRsyntax.SetBaseRFunction(clsOverallTransformFunction)
         End If
-        AddCalculate()
-        AutoFill()
-        SetAssignName()
-        GroupByStation()
-        GroupByYear()
-        SetAsReceiver()
-        ChangeFunctions()
-        AddRemoveMeanOperator()
-        ShowGroups()
-        InputConditionOptions()
     End Sub
 
     Private Sub DegreeFunctions()
@@ -1238,8 +1254,13 @@ Public Class dlgTransformClimatic
         clsRRainday.AddParameter("calculated_from", " list(" & strCurrDataName & "=" & ucrReceiverData.GetVariableNames() & ")", iPosition:=3)
     End Sub
 
+    Private Sub ChangeDefineAsClimaticDataName()
+        clsDefineAsClimaticFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
+    End Sub
+
     Private Sub ucrSelectorTransform_ControlValueChanged(ucrchangedControl As ucrCore) Handles ucrSelectorTransform.ControlValueChanged
-        strCurrDataName = Chr(34) & ucrSelectorTransform.ucrAvailableDataFrames.cboAvailableDataFrames.SelectedItem & Chr(34)
+        strCurrDataName = Chr(34) & ucrSelectorTransform.strCurrentDataFrame & Chr(34)
+        ChangeDefineAsClimaticDataName()
         RainDays()
         GroupByYear()
         GroupByStation()
@@ -1394,7 +1415,8 @@ Public Class dlgTransformClimatic
     End Sub
 
     Private Sub ucrSaveColumn_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrSaveColumn.ControlValueChanged
-        'change the parameter values
+        'change the parameter values.
+        clsConcatenateFunction.AddParameter("count", Chr(34) & ucrSaveColumn.GetText() & Chr(34), iPosition:=0)
         clsEndSeasonWBCalc.AddParameter("result_name", Chr(34) & ucrSaveColumn.GetText() & Chr(34), iPosition:=2)
         clsRTransform.AddParameter(strParameterName:="result_name", strParameterValue:=Chr(34) & ucrSaveColumn.GetText & Chr(34), iPosition:=2)
     End Sub
