@@ -935,7 +935,6 @@ Public Class dlgTransformClimatic
 
         'Base Function
         ChangeCodes()
-        ucrBase.clsRsyntax.SetBaseRFunction(clsOverallTransformFunction)
     End Sub
 
     Private Sub SetRCodeForControls(bReset As Boolean)
