@@ -237,11 +237,6 @@ Public Class dlgClimaticSummary
         clsConcFunction.SetRCommand("c")
         clsLinkColsFunction.SetRCommand("c")
 
-        'extremes_temps <- get_climatic_summaries_definition(calculations_data = calculations_data,
-        '                                          variables_metadata = variables_metadata,
-        '                                          summary_variables = summary_variables,
-        '                                          daily_data_calculation = daily_data_calculation)
-
         'Get DataFrame
         clsGetLinkedDataFrameFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_linked_to_data_name")
         clsGetLinkedDataFrameFunction.AddParameter("link_cols", clsRFunctionParameter:=clsLinkColsFunction, iPosition:=1)
@@ -258,7 +253,6 @@ Public Class dlgClimaticSummary
         clsGetClimaticSummariesFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_climatic_summaries_definition")
         clsGetClimaticSummariesFunction.AddParameter("summary_data", strLinkeddata, iPosition:=1)
         clsGetClimaticSummariesFunction.AddParameter("summary_variables", clsRFunctionParameter:=clsGetSummaryVariablesFunction, iPosition:=2)
-        'clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & ucrSaveObject.ucrInputTextSave.GetText & Chr(34), iPosition:=3)
 
         clsKeyColsVector.SetRCommand("c")
 
