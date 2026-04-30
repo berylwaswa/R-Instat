@@ -58,8 +58,8 @@ Public Class dlgPICSACrops
         ' Sub dialog not yet created.
         cmdOptions.Visible = False
 
-        Dim kvpEnd As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("end_season", {"end_season", "end_rains", "end_rain_filled", "end_season_filled"}.ToList())
-        Dim kvpStart As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("start_rain", {"start_rain"}.ToList())
+        Dim kvpEnd As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("end_season", {"end_season", "end_rains", "end_rain_filled", "end_season_filled", "end_dry"}.ToList())
+        Dim kvpStart As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("start_rain", {"start_rain", "start_dry"}.ToList())
 
         lstRecognisedTypes.AddRange({kvpEnd, kvpStart})
 
@@ -108,13 +108,16 @@ Public Class dlgPICSACrops
         ucrReceiverStart.SetParameter(New RParameter("start_day", 8))
         ucrReceiverStart.SetParameterIsString()
         ucrReceiverStart.SetDataType("numeric")
+        ucrReceiverStart.SetExcludedDataTypes({"Date", "POSIXct", "POSIXlt"})
         ucrReceiverStart.Tag = "start_rain"
 
         'End Receiver
         ucrReceiverEnd.Selector = ucrSelectorSummary
         ucrReceiverEnd.SetParameter(New RParameter("end_day", 9))
         ucrReceiverEnd.SetParameterIsString()
+        ucrChkDataCrops.AddToLinkedControls(ucrSaveDefinitionCrops, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedDisabledIfParameterMissing:=True)
         ucrReceiverEnd.SetDataType("numeric")
+        ucrReceiverEnd.SetExcludedDataTypes({"Date", "POSIXct", "POSIXlt"})
         ucrReceiverEnd.Tag = "end_season"
 
         ucrPnlStartCheck.AddRadioButton(rdoYes)
@@ -216,7 +219,6 @@ Public Class dlgPICSACrops
         ucrChkDataCrops.SetText("Return Crops Data")
         ucrChkDataCrops.SetParameter(New RParameter("return_crops_table", 11), bNewChangeParameterValue:=True, strNewValueIfChecked:="TRUE", strNewValueIfUnchecked:="FALSE")
         ucrChkDataCrops.SetRDefault("TRUE")
-        ucrChkDataCrops.AddToLinkedControls(ucrSaveDefinitionCrops, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedDisabledIfParameterMissing:=True)
 
         ucrChkDataProp.SetText("Calculate Proportions")
         ucrChkDataProp.SetParameter(New RParameter("definition_props", 12), bNewChangeParameterValue:=True, strNewValueIfChecked:="TRUE", strNewValueIfUnchecked:="FALSE")
