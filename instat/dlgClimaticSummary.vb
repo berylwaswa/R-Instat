@@ -242,7 +242,7 @@ Public Class dlgClimaticSummary
         'extremes_temps <- get_climatic_summaries_definition(calculations_data = calculations_data,
         '                                          variables_metadata = variables_metadata,
         '                                          summary_variables = summary_variables,
-        '                                          daily_data_calculation = daily_data_calculation
+        '                                          daily_data_calculation = daily_data_calculation)
 
         'Get DataFrame
         clsGetLinkedDataFrameFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_linked_to_data_name")
@@ -267,6 +267,7 @@ Public Class dlgClimaticSummary
         clsGetClimaticSummariesFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_climatic_summaries_definition")
         clsGetClimaticSummariesFunction.AddParameter("summary_data", strLinkeddata, iPosition:=1)
         clsGetClimaticSummariesFunction.AddParameter("summary_variables", clsRFunctionParameter:=clsGetSummaryVariablesFunction, iPosition:=2)
+        'clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & ucrSaveObject.ucrInputTextSave.GetText & Chr(34), iPosition:=3)
 
         clsKeyColsVector.SetRCommand("c")
 
@@ -284,6 +285,7 @@ Public Class dlgClimaticSummary
         AddDayRange()
         AddDateDoy()
         UpdateDateDoy()
+        SetSaveDefaultPrefix()
         ucrBase.clsRsyntax.ClearCodes()
         ucrBase.clsRsyntax.SetBaseRFunction(clsDefaultFunction)
     End Sub
@@ -310,42 +312,42 @@ Public Class dlgClimaticSummary
         End If
         AddDateDoy()
         UpdateDateDoy()
+        UpdateDefinitionName()
     End Sub
 
     'TODO: run these things at the correct times
     Public Sub TestOKEnabled()
+        Dim bOkEnabled As Boolean = True
+
         If Not clsSummariesList.clsParameters.Count = 0 AndAlso Not ucrReceiverDate.IsEmpty AndAlso Not ucrReceiverElements.IsEmpty AndAlso sdgSummaries.bOkEnabled Then
             If rdoAnnual.Checked Then
-                If Not ucrReceiverDOY.IsEmpty AndAlso (Not ucrReceiverYear.IsEmpty OrElse Not ucrReceiverStation.IsEmpty) Then
-                    ucrBase.OKEnabled(True)
-                Else
-                    ucrBase.OKEnabled(False)
+                If ucrReceiverDOY.IsEmpty OrElse (ucrReceiverYear.IsEmpty AndAlso ucrReceiverStation.IsEmpty) Then
+                    bOkEnabled = False
+                End If
+                If ucrChkDefinitions.Checked AndAlso Not ucrSaveObject.IsComplete Then
+                    bOkEnabled = False
                 End If
             ElseIf rdoWithinYear.Checked Then
-                If Not ucrReceiverDOY.IsEmpty AndAlso Not ucrReceiverWithinYear.IsEmpty Then
-                    ucrBase.OKEnabled(True)
-                Else
-                    ucrBase.OKEnabled(False)
+                If ucrReceiverDOY.IsEmpty OrElse ucrReceiverWithinYear.IsEmpty Then
+                    bOkEnabled = False
+                End If
+                If ucrChkDefinitions.Checked AndAlso Not ucrSaveObject.IsComplete Then
+                    bOkEnabled = False
                 End If
             ElseIf rdoAnnualWithinYear.Checked Then
-                If Not ucrReceiverDOY.IsEmpty AndAlso Not ucrReceiverYear.IsEmpty AndAlso Not ucrReceiverWithinYear.IsEmpty Then
-                    ucrBase.OKEnabled(True)
-                Else
-                    ucrBase.OKEnabled(False)
+                If ucrReceiverDOY.IsEmpty OrElse ucrReceiverYear.IsEmpty OrElse ucrReceiverWithinYear.IsEmpty Then
+                    bOkEnabled = False
                 End If
             ElseIf rdoStation.Checked Then
-                If Not ucrReceiverStation.IsEmpty Then
-                    ucrBase.OKEnabled(True)
-                Else
-                    ucrBase.OKEnabled(False)
+                If ucrReceiverStation.IsEmpty Then
+                    bOkEnabled = False
                 End If
             ElseIf rdoDaily.Checked Then
-                If Not ucrReceiverDOY.IsEmpty Then
-                    ucrBase.OKEnabled(True)
-                Else
-                    ucrBase.OKEnabled(False)
+                If ucrReceiverDOY.IsEmpty Then
+                    bOkEnabled = False
                 End If
             End If
+            ucrBase.OKEnabled(bOkEnabled)
         Else
             ucrBase.OKEnabled(False)
         End If
@@ -433,7 +435,7 @@ Public Class dlgClimaticSummary
         End If
         AddDateDoy()
         UpdateDateDoy()
-        AddSaveDefinitionOptions()
+        SetSaveDefaultPrefix()
     End Sub
 
     Private Sub ucrChkPrintOutput_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrChkPrintOutput.ControlValueChanged
@@ -545,7 +547,7 @@ Public Class dlgClimaticSummary
                 ' The following functions should use the main data frame from the selector, not the linked_data_name
                 clsGetClimaticSummariesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
                 clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & ucrSaveObject.ucrInputTextSave.GetText & Chr(34), iPosition:=3)
-                clsBuildClimaticSummaryDefinitions.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
+                clsGetSummaryVariablesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
 
                 ' Add to R syntax (so it appears in the final R command)
                 ucrBase.clsRsyntax.AddToAfterCodes(clsGetClimaticSummariesFunction, iPosition:=3)
@@ -561,12 +563,9 @@ Public Class dlgClimaticSummary
                 ' Remove all definition-related code if checkbox is unchecked
                 ' Note: The functions are already removed at the top of the sub
             End If
-        Else
-            ucrBase.clsRsyntax.RemoveFromAfterCodes(clsDefineAsClimatic)
-        End If
     End Sub
 
-    Private Sub CoreControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverDate.ControlContentsChanged, ucrReceiverYear.ControlContentsChanged, ucrReceiverDOY.ControlContentsChanged, ucrReceiverElements.ControlContentsChanged, ucrReceiverWithinYear.ControlContentsChanged, ucrPnlAnnualWithin.ControlContentsChanged, ucrReceiverStation.ControlContentsChanged
+    Private Sub CoreControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverDate.ControlContentsChanged, ucrReceiverYear.ControlContentsChanged, ucrReceiverDOY.ControlContentsChanged, ucrReceiverElements.ControlContentsChanged, ucrReceiverWithinYear.ControlContentsChanged, ucrPnlAnnualWithin.ControlContentsChanged, ucrReceiverStation.ControlContentsChanged, ucrSaveObject.ControlContentsChanged, ucrChkDefinitions.ControlContentsChanged
         TestOKEnabled()
     End Sub
 
