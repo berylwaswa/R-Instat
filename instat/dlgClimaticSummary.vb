@@ -27,7 +27,6 @@ Public Class dlgClimaticSummary
         clsDefaultFactors, clsDayFilterCalc, clsDayFilterCalcFromConvert,
         clsDayFilterCalcFromList, clsAddDateFunction,
         clsDummyFunction, clsGetSummaryVariablesFunction,
-        clsBuildClimaticSummaryDefinitions,
         clsGetClimaticSummariesFunction, clsLinkColsFunction,
         clsGetLinkedDataFrameFunction, clsDefineAsClimatic, clsKeyColsVector As New RFunction
     Private clsFromAndToConditionOperator, clsFromConditionOperator, clsToConditionOperator As New ROperator
@@ -186,7 +185,6 @@ Public Class dlgClimaticSummary
 
         clsGetLinkedDataFrameFunction = New RFunction
         clsGetSummaryVariablesFunction = New RFunction
-        clsBuildClimaticSummaryDefinitions = New RFunction
         clsGetClimaticSummariesFunction = New RFunction
         clsLinkColsFunction = New RFunction
         clsDefineAsClimatic = New RFunction
@@ -239,11 +237,6 @@ Public Class dlgClimaticSummary
         clsConcFunction.SetRCommand("c")
         clsLinkColsFunction.SetRCommand("c")
 
-        'extremes_temps <- get_climatic_summaries_definition(calculations_data = calculations_data,
-        '                                          variables_metadata = variables_metadata,
-        '                                          summary_variables = summary_variables,
-        '                                          daily_data_calculation = daily_data_calculation)
-
         'Get DataFrame
         clsGetLinkedDataFrameFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_linked_to_data_name")
         clsGetLinkedDataFrameFunction.AddParameter("link_cols", clsRFunctionParameter:=clsLinkColsFunction, iPosition:=1)
@@ -256,25 +249,17 @@ Public Class dlgClimaticSummary
         clsGetSummaryVariablesFunction.AddParameter(ucrReceiverElements.GetParameter())
         clsGetSummaryVariablesFunction.SetAssignTo("summary_variables")
 
-        ' Climatic Types from summary - Definitions for the Summarised data in the Summary data frame
-        clsBuildClimaticSummaryDefinitions.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$build_climatic_types_from_summary")
-        clsBuildClimaticSummaryDefinitions.AddParameter("base_types", clsRFunctionParameter:=clsLinkColsFunction, iPosition:=1)
-        clsBuildClimaticSummaryDefinitions.AddParameter(ucrReceiverElements.GetParameter())
-        clsBuildClimaticSummaryDefinitions.AddParameter("summary_variables", clsRFunctionParameter:=clsGetSummaryVariablesFunction, iPosition:=3)
-        clsBuildClimaticSummaryDefinitions.SetAssignTo("types")
-
         'get_climatic_summaries_definition
         clsGetClimaticSummariesFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_climatic_summaries_definition")
         clsGetClimaticSummariesFunction.AddParameter("summary_data", strLinkeddata, iPosition:=1)
         clsGetClimaticSummariesFunction.AddParameter("summary_variables", clsRFunctionParameter:=clsGetSummaryVariablesFunction, iPosition:=2)
-        'clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & ucrSaveObject.ucrInputTextSave.GetText & Chr(34), iPosition:=3)
 
         clsKeyColsVector.SetRCommand("c")
 
         clsDefineAsClimatic.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$define_as_climatic")
-        clsDefineAsClimatic.AddParameter("data_name", clsRFunctionParameter:=clsGetLinkedDataFrameFunction, iPosition:=0)
+        clsDefineAsClimatic.AddParameter("data_name", strLinkeddata, iPosition:=0)
         clsDefineAsClimatic.AddParameter("key_col_names", clsRFunctionParameter:=clsLinkColsFunction, iPosition:=1)
-        clsDefineAsClimatic.AddParameter("types", clsRFunctionParameter:=clsBuildClimaticSummaryDefinitions, iPosition:=2)
+        clsDefineAsClimatic.AddParameter("types", clsRFunctionParameter:=clsKeyColsVector, iPosition:=2)
         clsDefineAsClimatic.AddParameter("overwrite", "FALSE", iPosition:=3)
         clsDefineAsClimatic.iCallType = 2
 
@@ -293,10 +278,7 @@ Public Class dlgClimaticSummary
     Private Sub SetRCodeForControls(bReset As Boolean)
         ucrSelectorVariable.AddAdditionalCodeParameterPair(clsGetSummaryVariablesFunction, ucrSelectorVariable.GetParameter(), iAdditionalPairNo:=1)
         ucrSelectorVariable.AddAdditionalCodeParameterPair(clsGetClimaticSummariesFunction, ucrSelectorVariable.GetParameter(), iAdditionalPairNo:=2)
-        ucrSelectorVariable.AddAdditionalCodeParameterPair(clsBuildClimaticSummaryDefinitions, ucrSelectorVariable.GetParameter(), iAdditionalPairNo:=3)
         ucrReceiverElements.AddAdditionalCodeParameterPair(clsGetSummaryVariablesFunction, ucrReceiverElements.GetParameter(), iAdditionalPairNo:=1)
-        ucrReceiverElements.AddAdditionalCodeParameterPair(clsBuildClimaticSummaryDefinitions, ucrReceiverElements.GetParameter(), iAdditionalPairNo:=2)
-
         ucrChkAddDateColumn.SetRCode(clsAddDateFunction, bReset)
         ucrSelectorVariable.SetRCode(clsDefaultFunction, bReset)
         ucrReceiverElements.SetRCode(clsDefaultFunction, bReset)
@@ -529,40 +511,62 @@ Public Class dlgClimaticSummary
         clsGetSummaryVariablesFunction.RemoveParameterByName("data_name")
 
         ' Clear previous after-codes to avoid duplication
+        ucrBase.clsRsyntax.RemoveFromAfterCodes(clsGetSummaryVariablesFunction)
         ucrBase.clsRsyntax.RemoveFromAfterCodes(clsGetClimaticSummariesFunction)
+        ucrBase.clsRsyntax.RemoveFromAfterCodes(clsGetLinkedDataFrameFunction)
+        ucrBase.clsRsyntax.RemoveFromBeforeCodes(clsGetLinkedDataFrameFunction) ' Also clear from before-codes for safety
+        ucrBase.clsRsyntax.RemoveFromAfterCodes(clsDefineAsClimatic)
 
         ' Reset the call type to prevent output unless explicitly requested
+        clsDefineAsClimatic.iCallType = 0
 
-        If (rdoAnnual.Checked OrElse rdoWithinYear.Checked) Then
-            ucrBase.clsRsyntax.AddToAfterCodes(clsDefineAsClimatic, iPosition:=2)
-            clsGetSummaryVariablesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
+        If (rdoAnnual.Checked OrElse rdoWithinYear.Checked) AndAlso ucrChkDefinitions.Checked Then
             ' Set call type to 2 to trigger the definition summary output
             clsDefineAsClimatic.iCallType = 2
 
             ' 1. Configure parameters for each function
             clsGetLinkedDataFrameFunction.AddParameter("from_data_frame", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
             clsGetLinkedDataFrameFunction.AddParameter("link_cols", clsRFunctionParameter:=clsLinkColsFunction, iPosition:=1)
-            If ucrChkDefinitions.Checked Then
 
-                ' The following functions should use the main data frame from the selector, not the linked_data_name
-                clsGetClimaticSummariesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
-                clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & ucrSaveObject.ucrInputTextSave.GetText & Chr(34), iPosition:=3)
-                clsGetSummaryVariablesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
+            ' The following functions should use the main data frame from the selector, not the linked_data_name
+            clsGetClimaticSummariesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
+            clsGetSummaryVariablesFunction.AddParameter("data_name", Chr(34) & strDataFrame & Chr(34), iPosition:=0)
 
-                ' Add to R syntax (so it appears in the final R command)
-                ucrBase.clsRsyntax.AddToAfterCodes(clsGetClimaticSummariesFunction, iPosition:=3)
+            ' Add to R syntax (so it appears in the final R command)
+            ucrBase.clsRsyntax.AddToAfterCodes(clsGetLinkedDataFrameFunction, iPosition:=1)
+            ucrBase.clsRsyntax.AddToAfterCodes(clsDefineAsClimatic, iPosition:=2)
+            ucrBase.clsRsyntax.AddToAfterCodes(clsGetClimaticSummariesFunction, iPosition:=3)
 
-                ' Configure save object prefix
-                If rdoAnnual.Checked Then
-                    ucrSaveObject.SetPrefix("Annual_Definitions")
-                ElseIf rdoWithinYear.Checked Then
-                    ucrSaveObject.SetPrefix("Within_Year_Definitions")
-                End If
+            UpdateDefinitionName()
+        Else
+            ' Remove all definition-related code if checkbox is unchecked
+            ' Note: The functions are already removed at the top of the sub
+        End If
+    End Sub
 
-            Else
-                ' Remove all definition-related code if checkbox is unchecked
-                ' Note: The functions are already removed at the top of the sub
-            End If
+    Private Sub SetSaveDefaultPrefix()
+        ' Configure save object prefix
+        If rdoAnnual.Checked Then
+            ucrSaveObject.SetPrefix("Annual_Definitions")
+        ElseIf rdoWithinYear.Checked Then
+            ucrSaveObject.SetPrefix("Within_Year_Definitions")
+        End If
+
+        AddSaveDefinitionOptions()
+    End Sub
+
+
+    Private Sub ucrSaveObject_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrSaveObject.ControlContentsChanged
+        UpdateDefinitionName()
+    End Sub
+
+    Private Sub UpdateDefinitionName()
+        Dim strDefinitionName As String = ucrSaveObject.GetText()
+        If ucrChkDefinitions.Checked AndAlso strDefinitionName <> "" Then
+            clsGetClimaticSummariesFunction.AddParameter("definition_name", Chr(34) & strDefinitionName & Chr(34), iPosition:=3)
+        Else
+            clsGetClimaticSummariesFunction.RemoveParameterByName("definition_name")
+        End If
     End Sub
 
     Private Sub CoreControls_ControlContentsChanged(ucrChangedControl As ucrCore) Handles ucrReceiverDate.ControlContentsChanged, ucrReceiverYear.ControlContentsChanged, ucrReceiverDOY.ControlContentsChanged, ucrReceiverElements.ControlContentsChanged, ucrReceiverWithinYear.ControlContentsChanged, ucrPnlAnnualWithin.ControlContentsChanged, ucrReceiverStation.ControlContentsChanged, ucrSaveObject.ControlContentsChanged, ucrChkDefinitions.ControlContentsChanged
