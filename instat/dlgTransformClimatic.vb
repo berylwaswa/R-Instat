@@ -935,7 +935,7 @@ Public Class dlgTransformClimatic
         clsDefineAsClimaticFunction.AddParameter("overwrite", "FALSE", iPosition:=3)
 
         'Base Function
-        ChangeCodes()
+        SetTransformBaseCodes()
     End Sub
 
     Private Sub SetRCodeForControls(bReset As Boolean)
@@ -1079,7 +1079,7 @@ Public Class dlgTransformClimatic
     End Sub
 
     Private Sub ucrPnlTransform_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrPnlTransform.ControlValueChanged, ucrPnlDegree.ControlValueChanged ', ucrPnlEvap.ControlValueChanged
-        ChangeCodes()
+        SetTransformBaseCodes()
         AddCalculate()
         AutoFill()
         SetAssignName()
@@ -1092,7 +1092,7 @@ Public Class dlgTransformClimatic
         InputConditionOptions()
     End Sub
 
-    Private Sub ChangeCodes()
+    Private Sub SetTransformBaseCodes()
         ucrBase.clsRsyntax.ClearCodes()
 
         If rdoCumulative.Checked Then
@@ -1254,13 +1254,9 @@ Public Class dlgTransformClimatic
         clsRRainday.AddParameter("calculated_from", " list(" & strCurrDataName & "=" & ucrReceiverData.GetVariableNames() & ")", iPosition:=3)
     End Sub
 
-    Private Sub ChangeDefineAsClimaticDataName()
-        clsDefineAsClimaticFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
-    End Sub
-
     Private Sub ucrSelectorTransform_ControlValueChanged(ucrchangedControl As ucrCore) Handles ucrSelectorTransform.ControlValueChanged
         strCurrDataName = Chr(34) & ucrSelectorTransform.strCurrentDataFrame & Chr(34)
-        ChangeDefineAsClimaticDataName()
+        clsDefineAsClimaticFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
         RainDays()
         GroupByYear()
         GroupByStation()
