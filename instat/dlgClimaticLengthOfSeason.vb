@@ -346,6 +346,7 @@ Public Class dlgClimaticLengthOfSeason
         clsDefineAsClimatic.iCallType = 2
 
         clsGetSeasonLengthFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_seasonal_length_definition")
+        clsGetSeasonLengthFunction.AddParameter("data_name", Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34), iPosition:=0)
 
         'Base Function
         ucrBase.clsRsyntax.ClearCodes()
@@ -494,6 +495,7 @@ Public Class dlgClimaticLengthOfSeason
         strCurrDataName = Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34)
         clsDefineAsClimatic.AddParameter("data_name", strCurrDataName, iPosition:=0)
         clsConvertColumnTypeFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
+        AddDataName()
     End Sub
 
     Private Sub AddRemoveLengthmore()
