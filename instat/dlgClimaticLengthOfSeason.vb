@@ -345,11 +345,7 @@ Public Class dlgClimaticLengthOfSeason
         clsDefineAsClimatic.AddParameter("overwrite", "FALSE", iPosition:=3)
         clsDefineAsClimatic.iCallType = 2
 
-        'clsGetCalculationsFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_calculations")
-        'clsGetCalculationsFunction.SetAssignTo("calculations_data")
-
         clsGetSeasonLengthFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_seasonal_length_definition")
-        'clsGetSeasonLengthFunction.AddParameter("x", clsRFunctionParameter:=clsGetCalculationsFunction, iPosition:=0, bIncludeArgumentName:=False)
 
         'Base Function
         ucrBase.clsRsyntax.ClearCodes()
@@ -496,7 +492,6 @@ Public Class dlgClimaticLengthOfSeason
 
     Private Sub ucrSelectorLengthofSeason_DataFrameChanged() Handles ucrSelectorLengthofSeason.DataFrameChanged
         strCurrDataName = Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34)
-        'clsGetCalculationsFunction.AddParameter("x", strCurrDataName, iPosition:=0, bIncludeArgumentName:=False)
         clsDefineAsClimatic.AddParameter("data_name", strCurrDataName, iPosition:=0)
         clsConvertColumnTypeFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
     End Sub
