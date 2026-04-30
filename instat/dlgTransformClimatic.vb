@@ -458,6 +458,7 @@ Public Class dlgTransformClimatic
         clsGreaterThanOperator.Clear()
         clsLessThanOperator.Clear()
 
+        ucrNudCountOver.SetText(1)
         ucrSelectorTransform.Reset()
         ucrReceiverData.SetMeAsReceiver()
 
