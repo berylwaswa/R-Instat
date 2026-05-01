@@ -77,6 +77,9 @@ Public Class dlgClimaticLengthOfSeason
 
         lstFilledReceivers.AddRange({ucrReceiverEndFilled})
 
+        ucrSelectorLengthofSeason.SetParameter(New RParameter("data_name", 0))
+        ucrSelectorLengthofSeason.SetParameterIsString()
+
         ucrReceiverStartofRains.SetParameter(New RParameter("start_doy", 1, bNewIncludeArgumentName:=False))
         ucrReceiverStartofRains.SetParameterIsString()
         ucrReceiverStartofRains.bWithQuotes = False
@@ -346,7 +349,6 @@ Public Class dlgClimaticLengthOfSeason
         clsDefineAsClimatic.iCallType = 2
 
         clsGetSeasonLengthFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_seasonal_length_definition")
-        clsGetSeasonLengthFunction.AddParameter("data_name", Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34), iPosition:=0)
 
         'Base Function
         ucrBase.clsRsyntax.ClearCodes()
@@ -369,6 +371,7 @@ Public Class dlgClimaticLengthOfSeason
         ucrReceiverStartofRains.AddAdditionalCodeParameterPair(clsMinusmoreOperator, New RParameter("right", 1, bNewIncludeArgumentName:=False), iAdditionalPairNo:=1)
         ucrInputLengthofSeason.AddAdditionalCodeParameterPair(clsGetSeasonLengthFunction, New RParameter("seasonal_length", 1), iAdditionalPairNo:=1)
 
+        ucrSelectorLengthofSeason.SetRCode(clsGetSeasonLengthFunction, bReset)
         ucrSaveDefinition.SetRCode(clsGetSeasonLengthFunction)
         ucrReceiverStartofRains.SetRCode(clsMinusOpertor, bReset)
         ucrReceiverEndofRains.SetRCode(clsMinusOpertor, bReset)
@@ -444,15 +447,10 @@ Public Class dlgClimaticLengthOfSeason
         End If
     End Sub
 
-    Private Sub AddDataName()
-        clsGetSeasonLengthFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
-    End Sub
-
     Private Sub ucrSelectorLengthofSeason_ControlValueChanged(ucrChangedControl As ucrCore) Handles ucrSelectorLengthofSeason.ControlValueChanged
         bDataChanged = True
         bUserClearedReceiver = False
         strCurrDataName = Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34)
-        AddDataName()
         AutoFillReceivers(lstEndReceivers)
         AutoFillReceivers(lstStartReceivers)
         AutoFillReceivers(lstEndStatusReceivers)
@@ -495,7 +493,6 @@ Public Class dlgClimaticLengthOfSeason
         strCurrDataName = Chr(34) & ucrSelectorLengthofSeason.strCurrentDataFrame & Chr(34)
         clsDefineAsClimatic.AddParameter("data_name", strCurrDataName, iPosition:=0)
         clsConvertColumnTypeFunction.AddParameter("data_name", strCurrDataName, iPosition:=0)
-        AddDataName()
     End Sub
 
     Private Sub AddRemoveLengthmore()
