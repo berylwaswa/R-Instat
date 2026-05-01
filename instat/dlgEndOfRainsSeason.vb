@@ -408,9 +408,7 @@ Public Class dlgEndOfRainsSeason
         clsGetEndRainDefFunction = New RFunction
         clsGetEndSeasonDefFunction = New RFunction
         clsDeleteunusedrowFunction = New RFunction
-        'clsGetCalculationsFunction = New RFunction
         clsGetOffsetTermFunction = New RFunction
-        'clsGetDataframeFunction = New RFunction
         clsDefineAsClimatic = New RFunction
         clsVectorConcat2Function = New RFunction
         clsConditionCheckOperator = New ROperator
@@ -1195,26 +1193,14 @@ Public Class dlgEndOfRainsSeason
         clsDefineAsClimatic.AddParameter("overwrite", "FALSE", iPosition:=3)
         clsDefineAsClimatic.iCallType = 2
 
-        'clsGetDataframeFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_data_frame")
-        'clsGetDataframeFunction.AddParameter("summary_data", strLinkeddata, iPosition:=0, bIncludeArgumentName:=False)
-        'clsGetDataframeFunction.SetAssignTo("summary_data")
-
-        'clsGetCalculationsFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_calculations")
-        'clsGetCalculationsFunction.AddParameter("summary_data", strLinkeddata, iPosition:=0, bIncludeArgumentName:=False)
-        'clsGetCalculationsFunction.SetAssignTo("calculations_data")
-
         clsGetOffsetTermFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_offset_term")
         clsGetOffsetTermFunction.SetAssignTo("definitions_offset")
 
         clsGetEndRainDefFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_end_rains_definition")
-        'clsGetEndRainDefFunction.AddParameter("summary_data", clsRFunctionParameter:=clsGetDataframeFunction, iPosition:=0, bIncludeArgumentName:=False)
-        'clsGetEndRainDefFunction.AddParameter("summary_calc", clsRFunctionParameter:=clsGetCalculationsFunction, iPosition:=1, bIncludeArgumentName:=False)
         clsGetEndRainDefFunction.AddParameter("data_name", strLinkeddata, iPosition:=0)
         clsGetEndRainDefFunction.AddParameter("summary_offset", clsRFunctionParameter:=clsGetOffsetTermFunction, iPosition:=5, bIncludeArgumentName:=False)
 
         clsGetEndSeasonDefFunction.SetRCommand(frmMain.clsRLink.strInstatDataObject & "$get_end_season_definition")
-        'clsGetEndSeasonDefFunction.AddParameter("summary_data", clsRFunctionParameter:=clsGetDataframeFunction, iPosition:=0, bIncludeArgumentName:=False)
-        'clsGetEndSeasonDefFunction.AddParameter("summary_calc", clsRFunctionParameter:=clsGetCalculationsFunction, iPosition:=1, bIncludeArgumentName:=False)
         clsGetEndSeasonDefFunction.AddParameter("data_name", strLinkeddata, iPosition:=0)
         clsGetEndSeasonDefFunction.AddParameter("summary_offset", clsRFunctionParameter:=clsGetOffsetTermFunction, iPosition:=5, bIncludeArgumentName:=False)
 
