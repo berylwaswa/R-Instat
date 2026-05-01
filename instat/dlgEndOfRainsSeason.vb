@@ -1734,13 +1734,13 @@ Public Class dlgEndOfRainsSeason
     End Sub
 
     Private Sub AddDefinitionName()
-        Dim strDefinitionName = Chr(34) & ucrSaveObject.GetText() & Chr(34)
+        Dim strDefinitionName = ucrSaveObject.GetText()
 
         If strDefinitionName <> "" Then
             If rdoEndOfRains.Checked Then
-                clsGetEndRainDefFunction.AddParameter("definition_name", strDefinitionName, iPosition:=1)
+                clsGetEndRainDefFunction.AddParameter("definition_name", Chr(34) & strDefinitionName & Chr(34), iPosition:=1)
             ElseIf rdoEndOfSeasons.Checked Then
-                clsGetEndSeasonDefFunction.AddParameter("definition_name", strDefinitionName, iPosition:=1)
+                clsGetEndSeasonDefFunction.AddParameter("definition_name", Chr(34) & strDefinitionName & Chr(34), iPosition:=1)
             End If
         Else
             clsGetEndRainDefFunction.RemoveParameterByName("definition_name")
