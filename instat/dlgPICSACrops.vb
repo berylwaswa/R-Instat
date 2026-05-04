@@ -34,6 +34,7 @@ Public Class dlgPICSACrops
     Private lstEndReceivers As New List(Of ucrReceiverSingle)
     Private lstStartReceivers As New List(Of ucrReceiverSingle)
     Private bisFilling As Boolean = False
+    Private ReadOnly ExcludedDateTypes As String() = {"Date", "POSIXct", "POSIXlt"}
 
     Dim lstRecognisedTypes As New List(Of KeyValuePair(Of String, List(Of String)))
 
@@ -108,16 +109,15 @@ Public Class dlgPICSACrops
         ucrReceiverStart.SetParameter(New RParameter("start_day", 8))
         ucrReceiverStart.SetParameterIsString()
         ucrReceiverStart.SetDataType("numeric")
-        ucrReceiverStart.SetExcludedDataTypes({"Date", "POSIXct", "POSIXlt"})
+        ucrReceiverStart.SetExcludedDataTypes(ExcludedDateTypes)
         ucrReceiverStart.Tag = "start_rain"
 
         'End Receiver
         ucrReceiverEnd.Selector = ucrSelectorSummary
         ucrReceiverEnd.SetParameter(New RParameter("end_day", 9))
         ucrReceiverEnd.SetParameterIsString()
-        ucrChkDataCrops.AddToLinkedControls(ucrSaveDefinitionCrops, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedDisabledIfParameterMissing:=True)
         ucrReceiverEnd.SetDataType("numeric")
-        ucrReceiverEnd.SetExcludedDataTypes({"Date", "POSIXct", "POSIXlt"})
+        ucrReceiverEnd.SetExcludedDataTypes(ExcludedDateTypes)
         ucrReceiverEnd.Tag = "end_season"
 
         ucrPnlStartCheck.AddRadioButton(rdoYes)
@@ -223,6 +223,7 @@ Public Class dlgPICSACrops
         ucrChkDataProp.SetText("Calculate Proportions")
         ucrChkDataProp.SetParameter(New RParameter("definition_props", 12), bNewChangeParameterValue:=True, strNewValueIfChecked:="TRUE", strNewValueIfUnchecked:="FALSE")
         ucrChkDataProp.SetRDefault("TRUE")
+        ucrChkDataCrops.AddToLinkedControls(ucrSaveDefinitionCrops, {True}, bNewLinkedAddRemoveParameter:=True, bNewLinkedDisabledIfParameterMissing:=True)
 
         ucrSaveDefinitionCrops.SetPrefix("crops_data_definition")
         ucrSaveDefinitionCrops.SetSaveType(strRObjectType:=RObjectTypeLabel.StructureLabel, strRObjectFormat:=RObjectFormat.Text)
