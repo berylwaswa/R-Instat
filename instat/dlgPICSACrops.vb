@@ -60,7 +60,7 @@ Public Class dlgPICSACrops
         cmdOptions.Visible = False
 
         Dim kvpEnd As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("end_season", {"end_season", "end_rains", "end_rain_filled", "end_season_filled", "end_dry"}.ToList())
-        Dim kvpStart As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("start_rain", {"start_rain", "start_dry"}.ToList())
+        Dim kvpStart As KeyValuePair(Of String, List(Of String)) = New KeyValuePair(Of String, List(Of String))("start_rain", {"start_rain", "start", "start_dry"}.ToList())
 
         lstRecognisedTypes.AddRange({kvpEnd, kvpStart})
 
